@@ -1,9 +1,8 @@
-import { Text, View } from "react-native";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { Redirect } from "expo-router";
 
 export default function RootIndex() {
-  return (
-    <View className="flex-1 items-center justify-center bg-lime">
-      <Text className="text-xs font-body">Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+  const isMobile = useIsMobile();
+
+   return <Redirect href="/auth" />;
 }

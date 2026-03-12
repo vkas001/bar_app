@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 
-const { bgColor } = require("./theme/colorss");
+const { bgColor } = require("./theme/colors");
 
 module.exports = {
 
@@ -40,6 +40,10 @@ module.exports = {
         "8xl": "56px",
         "9xl": "64px"
       },
+      screens: {
+        mobile: { max: "767px" },
+        tablet: { min: "768px", max: "1023px" },
+      }
     },
   },
   plugins: [],
