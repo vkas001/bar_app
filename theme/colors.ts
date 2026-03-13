@@ -9,4 +9,5 @@ export const bgColor = {
   blue: "#025cca",
   rose: "#be3e3f",
   lime: "#02ca3a",
+  bg : "#1f1f1f",
 };

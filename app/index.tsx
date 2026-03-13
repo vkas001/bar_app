@@ -1,8 +1,5 @@
-import { useIsMobile } from "../hooks/useIsMobile";
-import { Redirect } from "expo-router";
+import { Href, Redirect } from "expo-router";
 
 export default function RootIndex() {
-  const isMobile = useIsMobile();
-
-   return <Redirect href="/auth" />;
+  return <Redirect href="/(tabs)/home" />;
 }
