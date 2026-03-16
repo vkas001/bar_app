@@ -40,7 +40,7 @@ const Greetings = () => {
                 <Text className="text-[#f5f5f5] text-2xl font-semibold tracking-wide">
                     {getGreeting()}, {"Vintage Lounge & Bar"}!
                 </Text>
-                <Text className="text-[#ababab] text-sm">
+                <Text className="text-[#ababab] text-xl">
                     Give your best services for customers 😀
                 </Text>
             </View>

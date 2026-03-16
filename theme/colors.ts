@@ -10,4 +10,5 @@ export const bgColor = {
   rose: "#be3e3f",
   lime: "#02ca3a",
   bg : "#1f1f1f",
+  card: "#3a3a3a",
 };
