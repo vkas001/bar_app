@@ -105,22 +105,22 @@ export default function TabsLayout() {
             ),
           }}
         />
-      </Tabs>
 
-      {/* Menu */}
-      <Tabs.Screen
-        name="menu"
-        options={{
-          title: "Menu",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? "restaurant" : "restaurant-outline"}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
+        {/* Menu */}
+        <Tabs.Screen
+          name="menu"
+          options={{
+            title: "Menu",
+            tabBarIcon: ({ color, size, focused }) => (
+              <Ionicons
+                name={focused ? "restaurant" : "restaurant-outline"}
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+      </Tabs>
     </>
   );
 }
