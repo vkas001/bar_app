@@ -5,20 +5,20 @@ import { Image, Text, TouchableOpacity, View } from 'react-native';
 export default function PageHeader() {
     return (
 
-        <View className="bg-[#1a1a1a] sticky top-0 z-50">
+        <View className="bg-black sticky top-0 z-50">
 
             {/* Main Header */}
             <View className='flex-row justify-between  items-center py-4 px-4 md:px-8'>
                 {/* Logo */}
-                <TouchableOpacity className="flex-row items-center gap-4 flex-shrink-0">
+                <View className="flex-row items-center gap-4 flex-shrink-0">
                     <Image
                         source={require("../../assets/images/logo.png")}
-                        className="h-8 w-8"
+                        className="h-10 w-20"
                     />
-                    <Text className="text-white text-xs font-bold">
+                    <Text className="text-white text-xl font-bold">
                         Vintage Bar
                     </Text>
-                </TouchableOpacity>
+                </View>
 
                 <View className="flex-row items-center gap-2">
                     <TouchableOpacity

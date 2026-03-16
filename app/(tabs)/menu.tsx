@@ -4,7 +4,17 @@ import React from 'react'
 export default function menu() {
   return (
     <View>
-      <Text>menu</Text>
+      <Text className="font-heading text-xl">
+        Heading Text
+      </Text>
+
+      <Text className="font-body text-base">
+        Body Text
+      </Text>
+
+      <Text className="font-bodyBold text-lg">
+        Bold Body Text
+      </Text>
     </View>
   )
 }

@@ -1,5 +1,5 @@
 import { bgColor } from "@/theme/colors";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, View } from "react-native";
@@ -91,29 +91,14 @@ export default function TabsLayout() {
           }}
         />
 
-        {/* Menu */}
-        <Tabs.Screen
-          name="menu"
-          options={{
-            title: "Menu",
-            tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? "restaurant" : "restaurant-outline"}
-                size={size}
-                color={color}
-              />
-            ),
-          }}
-        />
-
         {/* Tables */}
         <Tabs.Screen
           name="tables"
           options={{
             title: "Tables",
             tabBarIcon: ({ color, size, focused }) => (
-              <Ionicons
-                name={focused ? "list" : "list-outline"}
+              <MaterialCommunityIcons
+                name={focused ? "table-chair" : "table-furniture"}
                 size={size}
                 color={color}
               />
@@ -121,6 +106,21 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
+
+      {/* Menu */}
+      <Tabs.Screen
+        name="menu"
+        options={{
+          title: "Menu",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons
+              name={focused ? "restaurant" : "restaurant-outline"}
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
     </>
   );
 }
