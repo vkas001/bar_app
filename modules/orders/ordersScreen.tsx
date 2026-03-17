@@ -3,13 +3,26 @@ import { FlatList, View } from 'react-native'
 import OrderCard from './components/OrderCard'
 import OrderFilter from './components/OrderFilter'
 import { orders } from './data/order.data'
-import { orderStatus } from './types/order.types'
+import { order, orderStatus } from './types/order.types'
 import { PaymentFilter } from './types/orderFilter.types'
+import OrderDetailsModal from './components/OrderDetailsModal'
 
 export default function OrderModule() {
   const [statusFilter, setStatusFilter] = useState<orderStatus | 'All'>('All')
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('All')
   const [tableFilter, setTableFilter] = useState<string>('All')
+  const [selectedOrder, setSelectedOrder] = useState<order | null>(null)
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false)
+
+  const handleOrderPress = (selected: order) => {
+    setSelectedOrder(selected)
+    setIsDetailsVisible(true)
+  }
+
+  const handleCloseDetails = () => {
+    setIsDetailsVisible(false)
+    setSelectedOrder(null)
+  }
 
   const tableOptions = useMemo(() => {
     const uniqueTables = Array.from(new Set(orders.map((order) => order.table)))
@@ -48,12 +61,17 @@ export default function OrderModule() {
         columnWrapperStyle={{ gap: 8, justifyContent: 'space-between' }}
         renderItem={({ item }) => (
           <View style={{ width: '48.5%', flexGrow: 0, flexShrink: 0 }}>
-            <OrderCard order={item} />
+            <OrderCard order={item} onPress={handleOrderPress} />
           </View>
         )}
         keyExtractor={(item, index) => `${item.id}-${index}`}
       />
-     
+      <OrderDetailsModal
+        visible={isDetailsVisible}
+        order={selectedOrder}
+        onClose={handleCloseDetails}
+      />
+
     </View>
   )
 }
