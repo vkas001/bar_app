@@ -1,3 +1,4 @@
+import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Image, ImageBackground, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +15,13 @@ export default function Auth() {
           className='flex-1 justify-center'
           resizeMode="cover"
         >
+
+          <BlurView
+            intensity={0.5}
+            tint="light"
+            experimentalBlurMethod="dimezisBlurView"
+            className='absolute inset-0'
+          />
 
           {/* Semi-transparent overlay */}
           <View className='absolute inset-0 bg-black/70' />

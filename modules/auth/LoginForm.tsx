@@ -1,4 +1,3 @@
-import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -9,11 +8,9 @@ const LoginForm = () => {
   const [password, setPassword] = useState("");
 
   return (
-    <BlurView
-      intensity={80}
-      tint="dark"
-      experimentalBlurMethod="dimezisBlurView"
-      className="w-[90%] bg-white/10 p-6 rounded-3xl border border-white/20"
+    <View
+      className=" p-6 rounded-3xl border border-black/20"
+      style={{ width: "90%", alignSelf: "center", backgroundColor:"black" }}
     >
       <Text className="text-white text-lg font-semibold text-center mb-6">
         Staff Login
@@ -63,7 +60,7 @@ const LoginForm = () => {
       <Text className="text-white text-xs text-center" >
         Secure access to Vintage Bar POS
       </Text>
-    </BlurView>
+    </View>
   );
 };
 
