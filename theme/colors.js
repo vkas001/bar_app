@@ -1,4 +1,4 @@
-export const bgColor = {
+const bgColor = {
   red: "#b73e3e",
   purple: "#5b45b0",
   pink: "#7f167f",
@@ -12,4 +12,5 @@ export const bgColor = {
   bg: "#1f1f1f",
   card: "#3a3a3a",
 };
+
 module.exports = { bgColor };
