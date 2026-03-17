@@ -1,11 +1,14 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import AppInput from "../../components/input";
 
 const LoginForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <View
@@ -16,36 +19,33 @@ const LoginForm = () => {
         Staff Login
       </Text>
 
-      <View className="mb-6">
-        <Text className="text-white text-xs py-4">
-          Employee Email
-        </Text>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="you@vintageBar.com"
-          placeholderTextColor="rgba(255,255,255,0.35)"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          className="bg-white/10 text-white/85 text-sm px-4 py-3 rounded-xl border border-white/20"
-        />
-      </View>
+      <AppInput
+        label="Employee Email"
+        value={email}
+        onChangeText={setEmail}
+        placeholder="you@vintageBar.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
 
-      <View className="mb-8">
-        <Text className="text-white text-xs py-4">
-          Password
-        </Text>
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="********"
-          placeholderTextColor="rgba(255,255,255,0.35)"
-          secureTextEntry
-          autoCapitalize="none"
-          className="bg-white/10 text-white/85 text-sm px-4 py-3 rounded-xl border border-white/20"
-        />
-      </View>
+      <AppInput
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        placeholder="********"
+        secureTextEntry={!showPassword}
+        autoCapitalize="none"
+        containerClassName="mb-8"
+        rightIcon={
+          <Ionicons
+            name={showPassword ? "eye-off-outline" : "eye-outline"}
+            size={20}
+            color="rgba(255,255,255,0.7)"
+          />
+        }
+        onRightIconPress={() => setShowPassword((prev) => !prev)}
+      />
 
       <TouchableOpacity
         onPress={() => router.replace("/(tabs)/home")}
