@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { FlatList, View } from 'react-native'
+import { FlatList, RefreshControl, View } from 'react-native'
 import OrderCard from './components/OrderCard'
 import OrderFilter from './components/OrderFilter'
 import { orders } from './data/order.data'
@@ -7,7 +7,12 @@ import { order, orderStatus } from './types/order.types'
 import { PaymentFilter } from './types/orderFilter.types'
 import OrderDetailsModal from './components/OrderDetailsModal'
 
-export default function OrderModule() {
+type OrderModuleProps = {
+  refreshing?: boolean
+  onRefresh?: () => void
+}
+
+export default function OrderModule({ refreshing = false, onRefresh }: OrderModuleProps) {
   const [statusFilter, setStatusFilter] = useState<orderStatus | 'All'>('All')
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('All')
   const [tableFilter, setTableFilter] = useState<string>('All')
@@ -57,6 +62,9 @@ export default function OrderModule() {
         numColumns={2}
         key={'two-column-grid'}
         style={{ zIndex: 1, elevation: 1 }}
+        refreshControl={
+          onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined
+        }
         contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 12 }}
         columnWrapperStyle={{ gap: 8, justifyContent: 'space-between' }}
         renderItem={({ item }) => (

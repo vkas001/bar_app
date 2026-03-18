@@ -1,5 +1,5 @@
 import { Href, Redirect } from "expo-router";
 
 export default function RootIndex() {
-  return <Redirect href="/(tabs)/createOrder" />;
+  return <Redirect href="/(tabs)/tables" />;
 }
