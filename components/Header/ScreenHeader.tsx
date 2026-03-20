@@ -6,16 +6,17 @@ import { Text, TouchableOpacity, View } from 'react-native';
 interface ScreenHeaderProps {
     title: string;
     extraContent?: ReactNode;
+    onBackPress?: () => void;
 }
 
-const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, extraContent }) => {
+const ScreenHeader: React.FC<ScreenHeaderProps> = ({ title, extraContent, onBackPress }) => {
     const navigation = useNavigation();
 
     return (
         <View className="mb-2">
             <View className="flex-row items-center">
                 {/* Back Button */}
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={onBackPress ?? (() => navigation.goBack())}>
                     <Feather name="chevron-left" size={28} color="white" />
                 </TouchableOpacity>
 
