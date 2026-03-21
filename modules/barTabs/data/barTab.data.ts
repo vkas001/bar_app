@@ -3,7 +3,7 @@ import { BarTab, BarTabItem } from "../types/barTab.types";
 export const barTabs: BarTab[] = [
     {
         id: "1",
-        customerName: "ertadsfdsfa",
+        customerName: "Bikash Limbu",
         phone: "9800000000",
         notes: "Customer prefers less ice and quick service.",
         items: 2,
@@ -17,7 +17,7 @@ export const barTabs: BarTab[] = [
     },
     {
         id: "2",
-        customerName: "ertadsfdsfa",
+        customerName: "Cristiano Ronaldo",
         phone: "9800000000",
         notes: "No special notes.",
         items: 0,

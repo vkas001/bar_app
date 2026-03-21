@@ -1,7 +1,8 @@
 import ScreenHeader from '@/components/Header/ScreenHeader';
+import { useScreenRefresh } from '@/components/refresh/refresh';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Modal, View } from 'react-native';
+import { Modal, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BarTabCard from './components/BarTabCard';
 import BarTabDetailsModal from './components/BarTabDetailsModal';
@@ -13,6 +14,7 @@ import { BarTab, CreateBarTabPayload } from './types/barTab.types';
 
 export default function BarTabScreen() {
   const router = useRouter()
+  const { refreshing, onRefresh } = useScreenRefresh()
   const [isCreateTabOpen, setIsCreateTabOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<BarTab | null>(null)
   const [isTabDetailsOpen, setIsTabDetailsOpen] = useState(false)
@@ -59,7 +61,18 @@ export default function BarTabScreen() {
         }}
       />
 
-      <View className='px-4 pt-2'>
+      <ScrollView
+        className='flex-1'
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor='#facc15'
+            colors={['#facc15']}
+          />
+        }
+      >
         {barTabs.map((tab) => (
           <BarTabCard
             key={tab.id}
@@ -70,7 +83,7 @@ export default function BarTabScreen() {
             }}
           />
         ))}
-      </View>
+      </ScrollView>
 
     </SafeAreaView>
   )
