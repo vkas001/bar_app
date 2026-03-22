@@ -46,8 +46,10 @@ module.exports = {
         "9xl": "64px"
       },
       screens: {
-        mobile: { max: "767px" },
-        tablet: { min: "768px", max: "1023px" },
+       sm: "380px", //small phones
+       md: "414px", // large phones
+       lg: "768px", // tablets (portrait )
+       xl: "1024px", // small laptops (landscape tablets) / ipad Pros
       }
     },
   },
