@@ -1,8 +1,19 @@
-import { FontAwesome } from '@expo/vector-icons';
-import React from 'react';
+import { logout } from '@/modules/auth/services/auth.service';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import ConfirmDialog from '../confirmDialog';
+import { router } from 'expo-router';
 
 export default function PageHeader() {
+    const [showDialog, setShowDialog] = useState(false);
+
+    const handleLogout = async () => {
+        await logout();
+        setShowDialog(false);
+        router.replace("/auth");
+    };
+
     return (
 
         <View className="bg-black sticky top-0 z-50">
@@ -49,8 +60,16 @@ export default function PageHeader() {
                         accessibilityRole="button"
                         accessibilityLabel="More menu"
                         className="bg-[#1f1f1f] rounded-[12px] p-3"
+                        onPress={() => setShowDialog(true)}
                     >
-                        <FontAwesome name="bars" size={18} color="#f5f5f5" />
+                        <Ionicons name="log-out" size={18} color="#f5f5f5" />
+                        <ConfirmDialog
+                            visible={showDialog}
+                            title="Confirm Logout"
+                            message="Are you sure you want to logout?"
+                            onConfirm={handleLogout}
+                            onCancel={() => setShowDialog(false)}
+                        />
                     </TouchableOpacity>
                 </View>
             </View>

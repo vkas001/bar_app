@@ -1,14 +1,31 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import AppInput from "../../components/input";
+import { useAuth } from "./hooks/useAuth";
 
 const LoginForm = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const { logIn, loading } = useAuth();
+
+  const handleLogin = async () => {
+    setError("");
+    try {
+      const user = await logIn({ email, password });
+      if (user) {
+        router.replace("/(tabs)/home");
+      } else {
+        setError("Invalid credentials");
+      }
+    } catch (e) {
+      setError("Login failed. Please try again.");
+    }
+  };
 
   return (
     <View
@@ -19,6 +36,7 @@ const LoginForm = () => {
         Staff Login
       </Text>
 
+
       <AppInput
         label="Employee Email"
         value={email}
@@ -28,6 +46,7 @@ const LoginForm = () => {
         autoCapitalize="none"
         autoCorrect={false}
       />
+
 
       <AppInput
         label="Password"
@@ -47,14 +66,24 @@ const LoginForm = () => {
         onRightIconPress={() => setShowPassword((prev) => !prev)}
       />
 
+
+      {error ? (
+        <Text className="text-red-500 text-center mb-2">{error}</Text>
+      ) : null}
+
       <TouchableOpacity
-        onPress={() => router.replace("/(tabs)/home")}
+        onPress={handleLogin}
         activeOpacity={0.85}
         className="bg-yellow rounded-lg py-3 items-center mb-8"
+        disabled={loading}
       >
-        <Text className="text-white font-bold text-xl py-4">
-          Login
-        </Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text className="text-white font-bold text-xl">
+            Login
+          </Text>
+        )}
       </TouchableOpacity>
 
       <Text className="text-white text-xs text-center" >
