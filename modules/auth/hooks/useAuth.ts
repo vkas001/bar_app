@@ -2,7 +2,7 @@ import { useState } from "react";
 import { login } from "../services/auth.service";
 import { useAuthStore } from "../store/auth.store";
 import { saveToken } from "@/shared/storage/secure";
-import { saveUserLocal } from "@/shared/storage/async";
+import { saveAuthData } from "@/shared/storage/async";
 
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
@@ -17,14 +17,22 @@ export const useAuth = () => {
     try {
       const res = await login(data);
 
-      const { token, user } = res;
+      const { token, user, roles, permissions } = res;
 
       //  SAVE SESSION
       await saveToken(token);
-      await saveUserLocal(user);
+      await saveAuthData({
+        user,
+        roles,
+        permissions
+      });
 
       //  UPDATE GLOBAL STATE
-      setUser(user);
+      setUser({
+        user,
+        roles,
+        permissions
+      });
 
       return user;
     } finally {

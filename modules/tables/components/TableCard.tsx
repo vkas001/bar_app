@@ -9,36 +9,69 @@ type Props = {
     onPress: () => void;
 }
 
-export const TableCard = ({
-    table, selected, onPress
-}: Props) => {
+export const TableCard = ({ table, selected, onPress }: Props) => {
+    const isUnavailable = !table.is_available || !table.is_active;
+
+    const fullText = `${table.table_type.name}:${table.name}`;
+    const isLong = fullText.length > 9;
+
     return (
         <Pressable
-            onPress={onPress}
-            className={`w-full h-80 p-10 rounded-lg bg-['#262626'] border ${selected ? "border-yellow" : "border-neutral-700"
-                }`}
+            onPress={isUnavailable ? undefined : onPress}
+            className={`
+                w-full h-80 p-4 rounded-lg
+                ${isUnavailable
+                    ? 'opacity-50 bg-red-900/20 border-2 border-red-500/30'
+                    : selected
+                        ? 'bg-[#262626] border-2 border-yellow'
+                        : 'bg-[#262626] border-2 border-transparent'
+                }
+            `}
         >
-            {/* Top Row */}
+            {/* Top Row: group:name + status badge */}
             <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-yellow font-bold text-2xl">
-                    {table.label}
-                </Text>
+                <View className="bg-[#23272f] px-3 py-1.5 rounded-full">
+                    <Text
+                        className={`text-yellow font-bold ${isLong ? "text-xl" : "text-3xl"
+                            }`}
+                        numberOfLines={1}
+                    >
+                        {fullText}
+                    </Text>
+                </View>
 
-                <Badge label={table.status} />
-            </View>
-
-            {/* Center Circle */}
-            <View className="flex-1 justify-center items-center">
-                <View className="w-24 h-24 rounded-full bg-black items-center justify-center">
-                    <Text className="text-white font-bold text-3xl">
-                        N/A
+                <View className={`px-4 py-1 rounded-md border ${isUnavailable
+                    ? 'bg-red-900/30 border-red-400/30'
+                    : table.status === 'Booked'
+                        ? 'bg-green-900/30 border-green-400/30'
+                        : 'bg-yellow-900/30 border-yellow-400/30'
+                    }`}>
+                    <Text className={`text-lg font-medium ${isUnavailable
+                        ? 'text-red-400'
+                        : table.status === 'Booked'
+                            ? 'text-green-400'
+                            : 'text-yellow-300'
+                        }`}>
+                        {isUnavailable ? 'Occupied' : (table.status ?? 'Available')}
                     </Text>
                 </View>
             </View>
 
-            {/* Footer */}
-            <Text className="text-zinc-300 text-center text-xl mt-2">
-                Seats: {table.seats}
+            {/* Center: initials avatar */}
+            <View className="flex-1 justify-center items-center">
+                <View className={`w-24 h-24 rounded-full items-center justify-center ${table.is_available ? "bg-green-800" : "bg-red-900"
+                    }`}>
+                    <Text className="text-white font-bold text-lg text-center">
+                        {table.is_available ? 'Free' : 'Busy'}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Footer: seats */}
+            <Text className="text-[#ababab] text-center text-lg mt-2">
+                Seats: <Text className="text-white font-medium">
+                    {table.capacity}
+                </Text>
             </Text>
         </Pressable>
     );

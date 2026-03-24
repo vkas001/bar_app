@@ -1,13 +1,23 @@
-export const TYPES = [
-    "AllTypes", "A", "B", "C", "D", "VIP1", "VIP2"
-] as const;
+//export const TYPES = ['AllTypes', 'A', 'B', 'C'] as const;
+//export type TableType = typeof TYPES[number];
 
-export type TableType = (typeof TYPES)[number];
+export type TableType = string;
 
-export type Table = {
+export interface TableTypeObject {
+    id: number;
+    name: string;
+    description: string | null;
+}
+
+export interface Table {
     id: string;
-    label: string;
+    name: string;
+    status: string | null;
+    group: string;
+    initials?: string;
     seats: number;
-    status: "empty" | "occupied";
-};
-
+    table_type: TableTypeObject;
+    capacity: number;
+    is_available: boolean;
+    is_active: boolean;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FlatList, RefreshControl, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native'
 import { TableCard } from './components/TableCard'
 import TableFilter from './components/TableFilter'
 import TableStatusFilter from './components/TableStatusFilter'
@@ -12,13 +12,33 @@ type TableScreenProps = {
 }
 
 export default function TableScreen({ refreshing = false, onRefresh }: TableScreenProps) {
-  const { tables, selectedIds, toggleTableSelection } = useTables()
+  const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error } = useTables()
   const [selectedType, setSelectedType] = useState<TableType>('AllTypes')
   const [hideOccupied, setHideOccupied] = useState(false)
 
+  // Loading state
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#FFD700" />
+      </View>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center px-6">
+        <Text className="text-red-400 text-center text-lg">
+          {error}
+        </Text>
+      </View>
+    )
+  }
+
   const visibleTables = tables.filter((table) => {
-    const matchesType = selectedType === 'AllTypes' || table.label.toUpperCase().startsWith(`${selectedType.toUpperCase()}:`)
-    const matchesStatus = !hideOccupied || table.status !== 'occupied'
+    const matchesType = selectedType === 'AllTypes' || table.table_type.name === selectedType
+    const matchesStatus = !hideOccupied || table.is_available !== false
     return matchesType && matchesStatus
   })
 
@@ -27,11 +47,18 @@ export default function TableScreen({ refreshing = false, onRefresh }: TableScre
       <View className='flex-row items-center px-4 py-3'>
 
         <View className='flex-1'>
-          <TableFilter selectedType={selectedType} setSelectedType={setSelectedType} />
+          <TableFilter
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            tableTypes={tableTypes}
+          />
         </View>
 
         <View>
-          <TableStatusFilter hideOccupied={hideOccupied} setHideOccupied={setHideOccupied} />
+          <TableStatusFilter
+            hideOccupied={hideOccupied}
+            setHideOccupied={setHideOccupied}
+          />
         </View>
 
       </View>
@@ -42,11 +69,18 @@ export default function TableScreen({ refreshing = false, onRefresh }: TableScre
         numColumns={2}
         className='flex-1'
         refreshControl={
-          onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> : undefined
+          onRefresh ? <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          /> : undefined
         }
         contentContainerClassName='px-2 pt-4 pb-4'
         renderItem={({ item: table }) => (
-          <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
+          <View
+            style={{
+              width: '50%', paddingHorizontal: 8, marginBottom: 16
+            }}
+          >
             <TableCard
               table={table}
               selected={selectedIds.includes(table.id)}
