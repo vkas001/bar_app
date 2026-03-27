@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, TouchableOpacity } from 'react-native';
 import { order, orderStatus } from '../types/order.types';
 
 interface Props {
@@ -24,8 +24,15 @@ export default function OrderCard({ order, onPress }: Props) {
     const currentStatusColors = statusColors[order.status]
     const currentPaymentColors = paymentColors[order.paymentStatus]
 
+    // Split tables and group by 4 per line
+    const tableList = order.table.split(',').map(t => t.trim()).filter(Boolean);
+    const groupedTables: string[][] = [];
+    for (let i = 0; i < tableList.length; i += 4) {
+        groupedTables.push(tableList.slice(i, i + 4));
+    }
+
     return (
-        <Pressable
+        <TouchableOpacity
             onPress={() => onPress(order)}
         >
             <View
@@ -46,13 +53,18 @@ export default function OrderCard({ order, onPress }: Props) {
                             <Text className='w-full text-center font-bold text-2xl uppercase tracking-[0.6px] text-black leading-none'>
                                 Table:
                             </Text>
-                            <Text className='w-full text-center text-xl font-bold text-black leading-none -mt-1'>
-                                {order.table}
-                            </Text>
+                            {groupedTables.map((row, idx) => (
+                                <Text
+                                    key={idx}
+                                    className='w-full text-center text-xl font-bold text-black leading-none mt-2'
+                                >
+                                    {row.join(', ')}
+                                </Text>
+                            ))}
                         </View>
                     </View>
 
-                    <View className='flex-1 items-center'>
+                    <View className='flex-1 ml-2'>
                         <Text className='text-center text-xl font-bold text-white'>
                             {order.customer || 'Walk-in'}
                         </Text>
@@ -61,7 +73,9 @@ export default function OrderCard({ order, onPress }: Props) {
                     <View className='flex-1 items-center'>
                         <View
                             className='rounded-full px-3 py-1'
-                            style={{ backgroundColor: currentStatusColors.backgroundColor }}
+                            style={{
+                                backgroundColor: currentStatusColors.backgroundColor
+                            }}
                         >
                             <Text
                                 className='text-xs font-semibold uppercase tracking-[1px]'
@@ -74,12 +88,18 @@ export default function OrderCard({ order, onPress }: Props) {
                 </View>
 
                 <View className='mt-2 items-center'>
-                    <Text className='text-sm text-white'>{order.id} / {order.type}</Text>
+                    <Text className='text-sm text-white'>
+                        #{order.id} / {order.type}
+                    </Text>
                 </View>
 
                 <View className='mt-4 flex-row items-center justify-between mb-2'>
-                    <Text className='text-xm text-white'>{order.date}</Text>
-                    <Text className='text-sm font-semibold text-white'>Items: {order.items}</Text>
+                    <Text className='text-xm text-white'>
+                        {order.date}
+                    </Text>
+                    <Text className='text-sm font-semibold text-white'>
+                        {order.items}  Items
+                    </Text>
                 </View>
 
                 <View
@@ -92,18 +112,24 @@ export default function OrderCard({ order, onPress }: Props) {
                 />
 
                 <View className='flex-row items-center justify-between'>
-                    <Text className='text-lg font-bold text-white'>Total</Text>
-                    <Text className='text-lg font-bold text-white'>Rs. {order.total.toFixed(2)}</Text>
+                    <Text className='text-lg font-bold text-white'>
+                        Total
+                    </Text>
+                    <Text className='text-lg font-bold text-white'>
+                        Rs. {order.total.toFixed(2)}
+                    </Text>
                 </View>
 
                 <View className='mt-2 flex-row items-center justify-between'>
-                    <Text className='text-sm font-medium text-white'>Payment</Text>
+                    <Text className='text-sm font-medium text-white'>
+                        Payment
+                    </Text>
                     <View
                         className='rounded-full px-3 py-1'
                         style={{ backgroundColor: currentPaymentColors.backgroundColor }}
                     >
                         <Text
-                            className='text-xs font-semibold uppercase tracking-[1px]'
+                            className='text-base uppercase tracking-[1px]'
                             style={{ color: currentPaymentColors.color }}
                         >
                             {order.paymentStatus}
@@ -111,6 +137,6 @@ export default function OrderCard({ order, onPress }: Props) {
                     </View>
                 </View>
             </View>
-        </Pressable>
+        </TouchableOpacity>
     )
 }

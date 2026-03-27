@@ -1,5 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { order, orderItem, orderItemStatus } from '../types/order.types';
 
@@ -27,19 +27,22 @@ const ITEM_STATUS_ICONS: Record<orderItemStatus, keyof typeof MaterialIcons.glyp
   Cancel: "cancel",
 };
 
-// Dummy order items for now
-const DUMMY_ORDER_ITEMS: orderItem[] = [
-  { id: "ITEM001", qty: 2, unit: "Plates", note: "No onion", status: "Ready" },
-  { id: "ITEM002", qty: 1, unit: "Cup", note: "", status: "Served" },
-  { id: "ITEM003", qty: 3, unit: "Bowls", note: "Extra spicy", status: "Preparing" },
-
-];
-
-export default function OrderDetailsModal({ visible, order, onClose }: Props) {
-  if (!order) return null;
-
-  const [orderItems, setOrderItems] = useState<orderItem[]>(DUMMY_ORDER_ITEMS);
+export default function OrderDetailsModal({
+  visible,
+  order,
+  onClose
+}: Props) {
+  const [orderItems, setOrderItems] = useState<orderItem[]>([]);
   const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | null>(null);
+
+  // update orderItems when order changes
+  useEffect(() => {
+    if (order?.orderItems) {
+      setOrderItems(order.orderItems);
+    }
+  }, [order]);
+
+  if (!order) return null;
 
   const tables = order.table
     .split(",")
@@ -165,7 +168,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: Props) {
                     <View className="flex-row justify-between mb-1">
                       <View className="flex-row items-center gap-2 px-4">
                         <Text className="text-zinc-400 text-xl">Qty:</Text>
-                        <Text className="text-white text-xl">{item.qty}</Text>
+                        <Text className="text-white text-xl">{item.quantity}</Text>
                         <Text className="text-zinc-400 text-xl">{item.unit}</Text>
                       </View>
                     </View>
@@ -296,13 +299,13 @@ export default function OrderDetailsModal({ visible, order, onClose }: Props) {
             {/* PRINT BUTTON */}
 
             <View className="px-4 pb-4 pt-3 mt-2">
-                <Pressable
-                  className="bg-[#3a4455] py-3 rounded-lg"
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.8 : 1,
-                    transform: [{ scale: pressed ? 0.98 : 1 }],
-                  })}
-                >
+              <Pressable
+                className="bg-[#3a4455] py-3 rounded-lg"
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.8 : 1,
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                })}
+              >
                 <Text className="text-center text-white font-bold text-xl">
                   Print Receipt
                 </Text>

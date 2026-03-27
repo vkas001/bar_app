@@ -40,17 +40,17 @@ export const TableCard = ({ table, selected, onPress }: Props) => {
                     </Text>
                 </View>
 
-                <View className={`px-4 py-1 rounded-md border ${isUnavailable
+                <View className={`px-4 py-1 rounded-lg border ${isUnavailable
                     ? 'bg-red-900/30 border-red-400/30'
                     : table.status === 'Booked'
                         ? 'bg-green-900/30 border-green-400/30'
-                        : 'bg-yellow-900/30 border-yellow-400/30'
+                        : 'bg-green-900/30 border-yellow'
                     }`}>
                     <Text className={`text-lg font-medium ${isUnavailable
                         ? 'text-red-400'
                         : table.status === 'Booked'
                             ? 'text-green-400'
-                            : 'text-yellow-300'
+                            : 'text-yellow'
                         }`}>
                         {isUnavailable ? 'Occupied' : (table.status ?? 'Available')}
                     </Text>

@@ -1,12 +1,8 @@
-// order filter types
+import { orderStatus } from "./order.types";
 
-import { orderStatus } from "./order.types"
-
-export type FilterKey = 'status' | 'payment' | 'table'
-
-export type StatusFilter = orderStatus | 'All'
-
-export type PaymentFilter = 'Pending' | 'Paid' | 'All'
+export type StatusFilter = 'All' | orderStatus;
+export type PaymentFilter = 'All' | 'Pending' | 'Paid';
+export type FilterKey = 'status' | 'payment' | 'table';
 
 export interface OrderFilterProps {
     statusValue: StatusFilter;
