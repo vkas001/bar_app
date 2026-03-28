@@ -1,7 +1,7 @@
 import ScreenHeader from '@/components/Header/ScreenHeader';
 import { useScreenRefresh } from '@/components/refresh/refresh';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Modal, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BarTabCard from './components/BarTabCard';
@@ -10,16 +10,36 @@ import BarTabFilter from './components/BarTabFilter';
 import BarTabForm from './components/BarTabForm';
 import TabInfo from './components/TabInfo';
 import { barTabs } from './data/barTab.data';
-import { BarTab, CreateBarTabPayload } from './types/barTab.types';
+import { BarTab, BarTabStatus, CreateBarTabPayload } from './types/barTab.types';
+import { useBarTabs } from './hook/useBarTabs';
 
 export default function BarTabScreen() {
   const router = useRouter()
-  const { refreshing, onRefresh } = useScreenRefresh()
+  const { tabs, loading, creating, error, refresh, createBarTab } = useBarTabs()
+
+  const { refreshing, onRefresh } = useScreenRefresh(refresh)
   const [isCreateTabOpen, setIsCreateTabOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<BarTab | null>(null)
   const [isTabDetailsOpen, setIsTabDetailsOpen] = useState(false)
 
-  const handleCreateTab = (_payload: CreateBarTabPayload) => {
+  // Filters
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | BarTabStatus>('all')
+
+  const filteredTabs = useMemo(() => {
+    return tabs
+      .filter(tab => statusFilter === 'all' || tab.status === statusFilter)
+      .filter(tab => {
+        const q = search.toLowerCase()
+        return (
+          tab.customerName.toLowerCase().includes(q) ||
+          tab.phone.toLowerCase().includes(q)
+        )
+      })
+  }, [tabs, search, statusFilter])
+
+  const handleCreateTab = async (payload: CreateBarTabPayload) => {
+    await createBarTab(payload)
     setIsCreateTabOpen(false)
   }
 
@@ -27,11 +47,16 @@ export default function BarTabScreen() {
     <SafeAreaView className="flex-1 bg-black">
       <ScreenHeader
         title="Bar Tabs"
-        extraContent={<TabInfo />}
+        extraContent={<TabInfo tabs={tabs} />}
         onBackPress={() => router.replace('/(tabs)/home')}
       />
 
-      <BarTabFilter onPressNewTab={() => setIsCreateTabOpen(true)} />
+      <BarTabFilter
+        onPressNewTab={() => setIsCreateTabOpen(true)}
+        onSearchChange={setSearch}
+        onstatusCchange={setStatusFilter}
+
+      />
 
       <Modal
         visible={isCreateTabOpen}
@@ -73,7 +98,7 @@ export default function BarTabScreen() {
           />
         }
       >
-        {barTabs.map((tab) => (
+        {filteredTabs.map((tab) => (
           <BarTabCard
             key={tab.id}
             tab={tab}

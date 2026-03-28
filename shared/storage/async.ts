@@ -2,8 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USER_KEY = "auth_user";
 
-export const saveUserLocal = async (user: any) => {
-    await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+export const saveAuthData = async (data: {
+    user: any;
+    roles: String[];
+    permissions: String[]
+}) => {
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(data.user));
 };
 
 export const getUserLocal = async () => {

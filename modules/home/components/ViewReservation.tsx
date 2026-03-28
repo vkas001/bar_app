@@ -23,7 +23,7 @@ type Reservation = {
     total: number
 }
 
-{/* orders data*/}
+{/* orders data*/ }
 
 function mapOrderStatusToReservationStatus(status: string): ReservationStatus {
     const normalizedStatus = status.toLowerCase()
@@ -97,17 +97,17 @@ export default function ViewReservation() {
 
                 </Text>
                 <View className='mt-4'>
-                <AppInput
-                    placeholder='Search by customer or table...'
-                    inputClassName='h-14'
-                    inputTextClassName='text-xl'
-                    value={query}
-                    onChangeText={setQuery}
-                    leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
-                    rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
-                    onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
+                    <AppInput
+                        placeholder='Search by customer or table...'
+                        inputClassName='h-14'
+                        inputTextClassName='text-xl'
+                        value={query}
+                        onChangeText={setQuery}
+                        leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
+                        rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
+                        onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
                     />
-                    </View>
+                </View>
 
                 {isFilterOpen ? (
                     <View className='absolute right-0 top-16 z-20 min-w-[170px] rounded-xl border border-white/10 bg-zinc-900 p-2'>

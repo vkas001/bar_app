@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { View, Text } from "react-native";
 import { adToBs } from "@sbmdkl/nepali-date-converter";
+import React, { useEffect, useState } from "react";
+import { Text, useWindowDimensions, View } from "react-native";
+
+const useResponsive = () => {
+    const { width, height } = useWindowDimensions();
+    const isTablet = width >= 768;
+    const isLargeTablet = width >= 1024;
+    const isLandscape = width > height;
+
+    return { width, isTablet, isLargeTablet, isLandscape };
+};
 
 const Greetings = () => {
     const [dateTime, setDateTime] = useState(new Date());
+    const { isTablet, isLargeTablet } = useResponsive();
 
     useEffect(() => {
         const timer = setInterval(() => setDateTime(new Date()), 1000);
@@ -35,21 +45,55 @@ const Greetings = () => {
     };
 
     return (
-        <View className="flex-row justify-between items-center px-8 mt-5 pb-3">
-            <View>
-                <Text className="text-[#f5f5f5] text-2xl font-semibold tracking-wide">
+        <View
+            className={`
+                flex-row justify-between items-center
+                mt-3 pb-3
+                ${isLargeTablet ? "px-12" : isTablet ? "px-8" : "px-4"}
+            `}
+        >
+            {/* ── Left: Greeting + subtitle ── */}
+            <View className="flex-1 mr-3">
+                <Text
+                    className={`
+                        text-[#f5f5f5] font-semibold tracking-wide
+                        ${isLargeTablet ? "text-3xl" : isTablet ? "text-2xl" : "text-lg"}
+                    `}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                >
                     {getGreeting()}, {"Vintage Lounge & Bar"}!
                 </Text>
-                <Text className="text-[#ababab] text-xl">
+                <Text
+                    className={`
+                        text-[#ababab] mt-1
+                        ${isLargeTablet ? "text-xl" : isTablet ? "text-lg" : "text-sm"}
+                    `}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                >
                     Give your best services for customers 😀
                 </Text>
             </View>
 
-            <View>
-                <Text className="text-[#f5f5f5] text-3xl font-bold tracking-wide w-[130px]">
+            {/* ── Right: Clock + BS date ── */}
+            <View className="items-end">
+                <Text
+                    className={`
+                        text-[#f5f5f5] font-bold tracking-wide text-right
+                        ${isLargeTablet ? "text-5xl w-48" : isTablet ? "text-4xl w-40" : "text-xl w-29"}
+                    `}
+                >
                     {formatTime(dateTime)}
                 </Text>
-                <Text className="text-[#ababab] text-sm">{getCurrentDateInBS()}</Text>
+                <Text
+                    className={`
+                        text-[#ababab] mt-1
+                        ${isLargeTablet ? "text-base" : isTablet ? "text-sm" : "text-xs"}
+                    `}
+                >
+                    {getCurrentDateInBS()}
+                </Text>
             </View>
         </View>
     );

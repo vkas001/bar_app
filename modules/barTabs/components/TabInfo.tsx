@@ -1,16 +1,24 @@
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Text, View } from 'react-native'
+import { BarTab } from '../types/barTab.types'
 
-export default function TabInfo() {
+interface Props {
+    tabs: BarTab[]
+}
+
+export default function TabInfo({ tabs }: Props) {
+    const activeCount = tabs.filter(t => t.status === "active").length;
+    const totalAmount = tabs.reduce((sum, t) => sum + t.total, 0);
+
     return (
         <View className="flex-row items-center gap-2">
 
             <View className='flex-row items-center gap-1 rounded-lg bg-card px-3 py-1.5'>
-                <Ionicons name="alert" size={18} color="yellow" />
+                <Ionicons name="bulb" size={18} color="yellow" />
 
                 <Text className="text-base text-zinc-200">
-                    Active: 2
+                    Active: {activeCount}
                 </Text>
             </View>
 
@@ -18,7 +26,7 @@ export default function TabInfo() {
                 <Ionicons name="cash" size={18} color="green" />
 
                 <Text className="text-base text-white">
-                    Total: Rs. 27180
+                    Total: Rs. {totalAmount.toLocaleString('en-IN')}
                 </Text>
             </View>
         </View>

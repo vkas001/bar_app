@@ -45,6 +45,8 @@ const LoginForm = () => {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        inputTextClassName="text-lg"
+        labelClassName="text-lg"
       />
 
 
@@ -56,6 +58,8 @@ const LoginForm = () => {
         secureTextEntry={!showPassword}
         autoCapitalize="none"
         containerClassName="mb-8"
+        inputTextClassName="text-lg"
+        labelClassName="text-lg"
         rightIcon={
           <Ionicons
             name={showPassword ? "eye-off-outline" : "eye-outline"}

@@ -3,7 +3,7 @@ import { BarTabStatus } from '@/modules/barTabs/types/barTab.types'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { Pressable, Text, TouchableOpacity, View } from 'react-native'
+import { Pressable, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 
 const statusColors: Record<BarTabStatus, { bg: string; text: string }> = {
     active: { bg: '#16351f', text: '#86efac' },
@@ -11,62 +11,104 @@ const statusColors: Record<BarTabStatus, { bg: string; text: string }> = {
     suspended: { bg: '#4c1d1d', text: '#fca5a5' },
 }
 
+const useResponsive = () => {
+    const { width, height } = useWindowDimensions()
+    const isTablet = width >= 768
+    const isLargeTablet = width >= 1024
+    const isLandscape = width > height
+    return { isTablet, isLargeTablet, isLandscape }
+}
+
 export default function BarCard() {
     const router = useRouter()
+    const { isTablet, isLargeTablet } = useResponsive()
+
     const activeCount = barTabs.filter((tab) => tab.status === 'active').length
     const totalAmount = barTabs.reduce((sum, tab) => sum + tab.total, 0)
-    const recentActiveTabs = barTabs.filter((tab) => tab.status === 'active').slice(0, 1)
+    const recentCount = isLargeTablet ? 3 : isTablet ? 2 : 1
+    const recentActiveTabs = barTabs.filter((tab) => tab.status === 'active').slice(0, recentCount)
+
+    const cardPadding = isLargeTablet ? 'p-6' : isTablet ? 'p-5' : 'p-4'
+    const headerIconSize = isLargeTablet ? 28 : isTablet ? 26 : 24
+    const headerTextSize = isLargeTablet ? 'text-2xl' : isTablet ? 'text-xl' : 'text-lg'
+    const viewAllTextSize = isLargeTablet ? 'text-lg' : isTablet ? 'text-base' : 'text-base'
+    const statIconSize = isLargeTablet ? 24 : isTablet ? 22 : 20
+    const statLabelSize = isLargeTablet ? 'text-base' : isTablet ? 'text-sm' : 'text-sm'
+    const statValueSize = isLargeTablet ? 'text-4xl' : isTablet ? 'text-3xl' : 'text-3xl'
+    const totalValueSize = isLargeTablet ? 'text-3xl' : isTablet ? 'text-2xl' : 'text-2xl'
+    const sectionTitle = isLargeTablet ? 'text-2xl' : isTablet ? 'text-xl' : 'text-xl'
+    const avatarSize = isLargeTablet ? 'h-16 w-16' : isTablet ? 'h-15 w-15' : 'h-14 w-14'
+    const avatarText = isLargeTablet ? 'text-2xl' : isTablet ? 'text-xl' : 'text-xl'
+    const tabNameSize = isLargeTablet ? 'text-xl' : isTablet ? 'text-lg' : 'text-lg'
+    const tabIdSize = isLargeTablet ? 'text-base' : isTablet ? 'text-sm' : 'text-sm'
+    const tabAmountSize = isLargeTablet ? 'text-xl' : isTablet ? 'text-lg' : 'text-lg'
+    const tabStatusSize = isLargeTablet ? 'text-base' : isTablet ? 'text-sm' : 'text-sm'
+    const showMoreSize = isLargeTablet ? 'text-xl' : isTablet ? 'text-lg' : 'text-lg'
+    const sectionMx = isLargeTablet ? 'mx-6' : isTablet ? 'mx-5' : 'mx-4'
+    const sectionMb = isLargeTablet ? 'mb-8' : isTablet ? 'mb-6' : 'mb-6'
+
+    const tabListClass = isTablet ? 'flex-row flex-wrap gap-4 mt-4' : 'flex-col gap-3 mt-4'
+    const tabCardClass = isLargeTablet ? 'w-[31%]' : isTablet ? 'w-[48%]' : 'w-full'
 
     return (
         <View className='flex-1 bg-zinc-900 rounded-lg mb-4'>
 
-            <View className='flex-row items-center gap-4 p-4'>
-                <Ionicons name="wine" size={24} color="white" />
-                <Text className='ml-2 text-lg font-medium text-white'>
+            {/* ── Header ── */}
+            <View className={`flex-row items-center gap-4 ${cardPadding}`}>
+                <Ionicons name="wine" size={headerIconSize} color="white" />
+                <Text className={`ml-2 font-medium text-white ${headerTextSize}`}>
                     Bar Tabs
                 </Text>
                 <Pressable
                     onPress={() => router.push('/barTabs')}
                     className='ml-auto flex-row items-center gap-1'
                 >
-                    <Text className='text-yellow font-bold text-base'>
+                    <Text className={`text-yellow font-bold ${viewAllTextSize}`}>
                         View All
                     </Text>
-                    <Ionicons name='chevron-forward' size={18} color='yellow' />
+                    <Ionicons name='chevron-forward' size={isLargeTablet ? 22 : 18} color='yellow' />
                 </Pressable>
             </View>
 
+            {/* ── Stat cards ── */}
             <View className='pb-5'>
                 <View className='w-[90%] self-center flex-row justify-between'>
+
                     <View className='w-[48%] rounded-xl bg-black p-4'>
                         <View className='flex-row items-center gap-2'>
-                            <Ionicons name='time-outline' size={20} color='green' />
-                            <Text className='text-sm font-semibold text-zinc-300'>Active Tabs</Text>
+                            <Ionicons name='time-outline' size={statIconSize} color='green' />
+                            <Text className={`font-semibold text-zinc-300 ${statLabelSize}`}>
+                                Active Tabs
+                            </Text>
                         </View>
-                        <Text className='mt-2 text-3xl font-bold text-white'>
+                        <Text className={`mt-2 font-bold text-white ${statValueSize}`}>
                             {activeCount}
                         </Text>
                     </View>
 
                     <View className='w-[48%] rounded-xl bg-black p-4'>
                         <View className='flex-row items-center gap-2'>
-                            <Ionicons name='cash' size={20} color='green' />
-                            <Text className='text-sm font-semibold text-zinc-300'>Total Amount</Text>
+                            <Ionicons name='cash' size={statIconSize} color='green' />
+                            <Text className={`font-semibold text-zinc-300 ${statLabelSize}`}>
+                                Total Amount
+                            </Text>
                         </View>
-                        <Text className='mt-2 text-2xl font-bold text-white'>
+                        <Text className={`mt-2 font-bold text-white ${totalValueSize}`}>
                             Rs. {totalAmount}
                         </Text>
                     </View>
-                </View>
-            </View>
-            <View className='ml-8 mr-8 mb-8'>
-                <View className='flex-row items-center justify-between'>
-                    <Text className='text-white font-bold text-xl'>
-                        Recent Active Tabs
-                    </Text>
 
                 </View>
-                <View className='flex-row gap-4 mt-4'>
+            </View>
+
+            {/* ── Recent Active Tabs ── */}
+            <View className={`${sectionMx} ${sectionMb}`}>
+                <Text className={`text-white font-bold ${sectionTitle}`}>
+                    Recent Active Tabs
+                </Text>
+
+                {/* Tab cards — stacked on phone, wrapped grid on tablet */}
+                <View className={tabListClass}>
                     {recentActiveTabs.map((tab) => {
                         const initial = tab.customerName.trim().charAt(0).toUpperCase() || '?'
                         const tabStatus = statusColors[tab.status]
@@ -74,35 +116,39 @@ export default function BarCard() {
                         return (
                             <View
                                 key={tab.id}
-                                className='w-[80%] flex-row items-center rounded-xl bg-black px-4 py-4'
+                                className={`flex-row items-center rounded-xl bg-black px-4 py-4 ${tabCardClass}`}
                             >
+                                {/* Avatar */}
                                 <View
-                                    className='h-14 w-14 shrink-0 items-center justify-center rounded-full bg-yellow'
+                                    className={`shrink-0 items-center justify-center bg-yellow ${avatarSize}`}
                                     style={{ borderRadius: 999 }}
                                 >
-                                    <Text className='text-xl font-bold text-black'>{initial}</Text>
+                                    <Text className={`font-bold text-black ${avatarText}`}>
+                                        {initial}
+                                    </Text>
                                 </View>
 
+                                {/* Name + ID */}
                                 <View className='ml-4 flex-1'>
-                                    <Text numberOfLines={1} className='text-xl text-white'>
+                                    <Text numberOfLines={1} className={`text-white ${tabNameSize}`}>
                                         {tab.customerName}
                                     </Text>
-                                    <Text className='text-base text-zinc-400'>
+                                    <Text className={`text-zinc-400 ${tabIdSize}`}>
                                         Tab #{tab.id}
                                     </Text>
-
                                 </View>
 
-
+                                {/* Amount + Status */}
                                 <View className='items-end'>
-                                    <Text className='text-xl font-bold text-white'>
+                                    <Text className={`font-bold text-white ${tabAmountSize}`}>
                                         Rs. {tab.total}
                                     </Text>
                                     <View
                                         className='mt-1 rounded-full px-2 py-1'
                                         style={{ backgroundColor: tabStatus.bg }}
                                     >
-                                        <Text className='text-lg font-semibold capitalize'
+                                        <Text
+                                            className={`font-semibold capitalize ${tabStatusSize}`}
                                             style={{ color: tabStatus.text }}
                                         >
                                             {tab.status}
@@ -110,21 +156,22 @@ export default function BarCard() {
                                     </View>
                                 </View>
                             </View>
-
                         )
                     })}
-                    <TouchableOpacity
-                        onPress={() => router.push('/barTabs')}
-                        className='mt-4 self-center flex-row items-center justify-center gap-1'
-                    >
-                        <Text className='text-yellow font-bold text-lg'>
-                            Show More
-                        </Text>
-                        <Ionicons name='chevron-forward' size={18} color='yellow' />
-                    </TouchableOpacity>
                 </View>
+
+                {/* Show More */}
+                <TouchableOpacity
+                    onPress={() => router.push('/barTabs')}
+                    className='mt-4 self-center flex-row items-center justify-center gap-1'
+                >
+                    <Text className={`text-yellow font-bold ${showMoreSize}`}>
+                        Show More
+                    </Text>
+                    <Ionicons name='chevron-forward' size={isLargeTablet ? 22 : 18} color='yellow' />
+                </TouchableOpacity>
             </View>
 
-        </View >
+        </View>
     )
 }
