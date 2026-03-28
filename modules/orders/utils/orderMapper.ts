@@ -1,9 +1,9 @@
 import {
     ApiOrder,
     order,
-    orderStatus,
+    orderItem,
     orderItemStatus,
-    orderItem
+    orderStatus
 } from '../types/order.types';
 
 const mapStatus = (status: string): orderStatus => {
@@ -71,6 +71,7 @@ export const mapApiOrder = (apiOrder: ApiOrder): order => {
         type: apiOrder.reservation.status,
         date: formatDate(apiOrder.created_at),
         items: apiOrder.order_details.length,
+        peopleCount: apiOrder.reservation.party_size,
         total,
         paymentStatus: apiOrder.payment ? 'Paid' : 'Pending',
         orderItems,

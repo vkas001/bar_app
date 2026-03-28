@@ -1,50 +1,35 @@
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-
-type ReservationStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed'
-
-export interface ReservationDetailsData {
-    id: string
-    customerName: string
-    phone?: string
-    date?: string
-    tableNumber: string
-    peopleCount: number
-    time: string
-    status: ReservationStatus
-    orderItems?: number
-    orderStatus?: string
-    paymentStatus?: 'Pending' | 'Paid'
-    total?: number
-}
+import { Reservation, RESERVATION_STATUS_STYLES } from '../types/reservation.types'
 
 interface Props {
     visible: boolean
-    reservation: ReservationDetailsData | null
+    reservation: Reservation | null
     onClose: () => void
 }
 
-const statusColors: Record<ReservationStatus, { bg: string; text: string }> = {
-    confirmed: { bg: '#16351f', text: '#86efac' },
-    pending: { bg: '#4c3a12', text: '#facc15' },
-    cancelled: { bg: '#4c1d1d', text: '#fca5a5' },
-    completed: { bg: '#1f2937', text: '#d1d5db' },
-}
-
-export default function ReservationDetailsMotal({ visible, reservation, onClose }: Props) {
+export default function ReservationDetailsMotal({ 
+    visible, 
+    reservation, 
+    onClose 
+}: Props) {
     if (!reservation) return null
 
-    const currentStatusColor = statusColors[reservation.status]
+    const currentStatusColor = RESERVATION_STATUS_STYLES[reservation.status]
     const customerInitial = reservation.customerName.trim().charAt(0).toUpperCase() || '?'
     const formattedOrderId = reservation.id.startsWith('#') ? reservation.id : `#${reservation.id}`
     const totalAmount = reservation.total ?? 0
     const totalPaid = reservation.paymentStatus === 'Paid' ? totalAmount : 0
     const discount = 0
+    
     const reservationTables = reservation.tableNumber
         .split(',')
         .map((table) => table.trim())
         .filter(Boolean)
+
+    // Get order items from the original order
+    const orderItems = reservation.originalOrder.orderItems || []
 
     return (
         <Modal visible={visible} animationType='slide' transparent onRequestClose={onClose}>
@@ -106,7 +91,21 @@ export default function ReservationDetailsMotal({ visible, reservation, onClose 
                                                 Date
                                             </Text>
                                             <Text className='text-lg font-semibold text-white'>
-                                                {reservation.date ?? '-'}
+                                                {(() => {
+                                                    const dateStr = reservation.originalOrder.date;
+                                                    if (dateStr) {
+                                                        const d = new Date(dateStr);
+                                                        if (!isNaN(d.getTime())) {
+                                                            return d.toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                            });
+                                                        }
+                                                    }
+                                                    // fallback to plain reservation.date
+                                                    return reservation.date || '-';
+                                                })()}
                                             </Text>
                                         </View>
 
@@ -115,7 +114,21 @@ export default function ReservationDetailsMotal({ visible, reservation, onClose 
                                                 Time
                                             </Text>
                                             <Text className='text-lg text-white'>
-                                                {reservation.time}
+                                                {(() => {
+                                                    const dateStr = reservation.originalOrder.date;
+                                                    if (dateStr) {
+                                                        const d = new Date(dateStr);
+                                                        if (!isNaN(d.getTime())) {
+                                                            return d.toLocaleTimeString('en-US', {
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                                hour12: true,
+                                                            });
+                                                        }
+                                                    }
+                                                    // fallback to plain reservation.time
+                                                    return reservation.time || '-';
+                                                })()}
                                             </Text>
                                         </View>
 

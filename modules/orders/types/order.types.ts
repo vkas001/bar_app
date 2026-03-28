@@ -10,6 +10,7 @@ export interface order {
   type: string;            // reservation.status
   date: string;            // created_at formatted
   items: number;           // order_details.length
+  peopleCount?: number;    // reservation.party_size
   total: number;           // sum of order_details price * quantity
   paymentStatus: string;   // payment ? 'Paid' : 'Pending'
   orderItems: orderItem[]; // detailed items for modal
@@ -29,7 +30,11 @@ export interface ApiOrderDetail {
 export interface ApiOrder {
   id: number;
   reservation: {
-    customer: { id: number; name: string; phone: string };
+    customer: {
+      id: number;
+      name: string;
+      phone: string
+    };
     party_size: number;
     status: string;
     tables: {
