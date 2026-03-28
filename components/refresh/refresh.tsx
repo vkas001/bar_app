@@ -1,12 +1,16 @@
 import { useCallback, useState } from 'react';
 
-export function useScreenRefresh(refreshDelay = 900) {
+export function useScreenRefresh(onFetch?: () => Promise<void>) {
     const [refreshing, setRefreshing] = useState(false);
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        setTimeout(() => setRefreshing(false), refreshDelay);
-    }, [refreshDelay]);
+        try {
+            await onFetch?.();
+        } finally {
+            setRefreshing(false);
+        }
+    }, [onFetch]);
 
     return {
         refreshing,

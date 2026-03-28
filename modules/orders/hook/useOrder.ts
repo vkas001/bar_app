@@ -33,7 +33,7 @@ export const useOrders = () => {
                 mapApiOrder(o)
             );
 
-            console.log('Fetched orders:', mapped);
+            // console.log('Fetched orders:', mapped);
 
             setOrders(mapped);
         } catch (err) {

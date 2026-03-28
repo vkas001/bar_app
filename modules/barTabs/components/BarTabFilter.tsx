@@ -6,9 +6,15 @@ import { BarTabStatus } from '../types/barTab.types'
 
 interface BarTabFilterProps {
     onPressNewTab: () => void
+    onSearchChange: (text: string) => void
+    onstatusCchange: (status: 'all' | BarTabStatus) => void
 }
 
-export default function BarTabFilter({ onPressNewTab }: BarTabFilterProps) {
+export default function BarTabFilter({
+    onPressNewTab,
+    onSearchChange,
+    onstatusCchange
+}: BarTabFilterProps) {
     const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false)
     const [selectedStatus, setSelectedStatus] = useState<'all' | BarTabStatus>('all')
 
@@ -20,14 +26,15 @@ export default function BarTabFilter({ onPressNewTab }: BarTabFilterProps) {
     }, [selectedStatus])
 
     return (
-        <View className='w-full flex-row items-center gap-2 px-4 py-3' 
-        style={{ zIndex: 20, elevation: 20 }}
+        <View className='w-full flex-row items-center gap-2 px-4 py-3'
+            style={{ zIndex: 20, elevation: 20 }}
         >
             <AppInput
                 containerClassName='mb-0 flex-1'
                 inputClassName='h-14'
                 inputTextClassName='text-base'
                 placeholder='Search by name or phone...'
+                onChangeText={onSearchChange}
                 leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
             />
             <View className='h-14 w-14 items-center justify-center rounded-lg bg-card'>
@@ -63,6 +70,7 @@ export default function BarTabFilter({ onPressNewTab }: BarTabFilterProps) {
                                     onPress={() => {
                                         setSelectedStatus(status)
                                         setIsStatusMenuOpen(false)
+                                        onstatusCchange(status)
                                     }}
                                     className='mb-1 flex-row items-center justify-between rounded-md px-3 py-2.5'
                                     style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}

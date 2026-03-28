@@ -90,10 +90,10 @@ export default function BarTabCard({ tab, onPress }: Props) {
                     </View>
 
                     <View className="items-end">
-                        <Text className="text-base uppercase tracking-wide text-red">
+                        <Text className="text-base uppercase tracking-wide text-red-500">
                             Balance
                         </Text>
-                        <Text className="mt-0.5 text-base font-bold text-red">
+                        <Text className="mt-0.5 text-base font-bold text-red-500">
                             Rs. {balanceAmount.toFixed(2)}
                         </Text>
                     </View>
@@ -106,7 +106,7 @@ export default function BarTabCard({ tab, onPress }: Props) {
                             className="text-base font-bold capitalize"
                             style={{ color: currentPaymentColors.color }}
                         >
-                            {tab.paymentStatus}
+                            {tab.status}
                         </Text>
                     </View>
                 </View>
