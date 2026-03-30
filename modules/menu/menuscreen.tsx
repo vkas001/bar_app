@@ -4,6 +4,8 @@ import { useMenu } from '@/modules/menu/hook/useMenu';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MenuCategoryWithItems, MenuItemMerged } from './types/menu.types';
+import { useOrderStore } from '../orders/store/createOrderStore';
+import { useEffect, useState } from 'react';
 
 const CARD_HEIGHT = 90;
 const GAP = 8;
@@ -11,7 +13,26 @@ const VISIBLE_ROWS = 3;
 
 export default function MenuScreen() {
     const { categories, selectedCategory, setSelectedCategory, loading, error } = useMenu();
+    const {
+        pendingCustomerData,
+        selectedTableIds,
+        clearOrderData,
+    } = useOrderStore();
 
+    const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
+    const [createingOrder, setCreatingOrder] = useState(false);
+    const [cartItems, setCartItems] = useState<MenuItemMerged[]>([]);
+
+    // Check if we have a pending order on mount
+    useEffect(() => {
+        if (pendingCustomerData && selectedTableIds.length > 0) {
+            console.log('Pending Order Data:', {
+                customer: pendingCustomerData,
+                tables: selectedTableIds
+            });
+        }
+    }, []);
+    
     if (loading) return (
         <View className="flex-1 bg-[#111] justify-center items-center">
             <ActivityIndicator color="#e5a100" />
@@ -47,7 +68,7 @@ export default function MenuScreen() {
             {/* Category section — fixed height, scrollable */}
             <View style={{ height: CARD_HEIGHT * VISIBLE_ROWS + GAP * (VISIBLE_ROWS - 1) }}>
                 <ScrollView
-                    nestedScrollEnabled= {true}
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ gap: GAP, paddingHorizontal: 16 }}
                 >

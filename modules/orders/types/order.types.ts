@@ -74,3 +74,22 @@ export interface ApiOrderDetail {
   price: number;
   note: string;
 }
+
+export interface CreateOrderRequest {
+  reservation_id?: number | null;
+  customer_name: string;
+  customer_phone: string;
+  guest_count: number;
+  table_ids: number[];
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: number;
+    reservation: any;
+    status: string;
+    created_at: string;
+  };
+}
