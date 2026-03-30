@@ -35,9 +35,9 @@ export default function confirmDialog({
                     <View className="flex-row justify-between gap-x-3">
                         <TouchableOpacity
                             onPress={onCancel}
-                            className="flex-1 px-4 py-2 rounded-lg bg-red items-center"
+                            className="flex-1 px-4 py-2 rounded-lg bg-red-500 items-center"
                         >
-                            <Text className="text-black text-lg">
+                            <Text className="text-white text-lg">
                                 {cancelText}
                             </Text>
                         </TouchableOpacity>

@@ -1,9 +1,11 @@
 import { logout } from '@/modules/auth/services/auth.service';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import ConfirmDialog from '../confirmDialog';
-import { router } from 'expo-router';
+import QRDialog from '../qrDialog';
+import ProfileDialog from '../profileDialog';
 
 const useResponsive = () => {
     const { width, height } = useWindowDimensions();
@@ -15,6 +17,8 @@ const useResponsive = () => {
 
 export default function PageHeader() {
     const [showDialog, setShowDialog] = useState(false);
+    const [showQRDialog, setShowQRDialog] = useState(false);
+    const [showProfileDialog, setShowProfileDialog] = useState(false);
     const { isTablet, isLargeTablet } = useResponsive();
 
     const handleLogout = async () => {
@@ -86,6 +90,7 @@ export default function PageHeader() {
                             bg-[#1f1f1f] rounded-xl
                             ${isLargeTablet ? "p-4" : isTablet ? "p-3" : "p-3"}
                         `}
+                        onPress={() => setShowQRDialog(true)}
                     >
                         <FontAwesome name="qrcode" size={iconSize} color="#f5f5f5" />
                     </TouchableOpacity>
@@ -97,6 +102,7 @@ export default function PageHeader() {
                             bg-[#1f1f1f] rounded-xl
                             ${isLargeTablet ? "p-4" : isTablet ? "p-3" : "p-3"}
                         `}
+                        onPress={() => setShowProfileDialog(true)}
                     >
                         <FontAwesome name="user" size={iconSize} color="#f5f5f5" />
                     </TouchableOpacity>
@@ -117,12 +123,28 @@ export default function PageHeader() {
             </View>
 
             {/* ConfirmDialog rendered outside the button to avoid event bubbling */}
+
             <ConfirmDialog
                 visible={showDialog}
                 title="Confirm Logout"
                 message="Are you sure you want to logout?"
                 onConfirm={handleLogout}
                 onCancel={() => setShowDialog(false)}
+            />
+
+            {/* QRDialog rendered outside the button to avoid event bubbling */}
+            <QRDialog
+                visible={showQRDialog}
+                onClose={() => setShowQRDialog(false)}
+                imageSource={require('../../assets/images/vintage qr.jpg')} // Replace with your QR image or QR code component
+            />
+
+            {/* ProfileDialog rendered outside the button to avoid event bubbling */}
+            <ProfileDialog
+                visible={showProfileDialog}
+                onClose={() => setShowProfileDialog(false)}
+                name="User"
+                role="Waiter"
             />
 
         </View>

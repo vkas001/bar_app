@@ -21,3 +21,11 @@ export interface Table {
     is_available: boolean;
     is_active: boolean;
 }
+
+export interface CreateOrderRequest {
+    customer_name: string;
+    customer_phone: string;
+    guests: number;
+    table_ids: number[];  // Add table IDs to the order request 
+    reservation_id?: number; // Optional reservation ID if this order is linked to a reservation
+}

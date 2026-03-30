@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { order, orderItem, orderItemStatus } from '../types/order.types';
+import { order, orderItem, orderItemStatus, ApiOrder } from '../types/order.types';
 
 interface Props {
   visible: boolean;
@@ -107,7 +107,7 @@ export default function OrderDetailsModal({
                   <Text className="text-zinc-500 mx-2">•</Text>
                   <Text className="text-zinc-300 text-lg">{order.customer || "Walk In"}</Text>
                   <Text className="text-zinc-500 mx-2">•</Text>
-                  <Text className="text-zinc-300 text-lg">9876543210</Text>
+                  <Text className="text-zinc-300 text-lg">{order.customerPhone || ""}</Text>
                 </View>
 
                 <Text className="text-zinc-400 text-lg mt-1">
@@ -266,7 +266,9 @@ export default function OrderDetailsModal({
                   </Text>
                 </View>
                 {/* Divider Line */}
-                <View className="mb-2" style={{ height: 1, backgroundColor: '#71717a' }} />
+                <View className="mb-2"
+                  style={{ height: 1, backgroundColor: '#71717a' }}
+                />
 
                 <View className="flex-row justify-between pb-2">
 
@@ -280,7 +282,9 @@ export default function OrderDetailsModal({
 
                 </View>
                 {/* Divider Line */}
-                <View className="mt-2" style={{ height: 1, backgroundColor: '#71717a' }} />
+                <View className="mt-2"
+                  style={{ height: 1, backgroundColor: '#71717a' }}
+                />
 
                 <View className="flex-row justify-between mt-2">
                   <Text className="text-zinc-400 font-bold text-xl">

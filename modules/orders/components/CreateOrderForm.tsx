@@ -1,9 +1,12 @@
 import AppInput from '@/components/input';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Pressable, Text, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { useOrderStore } from '../store/createOrderStore';
 
 interface Props {
   onCreate: (data: any) => void;
+  selectedTableIds?: number[];  // Pass selected table IDs from parent       // Reservation ID to send to backend
 }
 
 const useResponsive = () => {
@@ -14,15 +17,19 @@ const useResponsive = () => {
   return { width, height, isTablet, isLargeTablet };
 };
 
-export default function CreateOrderForm
-  ({
-    onCreate
-  }: Props) {
+export default function CreateOrderForm({
+  onCreate,
+  selectedTableIds = [],
+}: Props) {
+  // console.log('CreateOrderForm props:');
   const [isWalkIn, setIsWalkIn] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [guests, setGuests] = useState(1);
   const [prevData, setPrevData] = useState({ name: "", phone: "" });
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
+  const setPendingCustomerData = useOrderStore(s => s.setPendingCustomerData);
 
   const { isTablet, isLargeTablet } = useResponsive();
 
@@ -49,34 +56,30 @@ export default function CreateOrderForm
   const inputFlexClass = isTablet ? "flex-1" : "";
 
   const handleCreate = () => {
-    onCreate({
-      customer: isWalkIn ? "Walk-in" : name,
-      phone,
-      guests,
-    });
+    if (!name.trim()) { Alert.alert('Error', 'Please enter customer name'); return }
+    if (!phone.trim()) { Alert.alert('Error', 'Please enter customer phone'); return }
 
-    // reset
-    setName("");
-    setPhone("");
-    setGuests(1);
-    setIsWalkIn(false);
-  };
+    setPendingCustomerData({
+      customer_name: isWalkIn ? "Walk In" : name.trim(),
+      customer_phone: isWalkIn ? "9876543210" : phone.trim(),
+      guest_count: guests,
+    })
 
+    navigation.navigate('tables' as never)
+  }
   const handleWalkInToggle = () => {
     if (!isWalkIn) {
-      setPrevData({ name, phone })
+      setPrevData({ name, phone });
 
-      //Autofill
-
+      // Autofill
       setName("Walk-in");
-      setPhone("9800000000");
+      setPhone("9876543210");
     } else {
       setName(prevData.name);
       setPhone(prevData.phone);
     }
-    setIsWalkIn((prev) => !prev)
-  }
-
+    setIsWalkIn((prev) => !prev);
+  };
 
   return (
     <View className={`flex-1 ${outerPadding}`}>
@@ -93,6 +96,7 @@ export default function CreateOrderForm
         {/* ── Walk-in Toggle ── */}
         <Pressable
           onPress={handleWalkInToggle}
+          disabled={loading}
           className={`
             flex-row items-center rounded-xl
             border border-zinc-700 bg-zinc-800/70
@@ -130,7 +134,7 @@ export default function CreateOrderForm
               value={name}
               onChangeText={setName}
               placeholder="Enter customer name"
-              editable={!isWalkIn}
+              editable={!isWalkIn && !loading}
               labelClassName={labelSize}
               inputTextClassName={inputTextSize}
             />
@@ -143,7 +147,7 @@ export default function CreateOrderForm
               onChangeText={setPhone}
               keyboardType="phone-pad"
               placeholder="9800000000"
-              editable={!isWalkIn}
+              editable={!isWalkIn && !loading}
               labelClassName={labelSize}
               inputTextClassName={inputTextSize}
             />
@@ -157,6 +161,7 @@ export default function CreateOrderForm
         <View className="flex-row items-center justify-between rounded-xl border border-white/20 bg-white/10 px-4 py-3">
           <Pressable
             onPress={() => setGuests(Math.max(1, guests - 1))}
+            disabled={loading}
             className={`rounded-full bg-zinc-700 items-center justify-center ${guestBtnSize}`}
           >
             <Text className={`text-yellow font-bold ${guestBtnText}`}>-</Text>
@@ -168,6 +173,7 @@ export default function CreateOrderForm
 
           <Pressable
             onPress={() => setGuests(guests + 1)}
+            disabled={loading}
             className={`rounded-full bg-zinc-700 items-center justify-center ${guestBtnSize}`}
           >
             <Text className={`text-yellow font-bold ${guestBtnText}`}>+</Text>
@@ -175,17 +181,21 @@ export default function CreateOrderForm
         </View>
 
         {/* ── Submit ── */}
-        <Pressable
+        <TouchableOpacity
           onPress={handleCreate}
+          disabled={loading}
           className={`bg-yellow rounded-xl items-center ${btnPadding} ${btnMarginTop}`}
-          style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
         >
-          <Text className={`text-white font-bold ${btnTextSize}`}>
-            Create Order
-          </Text>
-        </Pressable>
+          {loading ? (
+            <ActivityIndicator size="small" color="#000000" />
+          ) : (
+            <Text className={`text-black font-bold ${btnTextSize}`}>
+              Create Order
+            </Text>
+          )}
+        </TouchableOpacity>
 
       </View>
     </View>
-  )
+  );
 }
