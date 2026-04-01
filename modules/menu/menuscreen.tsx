@@ -1,17 +1,20 @@
 import CategoryCard from '@/modules/menu/components/CategoryCard';
 import ItemCard from '@/modules/menu/components/ItemCard';
 import { useMenu } from '@/modules/menu/hook/useMenu';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MenuCategoryWithItems, MenuItemMerged } from './types/menu.types';
 import { useOrderStore } from '../orders/store/createOrderStore';
-import { useEffect, useState } from 'react';
+import UnitSelectionModal from './components/UnitSelectionModal';
+import { useCartStore } from './store/cartStore';
+import { MenuCategoryWithItems, MenuItemMerged } from './types/menu.types';
 
 const CARD_HEIGHT = 90;
 const GAP = 8;
 const VISIBLE_ROWS = 3;
 
 export default function MenuScreen() {
+    const addItem = useCartStore((state) => state.addItem);
     const { categories, selectedCategory, setSelectedCategory, loading, error } = useMenu();
     const {
         pendingCustomerData,
@@ -21,18 +24,19 @@ export default function MenuScreen() {
 
     const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
     const [createingOrder, setCreatingOrder] = useState(false);
-    const [cartItems, setCartItems] = useState<MenuItemMerged[]>([]);
+    const [selectedItem, setSelectedItem] = useState<MenuItemMerged | null>(null);
 
     // Check if we have a pending order on mount
     useEffect(() => {
         if (pendingCustomerData && selectedTableIds.length > 0) {
-            console.log('Pending Order Data:', {
+            console.log('Pending Order Data:',
+                 {
                 customer: pendingCustomerData,
                 tables: selectedTableIds
             });
         }
     }, []);
-    
+
     if (loading) return (
         <View className="flex-1 bg-[#111] justify-center items-center">
             <ActivityIndicator color="#e5a100" />
@@ -59,7 +63,8 @@ export default function MenuScreen() {
     }
 
     const handleSelectItem = (item: MenuItemMerged) => {
-        console.log('Selected item:', item);
+        setSelectedItem(item);
+      //  console.log('Selected item:', item);
     };
 
     return (
@@ -129,6 +134,15 @@ export default function MenuScreen() {
                 )}
             </ScrollView>
 
+            <UnitSelectionModal
+                item={selectedItem}
+                visible={selectedItem !== null}
+                onClose={() => setSelectedItem(null)}
+                onSelect={(item, unit, quantity, note) => {
+                    addItem(item, unit, quantity, note);
+                    setSelectedItem(null);
+                }}
+            />
         </SafeAreaView>
     );
 }

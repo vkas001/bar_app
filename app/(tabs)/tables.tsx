@@ -1,11 +1,9 @@
-import { useRoute } from '@react-navigation/native'
 import ScreenHeader from '@/components/Header/ScreenHeader'
 import { useScreenRefresh } from '@/components/refresh/refresh'
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import TableScreen from '@/modules/tables/tableScreen'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from '@/.expo/types/router'
-import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 
 
 export default function tables() {

@@ -30,7 +30,7 @@ export function useBarTabs() {
             const json = await res.json();
             const mapped = (json.data as BarTabAPI[]).map(mapBarTabAPIToCard);
             setTabs(mapped);
-            console.log("Fetched bar tabs successfully.");
+           // console.log("Fetched bar tabs successfully.");
         } catch (e: any) {
             console.error("Error fetching bar tabs:", e);
             setError(e.message ?? "Something went wrong");

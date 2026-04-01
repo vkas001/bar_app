@@ -9,8 +9,6 @@ interface Props {
 
 export default function ItemCard({ item, onSelect }: Props) {
     const isVeg = item.item_category.name.toLowerCase().includes('veg');
-    const tagBg = isVeg ? '#14381f' : '#166df0';
-    const tagColor = isVeg ? '#15d15a' : '#60a5fa';
     const units = Array.isArray(item.units) ? item.units : [];
     const hasMultipleUnits = units.length > 1;
 

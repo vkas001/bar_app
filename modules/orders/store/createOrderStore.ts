@@ -17,13 +17,21 @@ interface CreateOrderStore {
 export const useOrderStore = create<CreateOrderStore>((set) => ({
   pendingCustomerData: null,
   selectedTableIds: [],
-  
+
   setPendingCustomerData: (data) => set({ pendingCustomerData: data }),
-  
+
   setSelectedTableIds: (ids) => set({ selectedTableIds: ids }),
-  
-  clearOrderData: () => set({ 
-    pendingCustomerData: null, 
-    selectedTableIds: [] 
+
+  clearOrderData: () => set({
+    pendingCustomerData: null,
+    selectedTableIds: []
   }),
+}));
+
+export const useCreateOrderStore = create<CreateOrderStore>((set) => ({
+  pendingCustomerData: null,
+  selectedTableIds: [],
+  setPendingCustomerData: (data) => set({ pendingCustomerData: data }),
+  setSelectedTableIds: (ids) => set({ selectedTableIds: ids }),
+  clearOrderData: () => set({ pendingCustomerData: null, selectedTableIds: [] }),
 }));
