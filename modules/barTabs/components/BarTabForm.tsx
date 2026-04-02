@@ -1,4 +1,5 @@
 import AppInput from '@/components/input'
+import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
@@ -15,11 +16,10 @@ export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFor
 	const [phone, setPhone] = useState('')
 	const [notes, setNotes] = useState('')
 
+	const { isPhone, isSmallPhone, textSm, textBase, textLg, textXl, iconSm, size } = useResponsive()
+
 	const handleCancel = () => {
-		if (onCancel) {
-			onCancel()
-			return
-		}
+		if (onCancel) { onCancel(); return }
 		onClose()
 	}
 
@@ -29,96 +29,122 @@ export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFor
 			phone: phone.trim(),
 			notes: notes.trim(),
 		})
-
 		setCustomerName('')
 		setPhone('')
 		setNotes('')
 	}
 
-	return (
-		<View className='px-4 py-4'>
-			<View className='rounded-2xl border border-zinc-700 bg-zinc-900/90 p-5'>
-				<View className='mb-3 flex-row items-start justify-between'>
-					<View className='flex-1 pr-4'>
-						<Text className='text-2xl font-bold text-white'>
-							Create Bar Tab
-						</Text>
-	
-					</View>
+	const s = isSmallPhone ? {
+		titleText: textXl,
+		labelText: textSm,
+		inputText: textSm,
+		inputH: 'h-10',
+		notesH: 'min-h-[100px] pt-2',
+		btnH: 'h-10',
+		btnText: textSm,
+		closeBtnSize: 'h-8 w-8',
+		closeIconSize: iconSm,
+		inputIconSize: iconSm,
+		inputMb: 'mb-3',
+	} : {
+		titleText: 'text-2xl',
+		labelText: 'text-lg',
+		inputText: 'text-base',
+		inputH: 'h-12',
+		notesH: 'min-h-[150px] pt-3',
+		btnH: 'h-12',
+		btnText: 'text-base',
+		closeBtnSize: 'h-10 w-10',
+		closeIconSize: 22,
+		inputIconSize: 20,
+		inputMb: 'mb-4',
+	}
 
+	return (
+		// On phone: full width, no outer padding, sharp corners
+		// On tablet: keep the given width with padding and rounded card
+		<View className={isPhone ? 'px-2' : 'px-4 py-4'}>
+			<View
+				className={`border border-zinc-700 bg-zinc-900/90 p-5 ${isPhone ? 'rounded-3xl' : 'rounded-2xl p-4'}`}
+			>
+				{/* Header */}
+				<View className='mb-3 flex-row items-start justify-between'>
+					<Text className={`flex-1 pr-4 font-bold text-white ${s.titleText}`}>
+						Create Bar Tab
+					</Text>
 					<Pressable
 						accessibilityRole='button'
 						onPress={onClose}
-						className='h-10 w-10 items-center justify-center rounded-lg bg-zinc-800'
+						className={`${s.closeBtnSize} items-center justify-center rounded-lg bg-zinc-800`}
 						style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
 					>
-						<Ionicons name='close' size={22} color='white' />
+						<Ionicons name='close' size={s.closeIconSize} color='white' />
 					</Pressable>
 				</View>
 
-				<View className='mb-5 h-px bg-white/15' />
+				<View className='mb-4 h-px bg-white/15' />
 
+				{/* Customer Name */}
 				<AppInput
 					label='Customer Name *'
 					value={customerName}
 					onChangeText={setCustomerName}
 					placeholder='Enter customer name'
-                    leftIcon={<Ionicons name='person' size={20} color='rgba(255,255,255,0.45)' />}
-					containerClassName='mb-4'
-					labelClassName='pb-2 text-lg'
-					inputTextClassName='text-base'
-					inputClassName='h-12'
+					leftIcon={<Ionicons name='person' size={s.inputIconSize} color='rgba(255,255,255,0.45)' />}
+					containerClassName={s.inputMb}
+					labelClassName={`pb-1 ${s.labelText}`}
+					inputTextClassName={s.inputText}
+					inputClassName={s.inputH}
 				/>
 
+				{/* Phone */}
 				<AppInput
-					label='Phone Number(optional)'
+					label='Phone Number (optional)'
 					value={phone}
 					onChangeText={setPhone}
 					keyboardType='phone-pad'
 					placeholder='98XXXXXXXX'
-                    leftIcon={<Ionicons name='call' size={20} color='rgba(255,255,255,0.45)' />}
-					containerClassName='mb-4'
-					labelClassName='pb-2 text-lg'
-					inputTextClassName='text-lg'
-					inputClassName='h-12'
+					leftIcon={<Ionicons name='call' size={s.inputIconSize} color='rgba(255,255,255,0.45)' />}
+					containerClassName={s.inputMb}
+					labelClassName={`pb-1 ${s.labelText}`}
+					inputTextClassName={s.inputText}
+					inputClassName={s.inputH}
 				/>
 
+				{/* Notes */}
 				<AppInput
-					label='Notes(optional)'
+					label='Notes (optional)'
 					value={notes}
 					onChangeText={setNotes}
 					placeholder='Add any note for this tab...'
-                    leftIcon={<Ionicons name='document-text' size={20} color='rgba(255,255,255,0.45)' />}
+					leftIcon={<Ionicons name='document-text' size={s.inputIconSize} color='rgba(255,255,255,0.45)' />}
 					multiline
-					numberOfLines={5}
+					numberOfLines={isSmallPhone ? 3 : 5}
 					textAlignVertical='top'
-					containerClassName='mb-5'
-					labelClassName='pb-2 text-lg'
-					inputTextClassName='text-lg'
-					inputClassName='min-h-[150px] pt-3'
+					containerClassName={isSmallPhone ? 'mb-3' : 'mb-5'}
+					labelClassName={`pb-1 ${s.labelText}`}
+					inputTextClassName={s.inputText}
+					inputClassName={s.notesH}
 				/>
 
-				<View className='mt-2 flex-row gap-3'>
+				{/* Buttons */}
+				<View className='mt-1 flex-row' style={{ gap: isSmallPhone ? size.padding.sm : 12 }}>
 					<Pressable
 						accessibilityRole='button'
 						onPress={handleCancel}
-						className='h-12 flex-1 items-center justify-center rounded-xl border border-zinc-600 bg-zinc-800'
+						className={`${s.btnH} flex-1 items-center justify-center rounded-xl border border-zinc-600 bg-zinc-800`}
 						style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
 					>
-						<Text className='text-base font-semibold text-zinc-100'>
-							Cancel
-						</Text>
+						<Text className={`font-semibold text-zinc-100 ${s.btnText}`}>Cancel</Text>
 					</Pressable>
 
 					<Pressable
 						accessibilityRole='button'
 						onPress={handleCreate}
-						className='h-12 flex-1 items-center justify-center rounded-xl bg-yellow'
+						className={`${s.btnH} flex-1 items-center justify-center rounded-xl bg-yellow`}
 						style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
 					>
-						<Text className='text-base font-semibold text-black'>
-							Create Tab
-						</Text>
+						<Text className={`font-semibold text-black ${s.btnText}`}>Create Tab</Text>
 					</Pressable>
 				</View>
 			</View>

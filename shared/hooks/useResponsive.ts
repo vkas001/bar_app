@@ -3,7 +3,7 @@ import { useWindowDimensions } from "react-native";
 const BREAKPOINTS = {
   sm: 380,
   md: 414,
-  lg: 768,   // tablet portrait
+  lg: 600,   // tablet portrait
   xl: 1024,  // tablet landscape
 };
 
@@ -29,7 +29,7 @@ export function useResponsive() {
   // Number of columns based on width
   const columns = isLargeTablet ? 4 : isTablet ? 3 : 2;
 
-  // ── Spacing classes ──────────────────────────────────────────────────────
+  // Spacing classes 
   const px = isLargeTablet ? 'px-8' : isTablet ? 'px-6' : 'px-4'
   const py = isLargeTablet ? 'py-4' : isTablet ? 'py-3' : 'py-2'
   const mx = isLargeTablet ? 'mx-8' : isTablet ? 'mx-6' : 'mx-4'
@@ -37,7 +37,7 @@ export function useResponsive() {
   const gap = isLargeTablet ? 'gap-6' : isTablet ? 'gap-4' : 'gap-3'
   const p = isLargeTablet ? 'p-6' : isTablet ? 'p-5' : 'p-4'
 
-  // ── Typography classes ───────────────────────────────────────────────────
+  // Typography classes 
   const textXs = isLargeTablet ? 'text-sm' : isTablet ? 'text-xs' : 'text-xs'
   const textSm = isLargeTablet ? 'text-base' : isTablet ? 'text-sm' : 'text-xs'
   const textBase = isLargeTablet ? 'text-lg' : isTablet ? 'text-base' : 'text-base'
@@ -46,37 +46,37 @@ export function useResponsive() {
   const text2xl = isLargeTablet ? 'text-3xl' : isTablet ? 'text-2xl' : 'text-xl'
   const text3xl = isLargeTablet ? 'text-4xl' : isTablet ? 'text-3xl' : 'text-2xl'
 
-  // ── Icon sizes (numeric — for Expo/vector icons) ─────────────────────────
+  // Icon sizes (numeric — for Expo/vector icons)
   const iconXs = isLargeTablet ? 16 : isTablet ? 14 : 12
   const iconSm = isLargeTablet ? 20 : isTablet ? 18 : 16
   const iconMd = isLargeTablet ? 24 : isTablet ? 22 : 20
   const iconLg = isLargeTablet ? 28 : isTablet ? 26 : 24
   const iconXl = isLargeTablet ? 32 : isTablet ? 30 : 28
 
-  // ── Avatar / circle sizes ────────────────────────────────────────────────
+  // Avatar / circle sizes
   const avatarSm = isLargeTablet ? 'h-12 w-12' : isTablet ? 'h-10 w-10' : 'h-9 w-9'
   const avatarMd = isLargeTablet ? 'h-16 w-16' : isTablet ? 'h-14 w-14' : 'h-12 w-12'
   const avatarLg = isLargeTablet ? 'h-20 w-20' : isTablet ? 'h-18 w-18' : 'h-16 w-16'
 
-  // ── Component classes ────────────────────────────────────────────────────
+  //Component classes
   const inputHeight = isLargeTablet ? 'h-16' : isTablet ? 'h-14' : 'h-12'
   const btnPadding = isLargeTablet ? 'py-5 px-8' : isTablet ? 'py-4 px-6' : 'py-3 px-4'
   const cardPadding = isLargeTablet ? 'p-8' : isTablet ? 'p-6' : 'p-4'
   const roundedCard = isLargeTablet ? 'rounded-2xl' : isTablet ? 'rounded-xl' : 'rounded-xl'
 
-  // ── Tab bar ──────────────────────────────────────────────────────────────
+  // Tab bar
   const tabBarHeight = rsc(64, 60, 72)
   const tabIconSize = rsc(22, 20, 26)
   const tabFontSize = rsc(10, 10, 13)
   const tabShowLabel = isTablet
   const tabLabelPosition: 'beside-icon' | 'below-icon' = isTablet ? 'beside-icon' : 'below-icon'
 
-  // ── FAB (center tab button) ──────────────────────────────────────────────
+  // FAB (center tab button) 
   const fabSize = rsc(64, 60, 72)
   const fabIconSize = rsc(26, 24, 30)
   const fabOffset = -(rsc(25, 22, 28))
 
-  // ── Raw numeric size tokens ──────────────────────────────────────────────
+  // Raw numeric size tokens
   const size = {
     icon: {
       xs: iconXs,
@@ -105,11 +105,11 @@ export function useResponsive() {
   }
 
   return {
-    // ── Raw dimensions ─────────────────────────────────────────────────────
+    // Raw dimensions
     width,
     height,
 
-    // ── Breakpoint booleans ────────────────────────────────────────────────
+    // Breakpoint booleans 
     isPhone,
     isSmallPhone,
     isMediumPhone,
@@ -117,40 +117,40 @@ export function useResponsive() {
     isLargeTablet,
     isLandscape,
 
-    // ── Scaling functions ──────────────────────────────────────────────────
+    // Scaling functions
     rs,
     rsc,
     columns,
 
-    // ── Spacing classes ────────────────────────────────────────────────────
+    // Spacing classes
     px, py, mx, my, gap, p,
 
-    // ── Typography classes ─────────────────────────────────────────────────
+    // Typography classes
     textXs, textSm, textBase, textLg, textXl, text2xl, text3xl,
 
-    // ── Icon sizes (numeric) ───────────────────────────────────────────────
+    //  Icon sizes (numeri
     iconXs, iconSm, iconMd, iconLg, iconXl,
 
-    // ── Component classes ──────────────────────────────────────────────────
+    //  Component classes 
     avatarSm, avatarMd, avatarLg,
     inputHeight,
     btnPadding,
     cardPadding,
     roundedCard,
 
-    // ── Tab bar values ─────────────────────────────────────────────────────
+    //  Tab bar values 
     tabBarHeight,
     tabIconSize,
     tabFontSize,
     tabShowLabel,
     tabLabelPosition,
 
-    // ── FAB values ─────────────────────────────────────────────────────────
+    //FAB values 
     fabSize,
     fabIconSize,
     fabOffset,
 
-    // ── Raw numeric tokens ─────────────────────────────────────────────────
+    // Raw numeric tokens
     size,
   }
 }

@@ -1,3 +1,4 @@
+import { useResponsive } from '@/shared/hooks/useResponsive';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { MenuCategoryWithItems } from '../types/menu.types';
@@ -14,41 +15,92 @@ interface Props {
     onPress: () => void;
 }
 
-export default function CategoryCard({ category, index, isSelected, onPress }: Props) {
-    const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+export default function CategoryCard({
+    category,
+    index,
+    isSelected,
+    onPress
+}: Props) {
+    const {
+        isSmallPhone,
+        isTablet,
+        isLargeTablet,
+        textSm,
+        textBase,
+        textLg,
+        textXl,
+        text2xl,
+        iconXs,
+        iconSm,
+        iconMd,
+        rsc,
+        size,
+    } = useResponsive()
 
-    // Conditional icon: 'apps' for 'All Items', 'list' for others
+    const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
     const isAllItems = category.name.toLowerCase().includes('all');
     const iconName = isAllItems ? 'apps' : 'cafe';
+
+    const cardPadding = isLargeTablet ? 24 : isTablet ? 20 : isSmallPhone ? 8 : 8
+    const cardMinHeight = isLargeTablet ? 140 : isTablet ? 130 : isSmallPhone ? 60 : 90
+    const cardMargin = isSmallPhone ? 4 : 8
+
+    const iconContainerSize = isSmallPhone ? 'w-8 h-8' : isTablet ? 'w-12 h-12' : 'w-10 h-10'
+    const iconSize = isSmallPhone ? iconXs : iconMd
+    const iconRadius = isSmallPhone ? 'rounded-md' : 'rounded-lg'
+
+    const nameSize = isSmallPhone ? textBase : isTablet ? text2xl : textXl
+    const itemCountSize = isSmallPhone ? textSm : textBase
+
+    const selectedDotOuter = isSmallPhone ? 'w-4 h-4' : 'w-5 h-5'
+    const selectedDotInner = isSmallPhone ? 'w-2 h-2' : 'w-3 h-3'
 
     return (
         <TouchableOpacity
             onPress={onPress}
-            className="m-2 rounded-2xl p-6"
             style={{
                 backgroundColor: color,
                 borderWidth: isSelected ? 2 : 0,
                 borderColor: '#fff',
-                minHeight: 120,
+                minHeight: cardMinHeight,
                 justifyContent: 'center',
                 width: '48%',
+                borderRadius: isSmallPhone ? 14 : 16,
+                padding: cardPadding,
+                margin: cardMargin,
             }}
         >
-            <View className="flex-row mb-4 items-center">
-                <View className="w-10 h-10 rounded-lg bg-white/25 justify-center items-center mr-2">
-                    <Ionicons name={iconName} size={22} color="#fff" />
+            {/* Top row: icon + name + selected indicator */}
+            <View
+                className='flex-row items-center'
+                style={{ marginBottom: isSmallPhone ? 8 : 16 }}
+            >
+                <View
+                    className={`${iconContainerSize} ${iconRadius} bg-white/25 justify-center items-center`}
+                    style={{ marginRight: size.padding.sm }}
+                >
+                    <Ionicons name={iconName} size={iconSize} color="#fff" />
                 </View>
-                <Text className="text-white text-2xl font-bold mb-0.5 flex-1" numberOfLines={1}>
+
+                <Text
+                    className={`text-white font-bold flex-1 ${nameSize}`}
+                    numberOfLines={1}
+                >
                     {category.name}
                 </Text>
+
                 {isSelected && (
-                    <View className="w-5 h-5 rounded-full border-2 border-white justify-center items-center ml-2">
-                        <View className="w-3 h-3 rounded-full bg-white" />
+                    <View
+                        className={`${selectedDotOuter} rounded-full border-2 border-white justify-center items-center`}
+                        style={{ marginLeft: size.padding.sm }}
+                    >
+                        <View className={`${selectedDotInner} rounded-full bg-white`} />
                     </View>
                 )}
             </View>
 
-            <Text className="text-white/80 text-base mt-2">
+            {/* Item count */}
+            <Text className={`text-white/80 ${itemCountSize}`}>
                 {category.items.length} Items
             </Text>
         </TouchableOpacity>

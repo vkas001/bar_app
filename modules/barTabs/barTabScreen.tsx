@@ -66,8 +66,8 @@ export default function BarTabScreen() {
         navigationBarTranslucent
         onRequestClose={() => setIsCreateTabOpen(false)}
       >
-        <View className='flex-1 items-center justify-center bg-black/60'>
-          <View className='w-[80%] rounded-3xl pb-4'>
+        <View className='flex-1 justify-center bg-black/50'>
+          <View className='rounded-3xl pb-4'>
             <BarTabForm
               onClose={() => setIsCreateTabOpen(false)}
               onCancel={() => setIsCreateTabOpen(false)}

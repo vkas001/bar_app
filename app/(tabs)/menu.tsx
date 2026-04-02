@@ -7,6 +7,7 @@ import { useCartStore } from '@/modules/menu/store/cartStore'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function menu() {
   const [cartVisible, setCartVisible] = useState(false)
@@ -14,7 +15,7 @@ export default function menu() {
   const router = useRouter()
 
   return (
-    <View className='flex-1 bg-black relative'>
+    <SafeAreaView className='flex-1 bg-black relative'>
 
       <PageHeader />
 
@@ -36,6 +37,6 @@ export default function menu() {
         }}
       />
 
-    </View>
+    </SafeAreaView>
   )
 }

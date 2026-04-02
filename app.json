@@ -17,7 +17,8 @@
         "backgroundImage": "",
         "monochromeImage": ""
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.vkas001.bar_app"
     },
     "web": {
       "output": "static",
@@ -28,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "",
+          "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e67fb527-a207-497f-9c61-b68cda5a50e0"
+      }
     }
   }
 }

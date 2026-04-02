@@ -1,37 +1,42 @@
+import { useResponsive } from '@/shared/hooks/useResponsive';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { TableType } from '../types/table.types';  // remove TYPES import
+import { TableType } from '../types/table.types';
 
 interface TableFilterProps {
     selectedType: TableType;
     setSelectedType: (type: TableType) => void;
-    tableTypes: string[];   // ← add this
+    tableTypes: string[];
 }
 
 export default function TableFilter({
     selectedType,
     setSelectedType,
-    tableTypes,             // ← add this
+    tableTypes,
 }: TableFilterProps) {
+    const { isSmallPhone, isTablet, isLargeTablet, textSm, textBase, textLg, size } = useResponsive()
+
+    const btnPx = isLargeTablet ? 'px-6' : isTablet ? 'px-5' : isSmallPhone ? 'px-2' : 'px-1.5'
+    const btnPy = isLargeTablet ? 'py-4' : isTablet ? 'py-3.5' : isSmallPhone ? 'py-2' : 'py-1'
+    const labelSize = isLargeTablet ? textLg : isTablet ? textBase : isSmallPhone ? textSm : textSm
+
     return (
-        <ScrollView
-            horizontal showsHorizontalScrollIndicator={false}
-            className='flex-1'>
-            <View className="flex-row gap-2 py-1">
-                {tableTypes.map((type) => (   // ← use prop instead of TYPES
-                    <TouchableOpacity
-                        key={type}
-                        onPress={() => setSelectedType(type)}
-                        className={`px-4 py-3 rounded-lg whitespace-nowrap ${
-                            selectedType === type ? "bg-yellow" : "bg-gray-500"
-                        }`}
-                    >
-                        <Text className="text-white font-bold text-lg">
-                            {type === 'AllTypes' ? 'AllTypes' : `${type}`}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-        </ScrollView>
+
+        <View
+            className='flex-row py-1'
+            style={{ gap: isSmallPhone ? size.padding.sm : size.padding.md }}
+        >
+            {tableTypes.map((type) => (
+                <TouchableOpacity
+                    key={type}
+                    onPress={() => setSelectedType(type)}
+                    className={`rounded-lg ${btnPx} ${btnPy} ${selectedType === type ? 'bg-yellow' : 'bg-gray-500'}`}
+                >
+                    <Text className={`font-bold text-white ${labelSize}`}>
+                        {type === 'AllTypes' ? 'AllTypes' : type}
+                    </Text>
+                </TouchableOpacity>
+            ))}
+        </View>
     );
 }
