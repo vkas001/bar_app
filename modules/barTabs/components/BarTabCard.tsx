@@ -1,7 +1,7 @@
+import { useResponsive } from "@/shared/hooks/useResponsive";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 import { BarPaymentStatus, BarTab, BarTabStatus } from "../types/barTab.types";
-import { useResponsive } from "@/shared/hooks/useResponsive";
 
 interface Props {
     tab: BarTab;
@@ -42,8 +42,10 @@ export default function BarTabCard({ tab, onPress }: Props) {
     const currentPaymentColors = paymentColors[tab.paymentStatus];
     const balanceAmount = Math.max(0, tab.total - tab.paidAmount);
 
-    const badgePx = isLargeTablet ? 'px-5' : isTablet ? 'px-4' : isSmallPhone ? 'px-2.5' : 'px-3';
-    const badgePy = isLargeTablet ? 'py-2.5' : isTablet ? 'py-2' : 'py-1.5';
+    // Static fallback for badge padding classes (choose most common or default)
+    // If you want to keep responsive, use style prop below
+    const badgePx = undefined;
+    const badgePy = undefined;
 
     return (
         <TouchableOpacity
@@ -51,21 +53,22 @@ export default function BarTabCard({ tab, onPress }: Props) {
             activeOpacity={0.75}
             onPress={() => onPress?.(tab)}
         >
-            <View className={`${roundedCard} border border-neutral-800 bg-neutral-900 ${cardPadding}`}>
-
+            <View
+                className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4"
+            >
                 {/* Header */}
-                <View className={`flex-row items-center justify-between ${gap}`}>
-                    <Text numberOfLines={1} className={`flex-1 font-bold text-white ${text2xl}`}>
+                <View className="flex-row items-center justify-between gap-2">
+                    <Text numberOfLines={1} className="flex-1 font-bold text-white text-2xl">
                         {tab.customerName}
                     </Text>
 
                     <View
-                        className={`flex-row items-center rounded-full ${badgePx} ${badgePy}`}
+                        className="flex-row items-center rounded-full px-3 py-1.5"
                         style={{ backgroundColor: currentStatusColors.backgroundColor, gap: size.padding.sm }}
                     >
                         <Ionicons name="time" size={iconSm} color={currentStatusColors.color} />
                         {!isSmallPhone && (
-                            <Text className={`font-bold capitalize ${textSm}`} style={{ color: currentStatusColors.color }}>
+                            <Text className="font-bold capitalize text-sm" style={{ color: currentStatusColors.color }}>
                                 {tab.status}
                             </Text>
                         )}
@@ -75,7 +78,7 @@ export default function BarTabCard({ tab, onPress }: Props) {
                 {/* Phone */}
                 <View className="mt-1.5 flex-row items-center" style={{ gap: size.padding.sm }}>
                     <Ionicons name="call" size={iconSm} color="rgba(255,255,255,0.45)" />
-                    <Text className={`text-neutral-400 ${textBase}`}>{tab.phone}</Text>
+                    <Text className="text-neutral-400 text-base">{tab.phone}</Text>
                 </View>
 
                 {/* Divider */}
@@ -85,14 +88,14 @@ export default function BarTabCard({ tab, onPress }: Props) {
                 <View className="flex-row items-center">
                     <View className="flex-1 flex-row items-center" style={{ gap: size.padding.sm }}>
                         <Ionicons name="wine" size={iconMd} color="rgba(255,255,255,0.45)" />
-                        <Text className={`text-neutral-400 ${textBase}`}>
+                        <Text className="text-neutral-400 text-base">
                             {tab.items}{isSmallPhone ? '' : ' items'}
                         </Text>
                     </View>
 
                     <View className="flex-1 flex-row items-center justify-center" style={{ gap: size.padding.sm }}>
                         <Ionicons name="time-outline" size={iconMd} color="rgba(255,255,255,0.45)" />
-                        <Text className={`text-neutral-400 ${textBase}`} numberOfLines={1}>
+                        <Text className="text-neutral-400 text-base" numberOfLines={1}>
                             {tab.createdAt}
                         </Text>
                     </View>
@@ -103,22 +106,22 @@ export default function BarTabCard({ tab, onPress }: Props) {
                 {/* Footer */}
                 <View className="mt-4 flex-row items-center justify-between">
                     <View>
-                        <Text className={`uppercase tracking-wide text-neutral-400 ${textXs}`}>Total</Text>
-                        <Text className={`mt-0.5 font-bold text-white ${textSm}`}>Rs. {tab.total.toFixed(2)}</Text>
+                        <Text className="uppercase tracking-wide text-neutral-400 text-xs">Total</Text>
+                        <Text className="mt-0.5 font-bold text-white text-sm">Rs. {tab.total.toFixed(2)}</Text>
                     </View>
 
                     <View className="items-end">
-                        <Text className={`uppercase tracking-wide text-red-500 ${textXs}`}>Balance</Text>
-                        <Text className={`mt-0.5 font-bold text-red-500 ${textSm}`}>Rs. {balanceAmount.toFixed(2)}</Text>
+                        <Text className="uppercase tracking-wide text-red-500 text-xs">Balance</Text>
+                        <Text className="mt-0.5 font-bold text-red-500 text-sm">Rs. {balanceAmount.toFixed(2)}</Text>
                     </View>
 
                     <View
-                        className={`flex-row items-center rounded-full ${badgePx} ${badgePy}`}
+                        className="flex-row items-center rounded-full px-3 py-1.5"
                         style={{ backgroundColor: currentPaymentColors.backgroundColor, gap: size.padding.sm }}
                     >
                         <Ionicons name="cash" size={iconSm} color={currentPaymentColors.color} />
                         {!isSmallPhone && (
-                            <Text className={`font-bold capitalize ${textSm}`} style={{ color: currentPaymentColors.color }}>
+                            <Text className="font-bold capitalize text-sm" style={{ color: currentPaymentColors.color }}>
                                 {tab.paymentStatus}
                             </Text>
                         )}

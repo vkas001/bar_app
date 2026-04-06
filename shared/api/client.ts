@@ -11,10 +11,15 @@ export const api = axios.create({
 
 // auto attach token to every request
 
-api.interceptors.request.use(async (config) => {
-    const token = await getToken();
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        console.log("API ERROR:", JSON.stringify({
+            url: error?.config?.url,
+            status: error?.response?.status,
+            data: error?.response?.data,
+            message: error?.message,
+        }));
+        return Promise.reject(error);
     }
-    return config;
-});
+);

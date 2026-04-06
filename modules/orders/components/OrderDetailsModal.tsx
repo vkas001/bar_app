@@ -1,5 +1,6 @@
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { ITEM_STATUS_COLORS, ITEM_STATUS_ICONS, ORDER_STATUS_OPTIONS } from '../../menu/types/itemStatus';
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { order, orderItem, orderItemStatus } from '../types/order.types';
@@ -10,25 +11,13 @@ interface Props {
   onClose: () => void;
 }
 
-const ITEM_STATUS_OPTIONS: orderItemStatus[] = ["Pending", "Preparing", "Ready", "Served"];
 
-const ITEM_STATUS_COLORS: Record<orderItemStatus, { backgroundColor: string; color: string }> = {
-  Pending: { backgroundColor: "#172554", color: "#60a5fa" },
-  Preparing: { backgroundColor: "#4c3a12", color: "#facc15" },
-  Ready: { backgroundColor: "#16351f", color: "#86efac" },
-  Served: { backgroundColor: "#3f3f46", color: "#f4f4f5" },
-  Cancel: { backgroundColor: "#3f3f46", color: "#f4f4f5" },
-};
 
-const ITEM_STATUS_ICONS: Record<orderItemStatus, keyof typeof MaterialIcons.glyphMap> = {
-  Pending: "schedule",
-  Preparing: "local-fire-department",
-  Ready: "check-circle",
-  Served: "done-all",
-  Cancel: "cancel",
-};
-
-export default function OrderDetailsModal({ visible, order, onClose }: Props) {
+export default function OrderDetailsModal({
+  visible,
+  order,
+  onClose
+}: Props) {
   const [orderItems, setOrderItems] = useState<orderItem[]>([]);
   const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | null>(null);
 
@@ -58,11 +47,12 @@ export default function OrderDetailsModal({ visible, order, onClose }: Props) {
 
   const tables = order.table.split(",").map((t) => t.trim()).filter(Boolean);
 
-  const updateItemStatus = (itemId: string, newStatus: orderItemStatus) => {
-    setOrderItems(orderItems.map(item =>
-      item.id === itemId ? { ...item, status: newStatus } : item
-    ));
-  };
+ const updateItemStatus = (itemId: string | number, newStatus: orderItemStatus) => {
+         setOrderItems(prev =>
+             prev.map(item => item.id === itemId ? { ...item, status: newStatus } : item)
+         );
+         setOpenStatusMenuItemId(null);
+     };
 
   // s config: tablet keeps originals, phone scales down
   const s = isSmallPhone ? {
@@ -138,7 +128,8 @@ export default function OrderDetailsModal({ visible, order, onClose }: Props) {
               </Pressable>
             </View>
 
-            <ScrollView className={s.px} showsVerticalScrollIndicator={false}>
+            <ScrollView className={s.px}
+              showsVerticalScrollIndicator={false}>
 
               {/* Order Summary Card */}
               <View className={`bg-card rounded-xl ${s.cardP} mt-3`}>
@@ -271,7 +262,7 @@ export default function OrderDetailsModal({ visible, order, onClose }: Props) {
 
                         {openStatusMenuItemId === item.id && (
                           <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
-                            {ITEM_STATUS_OPTIONS.map((statusOption) => (
+                            {ORDER_STATUS_OPTIONS.map((statusOption) => (
                               <Pressable
                                 key={statusOption}
                                 className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}

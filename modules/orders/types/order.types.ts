@@ -1,7 +1,7 @@
 export type orderStatus = 'Processing' | 'Completed' | 'Pending' | 'Cancelled';
-export type orderItemStatus = 'Pending' | 'Preparing' | 'Ready' | 'Served' | 'Cancel';
+export type orderItemStatus = 'Pending' | 'Preparing' | 'Ready' | 'Served' | 'Cancelled';
 
-// ─── Mapped/UI types ───────────────────────────────────────
+//  Mapped/UI types
 
 export interface order {
     id: string;
@@ -28,7 +28,7 @@ export interface orderItem {
     quantity: number;
 }
 
-// ─── Raw API types ─────────────────────────────────────────
+//Raw API types
 
 export interface ApiOrderDetail {
     id: number;
@@ -68,7 +68,7 @@ export interface ApiOrder {
     created_at: string;
 }
 
-// ─── Cart types ────────────────────────────────────────────
+// Cart types 
 
 export interface CartItemUnit {
     id: number;
@@ -89,7 +89,7 @@ export interface CartItem {
     note?: string;
 }
 
-// ─── Create order types ────────────────────────────────────
+// Create order types
 
 export interface CreateOrderRequest {
     customerName: string;

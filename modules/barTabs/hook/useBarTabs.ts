@@ -1,6 +1,11 @@
 import { getToken } from "@/shared/storage/secure";
 import { useEffect, useState } from "react";
-import { BarTab, BarTabAPI, CreateBarTabPayload } from "../types/barTab.types";
+import {
+    BarTab,
+    BarTabAPI,
+    CreateBarTabPayload,
+    AddItemsToBarTabPayload
+} from "../types/barTab.types";
 import { mapBarTabAPIToCard } from "../utils/barTabMapper";
 
 export function useBarTabs() {
@@ -30,7 +35,7 @@ export function useBarTabs() {
             const json = await res.json();
             const mapped = (json.data as BarTabAPI[]).map(mapBarTabAPIToCard);
             setTabs(mapped);
-           // console.log("Fetched bar tabs successfully.");
+            // console.log("Fetched bar tabs successfully.");
         } catch (e: any) {
             console.error("Error fetching bar tabs:", e);
             setError(e.message ?? "Something went wrong");
@@ -39,7 +44,9 @@ export function useBarTabs() {
         }
     };
 
-    const createBarTab = async (payload: CreateBarTabPayload) => {
+    const createBarTab = async (
+        payload: CreateBarTabPayload
+    ): Promise<BarTabAPI | null> => {
         try {
             setCreating(true);
             setError(null);
@@ -64,23 +71,72 @@ export function useBarTabs() {
             if (!res.ok) {
                 const rawText = await res.text();
                 console.log("STATUS:", res.status);
-                console.log("RAW ERROR:", rawText);  // console.log not console.error
+                console.log("RAW ERROR:", rawText);
                 throw new Error(`Failed to create bar tab: ${res.status}`);
             }
 
+            const json = await res.json();
             console.log("Bar tab created successfully.");
-            await fetchBarTabs(); // refresh list
+            await fetchBarTabs();
+            return json.data as BarTabAPI
         } catch (e: any) {
             console.error("Error creating bar tab:", e);
             setError(e.message ?? "Something went wrong");
+            return null
         } finally {
             setCreating(false);
         }
     };
 
+    const addItemsToBarTab = async (
+        tabId: number,
+        payload: AddItemsToBarTabPayload
+    ): Promise<boolean> => {
+        try {
+            setError(null);
+
+            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const token = await getToken();
+
+            const res = await fetch(`${baseUrl}/pos/bar-tabs/${tabId}/items`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: token ? `Bearer ${token}` : '',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                const rawText = await res.text();
+                console.log("STATUS:", res.status);
+                console.log("RAW ERROR:", rawText);
+                throw new Error(`Failed to add items to bar tab: ${res.status}`);
+            }
+
+            console.log("Items added to bar tab successfully.");
+            await fetchBarTabs();
+            return true;
+        } catch (e: any) {
+            console.error("Error adding items to bar tab:", e);
+            setError(e.message ?? "Something went wrong");
+            return false;
+        }
+    };
+
+
     useEffect(() => {
         fetchBarTabs();
     }, []);
 
-    return { tabs, loading, creating, error, refresh: fetchBarTabs, createBarTab };
+    return {
+        tabs,
+        loading,
+        creating,
+        error,
+        refresh: fetchBarTabs,
+        createBarTab,
+        addItemsToBarTab
+    };
 }

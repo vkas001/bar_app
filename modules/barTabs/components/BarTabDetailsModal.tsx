@@ -1,8 +1,13 @@
 import { useResponsive } from "@/shared/hooks/useResponsive";
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { BarPaymentStatus, BarTab, BarTabStatus } from "../types/barTab.types";
+import { BarPaymentStatus, BarTab, BarTabStatus, barTabItemStatus } from "../types/barTab.types";
+import {
+    BAR_TAB_STATUS_OPTIONS,
+    getItemStatusColor,
+    getItemStatusIcon
+} from "../../menu/types/itemStatus";
 
 interface Props {
     visible: boolean;
@@ -23,23 +28,36 @@ const paymentColors: Record<BarPaymentStatus, { backgroundColor: string; color: 
 };
 
 export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
-    if (!tab) return null;
+    const [tabItems, setTabItems] = useState(tab?.tabItems ?? []);
+    const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | number | null>(null);
 
-    const { isSmallPhone, textXs, textSm, textBase, textLg, textXl, text2xl, text3xl, iconXs, iconSm, iconMd, size } = useResponsive();
+    const {
+        isSmallPhone,
+        textXs, textSm, textBase, textLg, textXl,
+        text2xl, text3xl,
+        iconXs, iconSm, iconMd,
+        size,
+    } = useResponsive();
+
+    if (!tab) return null;
 
     const currentStatusColors = statusColors[tab.status];
     const currentPaymentColors = paymentColors[tab.paymentStatus];
 
-    const tabItems = tab.tabItems;
     const tabItemCount = tabItems.length;
 
     const subtotal = Math.max(0, tab.total - tab.tax);
     const totalWithTax = subtotal + tab.tax;
     const balanceAmount = Math.max(0, totalWithTax - tab.paidAmount);
 
-    // Only override sizing on small phones; tablets keep original values
+    const updateItemStatus = (itemId: string | number, newStatus: barTabItemStatus) => {
+        setTabItems(prev =>
+            prev.map(item => item.id === itemId ? { ...item, status: newStatus } : item)
+        );
+        setOpenStatusMenuItemId(null);
+    };
+
     const s = isSmallPhone ? {
-        panelWidth: '90%',
         headerText: textXl,
         sectionTitle: textBase,
         bodyText: textSm,
@@ -55,7 +73,6 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
         itemPx: 'px-2 py-2',
         gap: size.padding.sm,
     } : {
-        panelWidth: '80%',
         headerText: 'text-3xl',
         sectionTitle: 'text-xl',
         bodyText: 'text-lg',
@@ -70,7 +87,7 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
         badgePx: 'px-3 py-1',
         itemPx: 'px-4 py-4',
         gap: 8,
-    }
+    };
 
     return (
         <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -80,10 +97,7 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                 <View className="absolute inset-x-0 top-0 bottom-16 flex-row">
                     <Pressable className="flex-1" onPress={onClose} />
 
-                    <View
-                        className="rounded-l-2xl"
-                        style={{ width: '100%', backgroundColor: "#000000" }}
-                    >
+                    <View className="rounded-l-2xl" style={{ width: '100%', backgroundColor: "#000000" }}>
                         <ScrollView showsVerticalScrollIndicator={false}>
 
                             {/* Header */}
@@ -148,6 +162,8 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                                     ) : (
                                         tabItems.map((item) => (
                                             <View key={item.id} className="mb-3 rounded-lg border-b bg-black pb-3">
+
+                                                {/* Name + Price */}
                                                 <View className={`mb-1 flex-row items-center justify-between ${s.itemPx}`}>
                                                     <Text className={`font-semibold text-yellow flex-1 mr-2 ${s.bodyText}`} numberOfLines={1}>
                                                         {item.name}
@@ -157,12 +173,14 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                                                     </Text>
                                                 </View>
 
+                                                {/* Qty / Unit */}
                                                 <View className={`flex-row items-center ${s.px}`} style={{ gap: s.gap }}>
                                                     <Text className={`text-zinc-400 ${s.smallText}`}>Qty:</Text>
                                                     <Text className={`text-white ${s.smallText}`}>{item.quantity}</Text>
                                                     <Text className={`text-zinc-400 ${s.smallText}`}>unit: {item.unit}</Text>
                                                 </View>
 
+                                                {/* Note */}
                                                 {item.note ? (
                                                     <View className={`mt-1 flex-row items-center ${s.px}`} style={{ gap: s.gap }}>
                                                         <Text className={`text-zinc-400 ${s.smallText}`}>Note:</Text>
@@ -171,6 +189,73 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                                                         </Text>
                                                     </View>
                                                 ) : null}
+
+                                                {/* Status + Change */}
+                                                <View className={`mt-2 flex-row items-center justify-between ${s.px}`}>
+                                                    <View
+                                                        className={`rounded-full flex-row items-center ${s.badgePx}`}
+                                                        style={{
+                                                            backgroundColor: getItemStatusColor(item.status).backgroundColor,
+                                                            gap: size.padding.sm,
+                                                        }}
+                                                    >
+                                                        <MaterialIcons
+                                                            name={getItemStatusIcon(item.status)}
+                                                            size={s.iconSize}
+                                                            color={getItemStatusColor(item.status).color}
+                                                        />
+                                                        <Text
+                                                            className={`font-semibold ${s.smallText}`}
+                                                            style={{ color: getItemStatusColor(item.status).color }}
+                                                        >
+                                                            {item.status}
+                                                        </Text>
+                                                    </View>
+
+                                                    <View className="relative items-end">
+                                                        <Pressable
+                                                            className={`bg-zinc-700 rounded-full flex-row items-center ${isSmallPhone ? 'px-2 py-0.5' : 'px-3 py-1'}`}
+                                                            style={{ gap: size.padding.sm }}
+                                                            onPress={() =>
+                                                                setOpenStatusMenuItemId(openStatusMenuItemId === item.id ? null : item.id)
+                                                            }
+                                                        >
+                                                            <MaterialIcons name="edit" size={s.iconSize} color="#e4e4e7" />
+                                                            {!isSmallPhone && (
+                                                                <Text className={`text-zinc-200 font-semibold ${s.smallText}`}>
+                                                                    Change Status
+                                                                </Text>
+                                                            )}
+                                                            <MaterialIcons name="keyboard-arrow-down" size={isSmallPhone ? 14 : 18} color="#e4e4e7" />
+                                                        </Pressable>
+
+                                                        {openStatusMenuItemId === item.id && (
+                                                            <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
+                                                                {BAR_TAB_STATUS_OPTIONS.map((statusOption) => (
+                                                                    <Pressable
+                                                                        key={statusOption}
+                                                                        className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                                                        style={{ gap: size.padding.sm }}
+                                                                        onPress={() => updateItemStatus(item.id, statusOption)} // ✅ wired up
+                                                                    >
+                                                                        <MaterialIcons
+                                                                            name={getItemStatusIcon(statusOption)}
+                                                                            size={s.iconSize}
+                                                                            color={getItemStatusColor(statusOption).color}
+                                                                        />
+                                                                        <Text
+                                                                            className={`font-semibold ${s.smallText}`}
+                                                                            style={{ color: getItemStatusColor(statusOption).color }}
+                                                                        >
+                                                                            {statusOption}
+                                                                        </Text>
+                                                                    </Pressable>
+                                                                ))}
+                                                            </View>
+                                                        )}
+                                                    </View>
+                                                </View>
+
                                             </View>
                                         ))
                                     )}

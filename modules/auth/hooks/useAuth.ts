@@ -16,7 +16,6 @@ export const useAuth = () => {
 
     try {
       const res = await login(data);
-
       const { token, user, roles, permissions } = res;
 
       //  SAVE SESSION
@@ -27,14 +26,15 @@ export const useAuth = () => {
         permissions
       });
 
-      //  UPDATE GLOBAL STATE
-      setUser({
-        user,
-        roles,
-        permissions
-      });
-
       return user;
+    } catch (e: any) {
+      const message =
+        e?.response?.data?.message ||
+        e?.response?.status ||
+        e?.message ||
+        "unknown error";
+
+      throw new Error(message);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import ScreenHeader from '@/components/Header/ScreenHeader'
 import { useScreenRefresh } from '@/components/refresh/refresh'
+import LoadingScreen from '@/components/refresh/LoadingScreen'
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import TableScreen from '@/modules/tables/tableScreen'
 import React from 'react'
@@ -21,6 +22,8 @@ export default function tables() {
         fromOrder={!!pendingCustomerData}
         customerData={pendingCustomerData ?? undefined}
       />
+
+      {refreshing && <LoadingScreen />}
 
     </SafeAreaView>
   )

@@ -1,5 +1,6 @@
 import ScreenHeader from '@/components/Header/ScreenHeader';
 import { useScreenRefresh } from '@/components/refresh/refresh';
+import LoadingScreen from '@/components/refresh/LoadingScreen';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Modal, RefreshControl, ScrollView, View } from 'react-native';
@@ -9,15 +10,15 @@ import BarTabDetailsModal from './components/BarTabDetailsModal';
 import BarTabFilter from './components/BarTabFilter';
 import BarTabForm from './components/BarTabForm';
 import TabInfo from './components/TabInfo';
-import { barTabs } from './data/barTab.data';
-import { BarTab, BarTabStatus, CreateBarTabPayload } from './types/barTab.types';
 import { useBarTabs } from './hook/useBarTabs';
+import { BarTab, BarTabStatus, CreateBarTabPayload } from './types/barTab.types';
 
 export default function BarTabScreen() {
   const router = useRouter()
   const { tabs, loading, creating, error, refresh, createBarTab } = useBarTabs()
 
   const { refreshing, onRefresh } = useScreenRefresh(refresh)
+  // ...existing code...
   const [isCreateTabOpen, setIsCreateTabOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<BarTab | null>(null)
   const [isTabDetailsOpen, setIsTabDetailsOpen] = useState(false)
@@ -39,8 +40,23 @@ export default function BarTabScreen() {
   }, [tabs, search, statusFilter])
 
   const handleCreateTab = async (payload: CreateBarTabPayload) => {
-    await createBarTab(payload)
-    setIsCreateTabOpen(false)
+    // Customer name is required, phone and notes are optional
+    const { customerName, phone, notes } = payload;
+    if (!customerName) {
+      alert('Please enter customer name');
+      return;
+    }
+    await createBarTab(payload);
+    setIsCreateTabOpen(false);
+
+    router.replace({
+      pathname: '/(tabs)/menu',
+      params: {
+        customerName,
+        phone: phone || '',
+        notes: notes || ''
+      }
+    });
   }
 
   return (
@@ -58,6 +74,8 @@ export default function BarTabScreen() {
 
       />
 
+
+        {refreshing && <LoadingScreen />}
       <Modal
         visible={isCreateTabOpen}
         transparent

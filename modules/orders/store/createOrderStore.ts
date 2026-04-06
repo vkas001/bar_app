@@ -1,37 +1,46 @@
 import { create } from 'zustand';
 
+// For creating a new order
 interface PendingCustomerData {
-  customer_name: string;
-  customer_phone: string;
-  guest_count: number;
+  customerName: string;
+  customerPhone: string;
+  guestCount: number;
+}
+
+// For creating a new Bar Tab
+interface BarTabCustomerData {
+  id: number;
+  customerName: string;
+  customerPhone: string | null;
+  notes: string | null;
 }
 
 interface CreateOrderStore {
   pendingCustomerData: PendingCustomerData | null;
   selectedTableIds: number[];
+  barTabCustomerData: BarTabCustomerData | null;
   setPendingCustomerData: (data: PendingCustomerData | null) => void;
   setSelectedTableIds: (ids: number[]) => void;
+  setBarTabCustomerData: (data: BarTabCustomerData | null) => void;
   clearOrderData: () => void;
 }
 
 export const useOrderStore = create<CreateOrderStore>((set) => ({
   pendingCustomerData: null,
   selectedTableIds: [],
+  barTabCustomerData: null,
 
   setPendingCustomerData: (data) => set({ pendingCustomerData: data }),
 
   setSelectedTableIds: (ids) => set({ selectedTableIds: ids }),
+
+  setBarTabCustomerData: (data) => set({ barTabCustomerData: data }),
 
   clearOrderData: () => set({
     pendingCustomerData: null,
-    selectedTableIds: []
+    selectedTableIds: [],
+    barTabCustomerData: null
+
   }),
 }));
 
-export const useCreateOrderStore = create<CreateOrderStore>((set) => ({
-  pendingCustomerData: null,
-  selectedTableIds: [],
-  setPendingCustomerData: (data) => set({ pendingCustomerData: data }),
-  setSelectedTableIds: (ids) => set({ selectedTableIds: ids }),
-  clearOrderData: () => set({ pendingCustomerData: null, selectedTableIds: [] }),
-}));

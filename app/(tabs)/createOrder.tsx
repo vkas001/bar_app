@@ -1,5 +1,6 @@
 import ScreenHeader from '@/components/Header/ScreenHeader'
 import { useScreenRefresh } from '@/components/refresh/refresh'
+import LoadingScreen from '@/components/refresh/LoadingScreen'
 import CreateOrderForm from '@/modules/orders/components/CreateOrderForm'
 import React from 'react'
 import { RefreshControl, ScrollView, useWindowDimensions, View } from 'react-native'
@@ -28,6 +29,8 @@ export default function createOrder() {
       <ScrollView
         className="flex-1"
         contentContainerClassName={`
+
+      {refreshing && <LoadingScreen />}
           pb-6
           ${isLargeTablet ? "px-16" : isTablet ? "px-8" : "px-0"}
         `}

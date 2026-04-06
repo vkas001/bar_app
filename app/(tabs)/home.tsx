@@ -1,5 +1,6 @@
 import Greetings from '@/components/Header/greetings';
 import PageHeader from '@/components/Header/PageHeader';
+import LoadingScreen from '@/components/refresh/LoadingScreen';
 import { useScreenRefresh } from '@/components/refresh/refresh';
 import { useBarTabs } from '@/modules/barTabs/hook/useBarTabs';
 import HomeScreen from '@/modules/home/homeScreen';
@@ -36,6 +37,8 @@ export default function home() {
       >
         <HomeScreen />
       </ScrollView>
+
+      {refreshing && <LoadingScreen />}
 
     </SafeAreaView>
   )

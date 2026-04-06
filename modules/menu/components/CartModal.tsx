@@ -1,9 +1,10 @@
-import { useResponsive } from '@/shared/hooks/useResponsive';
+import { useBarTabs } from '@/modules/barTabs/hook/useBarTabs';
 import { useCartStore } from '@/modules/menu/store/cartStore';
 import { useCreateOrder } from '@/modules/orders/hook/useCreateOrder';
 import { useOrderStore } from '@/modules/orders/store/createOrderStore';
 import { CreateOrderRequest } from '@/modules/orders/types/order.types';
 import { useTables } from '@/modules/tables/hooks/useTable';
+import { useResponsive } from '@/shared/hooks/useResponsive';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
@@ -14,17 +15,22 @@ import {
 interface Props {
     visible: boolean;
     onClose: () => void;
-    onOrderSuccess: () => void;
+    onOrderSuccess: (type: 'bar_tab' | 'order') => void;
 }
 
-export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
+export default function CartModal({
+    visible,
+    onClose,
+    onOrderSuccess
+}: Props) {
     const [orderNote, setOrderNote] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const { items, updateQuantity, removeItem, clearCart, getTotal, getTotalItems } = useCartStore();
-    const { pendingCustomerData, selectedTableIds, clearOrderData } = useOrderStore();
+    const { pendingCustomerData, selectedTableIds, barTabCustomerData, clearOrderData } = useOrderStore();
     const { createOrder } = useCreateOrder();
+    const { addItemsToBarTab } = useBarTabs();
     const { tables } = useTables();
 
     const {
@@ -40,38 +46,78 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
         iconSm,
         iconMd,
         size,
-    } = useResponsive()
+    } = useResponsive();
 
     const total = getTotal();
     const totalItems = getTotalItems();
     const tax = 0;
-    const totalWithTax = total + tax;
 
     const renderTables = () => {
         if (!selectedTableIds || selectedTableIds.length === 0)
-            return <Text className={`text-white ${textBase}`}>No table selected</Text>;
+            return <Text className={`text-black font-medium ${textBase}`}>
+                Table:
+            </Text>;
         const selectedTables = tables.filter((t) => selectedTableIds.includes(Number(t.id)));
         const labelList = selectedTables.map((t) => `${t.table_type?.name || ''}:${t.name}`);
         return (
             <Text className={`text-black font-medium ${isSmallPhone ? textSm : textLg}`} numberOfLines={2}>
-                Table{labelList.length > 1 ? 's' : ''}: {labelList.join(', ')}
+                Table: {labelList.length > 1 ? 's' : ''}: {labelList.join(', ')}
             </Text>
         );
     };
 
     const handlePlaceOrder = async () => {
         if (items.length === 0) { setError('Your cart is empty'); return; }
-        if (!pendingCustomerData) { setError('Customer details are missing'); return; }
-        if (!selectedTableIds || selectedTableIds.length === 0) { setError('No table selected'); return; }
 
         setLoading(true);
         setError(null);
 
+        // BAR TAB ORDER
+        if (barTabCustomerData) {
+            console.log('selectedUnit:', JSON.stringify(items[0]?.selectedUnit));
+            if (!barTabCustomerData.id) {
+                setError('Bar tab ID is missing');
+                setLoading(false);
+                return;
+            }
+
+            const success = await addItemsToBarTab(barTabCustomerData.id, {
+                items: items.map((item) => ({
+                    ...item,
+                    selectedUnit: {
+                        id: item.selectedUnit.item_unit_id,
+                        value: String(item.selectedUnit.item_unit_price),
+                    },
+                })),
+                subtotal: total,
+                tax: 0,
+                total,
+                orderNote,
+            });
+
+            setLoading(false);
+
+            if (success) {
+                clearCart();
+                clearOrderData();
+                setOrderNote('');
+                onOrderSuccess('bar_tab');
+
+            } else {
+                setError('Failed to add items to bar tab');
+
+            }
+            return;
+        }
+
+        if (!pendingCustomerData) { setError('Customer details are missing'); setLoading(false); return; }
+        if (!selectedTableIds || selectedTableIds.length === 0) { setError('No table selected'); setLoading(false); return; }
+
         const payload: CreateOrderRequest = {
-            customerName: pendingCustomerData.customer_name,
-            phone: pendingCustomerData.customer_phone,
+            customerName: pendingCustomerData.customerName,
+            phone: pendingCustomerData.customerPhone,
             tableIds: selectedTableIds,
-            guestCount: pendingCustomerData.guest_count,
+            guestCount: pendingCustomerData.guestCount,
             items: items.map((item) => ({
                 ...item,
                 selectedUnit: {
@@ -90,8 +136,15 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
         const success = await createOrder(payload);
         setLoading(false);
         if (success) {
-            clearCart(); clearOrderData(); setOrderNote(''); onOrderSuccess();
+            clearCart();
+            clearOrderData();
+            setOrderNote('');
+            onOrderSuccess('order');
+
+        } else {
+            setError('Failed to place order');
         }
+        return;
     };
 
     const handleClear = () => {
@@ -99,65 +152,85 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
     };
 
     // Responsive tokens
-    const containerPx = isSmallPhone ? 'px-3' : isTablet ? 'px-10' : 'px-8'
-    const containerPy = isSmallPhone ? 'py-3' : 'py-5'
-    const containerPb = isSmallPhone ? 'pb-4' : 'pb-8'
+    const containerPx = isSmallPhone ? 16 : isTablet ? 40 : 32;
+    const containerPy = isSmallPhone ? 12 : 20;
 
-    const headerTitleSize = isSmallPhone ? textXl : text2xl
-    const closeBtnSize = isSmallPhone ? 'w-7 h-7' : 'w-8 h-8'
-    const closeIconSize = isSmallPhone ? iconSm : iconMd
+    const headerTitleSize = isSmallPhone ? textXl : text2xl;
+    const closeBtnSize = isSmallPhone ? 'w-7 h-7' : 'w-8 h-8';
+    const closeIconSize = isSmallPhone ? iconSm : iconMd;
 
-    const sectionTitleSize = isSmallPhone ? textBase : textXl
-    const customerNameSize = isSmallPhone ? textBase : textXl
-    const customerMetaSize = isSmallPhone ? textXs : textBase
-    const cardP = isSmallPhone ? 'p-2' : 'p-3'
-    const cardMb = isSmallPhone ? 'mb-2' : 'mb-4'
+    const sectionTitleSize = isSmallPhone ? textBase : textXl;
+    const customerNameSize = isSmallPhone ? textXs : textSm;
+    const customerMetaSize = isSmallPhone ? textXs : textSm;
+    const cardP = isSmallPhone ? 'p-2' : 'p-3';
+    const cardMb = isSmallPhone ? 'mb-2' : 'mb-4';
 
-    const itemNameSize = isSmallPhone ? textSm : textBase
-    const itemMetaSize = isSmallPhone ? textXs : textBase
-    const itemPriceSize = isSmallPhone ? textSm : textLg
-    const itemEachSize = isSmallPhone ? textXs : textBase
-    const itemCardPx = isSmallPhone ? 'px-2 py-2' : 'px-4 py-3'
+    const itemNameSize = isSmallPhone ? textSm : textBase;
+    const itemMetaSize = isSmallPhone ? textXs : textBase;
+    const itemPriceSize = isSmallPhone ? textSm : textLg;
+    const itemEachSize = isSmallPhone ? textXs : textBase;
+    const itemCardPx = isSmallPhone ? 'px-2 py-2' : 'px-4 py-3';
 
-    const qtyBtnSize = isSmallPhone ? 'w-6 h-6' : 'w-7 h-7'
-    const qtyIconSize = isSmallPhone ? 16 : iconMd
-    const actionBtnSize = isSmallPhone ? 'w-7 h-7' : 'w-8 h-8'
-    const actionIconSize = isSmallPhone ? iconSm : iconMd
+    const qtyBtnSize = isSmallPhone ? 'w-6 h-6' : 'w-7 h-7';
+    const qtyIconSize = isSmallPhone ? 16 : iconMd;
+    const actionBtnSize = isSmallPhone ? 'w-7 h-7' : 'w-8 h-8';
+    const actionIconSize = isSmallPhone ? iconSm : iconMd;
 
-    const billLabelSize = isSmallPhone ? textSm : textBase
-    const billAmountSize = isSmallPhone ? textBase : textXl
-    const grandTotalSize = isSmallPhone ? textBase : textXl
+    const billLabelSize = isSmallPhone ? textSm : textBase;
+    const billAmountSize = isSmallPhone ? textBase : textXl;
+    const grandTotalSize = isSmallPhone ? textBase : textXl;
 
-    const noteHeight = isSmallPhone ? 55 : 75
-    const noteTextSize = isSmallPhone ? textSm : textBase
-    const noteLabelSize = isSmallPhone ? textSm : textBase
-    const charCountSize = isSmallPhone ? textXs : 'text-xs'
+    const noteHeight = isSmallPhone ? 55 : 75;
+    const noteTextSize = isSmallPhone ? textSm : textBase;
+    const noteLabelSize = isSmallPhone ? textSm : textBase;
+    const charCountSize = isSmallPhone ? textXs : 'text-xs';
 
-    const btnPy = isSmallPhone ? 'py-2.5' : 'py-4'
-    const btnTextSize = isSmallPhone ? textBase : textXl
-    const btnMb = isSmallPhone ? 'mb-3' : 'mb-8'
-    const scrollMaxHeight = isSmallPhone ? 260 : 420
+    const btnPy = isSmallPhone ? 'py-2.5' : 'py-4';
+    const btnTextSize = isSmallPhone ? textBase : textXl;
+    const btnMb = isSmallPhone ? 'mb-3' : 'mb-8';
 
-    const dividerMy = isSmallPhone ? 'my-2' : 'my-3'
-    const sectionMb = isSmallPhone ? 'mb-2' : 'mb-4'
+    const dividerMy = isSmallPhone ? 'my-2' : 'my-3';
+    const sectionMb = isSmallPhone ? 'mb-2' : 'mb-4';
+
+    const itemsMaxHeight = isSmallPhone ? 200 : isTablet ? 400 : 280;
 
     return (
         <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-            <Pressable className="flex-1 bg-black/60" onPress={onClose}>
-                <Pressable onPress={(e) => e.stopPropagation()} className='absolute left-0 right-0 top-0'>
-                    <View className={`bg-[#1a1a1a] rounded-t-3xl border-t border-[#333] ${containerPx} ${containerPy} ${containerPb}`}>
 
-                        {/* Header */}
-                        <View className={`flex-row justify-between items-center ${cardMb}`}>
-                            <Text className={`text-white font-medium ${headerTitleSize}`}>Cart</Text>
-                            <TouchableOpacity
-                                onPress={onClose}
-                                className={`${closeBtnSize} rounded-full bg-[#333] items-center justify-center`}
-                            >
-                                <Ionicons name="close" size={closeIconSize} color="white" />
-                            </TouchableOpacity>
-                        </View>
+            <View className="flex-1" pointerEvents="box-none">
 
+
+                <Pressable className="absolute inset-0 bg-black/60" onPress={onClose} />
+
+
+                <View
+                    className="absolute bottom-0 left-0 right-0 bg-[#1a1a1a] rounded-t-3xl border-t border-[#333]"
+                    style={{ maxHeight: '100%' }}
+                >
+
+                    <View
+                        className="flex-row justify-between items-center"
+                        style={{ paddingHorizontal: containerPx, paddingTop: containerPy, paddingBottom: 8 }}
+                    >
+                        <Text className={`text-white font-medium ${headerTitleSize}`}>Cart</Text>
+                        <TouchableOpacity
+                            onPress={onClose}
+                            className={`${closeBtnSize} rounded-full bg-[#333] items-center justify-center`}
+                        >
+                            <Ionicons name="close" size={closeIconSize} color="white" />
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <ScrollView
+                        nestedScrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={{
+                            paddingHorizontal: containerPx,
+                            paddingBottom: containerPy,
+                        }}
+                    >
                         {/* Customer + Table */}
                         <View className={`${cardMb} ${cardP} rounded-xl bg-[#222] border border-[#333]`}>
                             <Text className={`text-white font-semibold mb-1 ${isSmallPhone ? textSm : textBase}`}>
@@ -165,19 +238,21 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
                             </Text>
                             <View className="flex-row flex-wrap items-center justify-between">
                                 <View className="mb-1 flex-1 mr-2">
-                                    <Text className={`text-white font-bold ${customerNameSize}`} numberOfLines={1}>
-                                        {pendingCustomerData?.customer_name || '—'}
+                                    <Text className={`text-white ${customerNameSize}`} numberOfLines={1}>
+                                        Name: {barTabCustomerData?.customerName ?? pendingCustomerData?.customerName ?? ''}
                                     </Text>
                                     <Text className={`text-[#888] ${customerMetaSize}`}>
-                                        {pendingCustomerData?.customer_phone || '—'}
+                                        Phone: {barTabCustomerData?.customerPhone ?? pendingCustomerData?.customerPhone ?? ''}
                                     </Text>
                                     <Text className={`text-[#888] ${customerMetaSize}`}>
-                                        Guests: {pendingCustomerData?.guest_count ?? '—'}
+                                     {barTabCustomerData ? 'Bar Tab' : `Guests: ${pendingCustomerData?.guestCount ?? ''}`}
                                     </Text>
                                 </View>
-                                <View className={`bg-[#e5a100] rounded-xl items-center ${isSmallPhone ? 'px-2 py-1' : 'px-4 py-2'}`}>
-                                    {renderTables()}
-                                </View>
+                                {!barTabCustomerData && (
+                                    <View className={`bg-[#e5a100] rounded-xl items-center ${isSmallPhone ? 'px-2 py-1' : 'px-4 py-4'}`}>
+                                        {renderTables()}
+                                    </View>
+                                )}
                             </View>
                         </View>
 
@@ -188,29 +263,30 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
                             </View>
                         )}
 
-                        {/* Order Details */}
+                        {/* Order Details label */}
                         <Text className={`text-white font-medium ${sectionTitleSize} ${sectionMb}`}>
                             Order Details
                         </Text>
 
-                        <ScrollView
-                            style={{ maxHeight: scrollMaxHeight }}
-                            showsVerticalScrollIndicator={false}
-                            nestedScrollEnabled={true}
-                        >
-                            {items.length === 0 ? (
-                                <View className="items-center py-8">
-                                    <Text className={`text-[#888] ${textBase}`}>No items in cart</Text>
-                                </View>
-                            ) : (
-                                items.map((cartItem) => (
+                        {/* Inner ScrollView — scrolls only the items list */}
+                        {items.length === 0 ? (
+                            <View className="items-center py-8">
+                                <Text className={`text-[#888] ${textBase}`}>No items in cart</Text>
+                            </View>
+                        ) : (
+                            <ScrollView
+                                nestedScrollEnabled
+                                showsVerticalScrollIndicator
+                                style={{ maxHeight: itemsMaxHeight }}
+                            >
+                                {items.map((cartItem) => (
                                     <View
                                         key={cartItem.id}
                                         className={`bg-[#252525] rounded-xl ${itemCardPx} ${cardMb}`}
                                     >
                                         {/* Name + Qty controls */}
                                         <View
-                                            className='flex-row justify-between items-center'
+                                            className="flex-row justify-between items-center"
                                             style={{ marginBottom: isSmallPhone ? 4 : 8 }}
                                         >
                                             <Text
@@ -226,7 +302,8 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
                                                 >
                                                     <Ionicons name="remove" size={qtyIconSize} color="#e5a100" />
                                                 </TouchableOpacity>
-                                                <Text className={`text-white font-medium text-center ${itemNameSize}`}
+                                                <Text
+                                                    className={`text-white font-medium text-center ${itemNameSize}`}
                                                     style={{ minWidth: isSmallPhone ? 20 : 24 }}
                                                 >
                                                     x{cartItem.quantity}
@@ -278,9 +355,9 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
                                             </Text>
                                         )}
                                     </View>
-                                ))
-                            )}
-                        </ScrollView>
+                                ))}
+                            </ScrollView>
+                        )}
 
                         {/* Order Note */}
                         <Text className={`text-white font-medium mt-3 mb-1 ${noteLabelSize}`}>
@@ -317,13 +394,14 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
 
                         <View className={`h-px bg-[#333] ${dividerMy}`} />
 
-                        <View className={`flex-row justify-between ${isSmallPhone ? 'mb-3' : 'mb-8'}`}>
+                        <View className={`flex-row justify-between ${isSmallPhone ? 'mb-3' : 'mb-6'}`}>
                             <Text className={`text-white font-medium ${grandTotalSize}`}>Grand Total</Text>
                             <Text className={`text-white font-medium ${grandTotalSize}`}>Rs. {total.toFixed(2)}</Text>
                         </View>
 
                         {/* Buttons */}
-                        <View className={`flex-row ${btnMb}`}
+                        <View
+                            className={`flex-row ${btnMb}`}
                             style={{ gap: isSmallPhone ? size.padding.sm : 12 }}
                         >
                             <TouchableOpacity
@@ -343,10 +421,9 @@ export default function CartModal({ visible, onClose, onOrderSuccess }: Props) {
                                 <Text className={`text-white font-medium ${btnTextSize}`}>Clear</Text>
                             </TouchableOpacity>
                         </View>
-
-                    </View>
-                </Pressable>
-            </Pressable>
+                    </ScrollView>
+                </View>
+            </View>
         </Modal>
     );
 }

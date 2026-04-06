@@ -1,20 +1,30 @@
 import AppInput from '@/components/input'
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Alert, Pressable, Text, View } from 'react-native'
+import { useBarTabs } from '../hook/useBarTabs'
 import { CreateBarTabPayload } from '../types/barTab.types'
 
 interface BarTabFormProps {
 	onClose: () => void
 	onCancel?: () => void
-	onCreateTab: (payload: CreateBarTabPayload) => void
 }
 
-export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFormProps) {
+export default function BarTabForm({
+	onClose,
+	onCancel
+}: BarTabFormProps) {
+	const router = useRouter()
+	const { createBarTab, creating } = useBarTabs()
+	const setBarTabCustomerData = useOrderStore(state => state.setBarTabCustomerData)
+
 	const [customerName, setCustomerName] = useState('')
 	const [phone, setPhone] = useState('')
 	const [notes, setNotes] = useState('')
+
 
 	const { isPhone, isSmallPhone, textSm, textBase, textLg, textXl, iconSm, size } = useResponsive()
 
@@ -23,17 +33,30 @@ export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFor
 		onClose()
 	}
 
-	const handleCreate = () => {
-		onCreateTab({
-			customerName: customerName.trim(),
-			phone: phone.trim(),
-			notes: notes.trim(),
-		})
-		setCustomerName('')
-		setPhone('')
-		setNotes('')
-	}
+	const handleCreate = async () => {
+		if (!customerName.trim()) {
+			Alert.alert('Error', 'Please enter customer name');
+			return
+		}
 
+		const created = await createBarTab({
+			customerName: customerName.trim(),
+			phone: phone.trim() || '',
+			notes: notes.trim() || '',
+		})
+
+		if (!created) return
+
+		setBarTabCustomerData({
+			id: created.id,
+			customerName: created.customerName,
+			customerPhone: created.phone,
+			notes: created.notes ?? '',
+		})
+
+		onClose()
+		router.push('/(tabs)/menu')
+	}
 	const s = isSmallPhone ? {
 		titleText: textXl,
 		labelText: textSm,
@@ -128,7 +151,9 @@ export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFor
 				/>
 
 				{/* Buttons */}
-				<View className='mt-1 flex-row' style={{ gap: isSmallPhone ? size.padding.sm : 12 }}>
+				<View className='mt-1 flex-row'
+					style={{ gap: isSmallPhone ? size.padding.sm : 12 }}
+				>
 					<Pressable
 						accessibilityRole='button'
 						onPress={handleCancel}
@@ -141,10 +166,13 @@ export default function BarTabForm({ onClose, onCancel, onCreateTab }: BarTabFor
 					<Pressable
 						accessibilityRole='button'
 						onPress={handleCreate}
+						disabled={creating}
 						className={`${s.btnH} flex-1 items-center justify-center rounded-xl bg-yellow`}
 						style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
 					>
-						<Text className={`font-semibold text-black ${s.btnText}`}>Create Tab</Text>
+						<Text className={`font-semibold text-black ${s.btnText}`}>
+							{creating ? 'Creating...' : 'Create Tab'}
+						</Text>
 					</Pressable>
 				</View>
 			</View>

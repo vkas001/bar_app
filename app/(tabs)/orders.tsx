@@ -1,5 +1,6 @@
 import PageHeader from '@/components/Header/PageHeader';
 import { useScreenRefresh } from '@/components/refresh/refresh';
+import LoadingScreen from '@/components/refresh/LoadingScreen';
 import ScreenHeader from '@/components/Header/ScreenHeader';
 import OrderModule from '@/modules/orders/ordersScreen';
 import React from 'react';
@@ -15,6 +16,8 @@ export default function Orders() {
       <ScreenHeader title="Orders" />
 
       <OrderModule refreshing={refreshing} onRefresh={onRefresh} />
+
+      {refreshing && <LoadingScreen />}
     </SafeAreaView>
   )
 }

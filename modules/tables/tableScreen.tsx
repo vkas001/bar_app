@@ -9,9 +9,9 @@ import { useTables } from './hooks/useTable'
 import { TableType } from './types/table.types'
 
 type CustomerData = {
-  customer_name: string
-  customer_phone: string
-  guest_count: number
+  customerName: string
+  customerPhone: string
+  guestCount: number
 }
 
 type TableScreenProps = {

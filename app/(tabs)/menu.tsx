@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function menu() {
   const [cartVisible, setCartVisible] = useState(false)
-  const getTotalItems = useCartStore((state) => state.getTotalItems)
+  const itemCount = useCartStore((state) => state.getTotalItems());
   const router = useRouter()
 
   return (
@@ -24,16 +24,22 @@ export default function menu() {
       <MenuScreen />
 
       <CartButton
-        itemCount={getTotalItems()}
+        itemCount={itemCount}
         onPress={() => setCartVisible(true)}
       />
 
       <CartModal
         visible={cartVisible}
         onClose={() => setCartVisible(false)}
-        onOrderSuccess={() => {
+        onOrderSuccess={(type) => {
           setCartVisible(false);
-          router.push('/(tabs)/orders');
+          
+          if (type === 'bar_tab') {
+            router.push('/(tabs)/home');
+
+          } else {
+            router.push('/(tabs)/orders');
+          }
         }}
       />
 

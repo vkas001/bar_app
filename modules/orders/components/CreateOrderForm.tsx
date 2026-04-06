@@ -60,9 +60,9 @@ export default function CreateOrderForm({
     if (!phone.trim()) { Alert.alert('Error', 'Please enter customer phone'); return }
 
     setPendingCustomerData({
-      customer_name: isWalkIn ? "Walk In" : name.trim(),
-      customer_phone: isWalkIn ? "9876543210" : phone.trim(),
-      guest_count: guests,
+      customerName: isWalkIn ? "Walk In" : name.trim(),
+      customerPhone: isWalkIn ? "9876543210" : phone.trim(),
+      guestCount: guests,
     })
 
     navigation.navigate('tables' as never)
