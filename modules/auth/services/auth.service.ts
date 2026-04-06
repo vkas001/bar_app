@@ -11,9 +11,6 @@ export const login = async (data: {
 
   const { token, user, roles, permissions } = res.data;
 
-  await saveToken(token);
-  await saveAuthData({ user, roles, permissions });
-
   return { token, user, roles, permissions };
 };
 

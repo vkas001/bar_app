@@ -1,33 +1,37 @@
 import { getToken } from '@/shared/storage/secure';
-import { CreateOrderRequest, CreateOrderResponse } from '../types/order.types';
+import { CreateOrderRequest } from '../types/order.types';
 
-export const createOrder = async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
-    try {
-        const baseUrl = process.env.EXPO_PUBLIC_API_URL;
-        const token = await getToken();
+export const useCreateOrder = () => {
+    const createOrder = async (payload: CreateOrderRequest): Promise<boolean> => {
+        try {
+            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const token = await getToken();
 
-        const response = await fetch(`${baseUrl}/pos/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : '',
-            },
-            body: JSON.stringify(orderData),
-        });
+            const res = await fetch(`${baseUrl}/pos/reservation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    Authorization: token ? `Bearer ${token}` : '',
+                },
+                body: JSON.stringify(payload),
+            });
 
-        const text = await response.text();
-        console.log('API Response Status:', response.status);
-        console.log('API Response Body:', text);
-        const json = JSON.parse(text);
+            const text = await res.text();
+            const json = JSON.parse(text);
+            console.log('Order API response:', json);
 
-        if (!response.ok) {
-            throw new Error(json.message || 'Failed to create order');
+            if (!res.ok) {
+                console.log('Order API error:', json);
+                return false;
+            }
+
+            return true;
+        } catch (err) {
+            console.error('Order error:', err);
+            return false;
         }
+    };
 
-        return json;
-    } catch (error) {
-        console.error('Error creating order:', error);
-        throw error;
-    }
+    return { createOrder };
 };

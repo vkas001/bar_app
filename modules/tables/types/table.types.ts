@@ -20,6 +20,7 @@ export interface Table {
     capacity: number;
     is_available: boolean;
     is_active: boolean;
+    label?: string; // Optional label for UI display
 }
 
 export interface CreateOrderRequest {
@@ -28,4 +29,10 @@ export interface CreateOrderRequest {
     guests: number;
     table_ids: number[];  // Add table IDs to the order request 
     reservation_id?: number; // Optional reservation ID if this order is linked to a reservation
+}
+
+// API response for a single table
+export interface TableApiResponse {
+    data: Table;
+    [key: string]: any; // for any additional fields
 }

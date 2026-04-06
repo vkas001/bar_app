@@ -22,15 +22,21 @@ const LoginForm = () => {
       } else {
         setError("Invalid credentials");
       }
-    } catch (e) {
-      setError("Login failed. Please try again.");
+    } catch (e: any) {
+      // Show the REAL error instead of generic message
+      const msg =
+        e?.response?.data?.message ||
+        e?.response?.status ||
+        e?.message ||
+        JSON.stringify(e);
+      setError(`Error: ${msg}`);
     }
   };
 
   return (
     <View
       className=" p-6 rounded-3xl border border-black/20"
-      style={{ width: "90%", alignSelf: "center", backgroundColor:"black" }}
+      style={{ width: "90%", alignSelf: "center", backgroundColor: "black" }}
     >
       <Text className="text-white text-lg font-semibold text-center mb-6">
         Staff Login

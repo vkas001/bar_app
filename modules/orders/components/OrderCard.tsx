@@ -1,5 +1,6 @@
+import { useResponsive } from '@/shared/hooks/useResponsive'
 import React from 'react';
-import { Pressable, Text, View, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { order, orderStatus } from '../types/order.types';
 
 interface Props {
@@ -21,25 +22,50 @@ const paymentColors: Record<string, { backgroundColor: string; color: string }> 
 }
 
 export default function OrderCard({ order, onPress }: Props) {
+    const {
+        isSmallPhone,
+        isTablet,
+        isLargeTablet,
+        textXs,
+        textSm,
+        textBase,
+        textLg,
+        textXl,
+        text2xl,
+        size,
+    } = useResponsive()
+
     const currentStatusColors = statusColors[order.status]
     const currentPaymentColors = paymentColors[order.paymentStatus]
 
-    // Split tables and group by 4 per line
-    const tableList = order.table.split(',').map(t => t.trim()).filter(Boolean);
-    const groupedTables: string[][] = [];
+    const tableList = order.table.split(',').map(t => t.trim()).filter(Boolean)
+    const groupedTables: string[][] = []
     for (let i = 0; i < tableList.length; i += 4) {
-        groupedTables.push(tableList.slice(i, i + 4));
+        groupedTables.push(tableList.slice(i, i + 4))
     }
 
+    // Responsive tokens
+    const cardPadding = isLargeTablet ? 20 : isTablet ? 16 : isSmallPhone ? 10 : 12
+    const cardRadius = isLargeTablet ? 28 : isTablet ? 24 : 20
+    const tablePx = isSmallPhone ? 'px-2 py-2' : isTablet ? 'px-5 py-5' : 'px-4 py-4'
+    const tableLabelSize = isSmallPhone ? textSm : isTablet ? text2xl : textXl
+    const tableValueSize = isSmallPhone ? textXs : isTablet ? textXl : textBase
+    const customerSize = isSmallPhone ? textSm : isTablet ? textXl : textBase
+    const statusTextSize = isSmallPhone ? textXs : textXs
+    const badgePx = isSmallPhone ? 'px-2 py-0.5' : 'px-3 py-1'
+    const metaTextSize = isSmallPhone ? textXs : textSm
+    const totalTextSize = isSmallPhone ? textBase : textLg
+
     return (
-        <TouchableOpacity
-            onPress={() => onPress(order)}
-        >
+        <TouchableOpacity onPress={() => onPress(order)} activeOpacity={0.75}>
             <View
-                className='my-2 rounded-[24px] border p-4'
                 style={{
                     backgroundColor: '#222222',
                     borderColor: '#3f3f46',
+                    borderWidth: 1,
+                    borderRadius: cardRadius,
+                    padding: cardPadding,
+                    marginVertical: isSmallPhone ? 6 : 8,
                     shadowColor: '#000000',
                     shadowOpacity: 0.18,
                     shadowRadius: 12,
@@ -47,16 +73,21 @@ export default function OrderCard({ order, onPress }: Props) {
                     elevation: 6,
                 }}
             >
-                <View className='flex-row items-center'>
+                {/* Top Row: Table | Customer | Status */}
+                <View className='flex-row items-center' style={{ gap: size.padding.sm }}>
+
+                    {/* Table block */}
                     <View className='flex-1 items-center'>
-                        <View className='bg-yellow gap-0 items-center justify-center rounded-lg px-4 py-4'>
-                            <Text className='w-full text-center font-bold text-2xl uppercase tracking-[0.6px] text-black leading-none'>
+                        <View className={`w-full items-center justify-center rounded-lg bg-yellow ${tablePx}`}>
+                            <Text
+                                className={`w-full text-center font-bold uppercase tracking-[0.6px] text-black leading-none ${tableLabelSize}`}
+                            >
                                 Table:
                             </Text>
                             {groupedTables.map((row, idx) => (
                                 <Text
                                     key={idx}
-                                    className='w-full text-center text-xl font-bold text-black leading-none mt-2'
+                                    className={`w-full text-center font-bold text-black leading-none mt-1 ${tableValueSize}`}
                                 >
                                     {row.join(', ')}
                                 </Text>
@@ -64,22 +95,26 @@ export default function OrderCard({ order, onPress }: Props) {
                         </View>
                     </View>
 
-                    <View className='flex-1 ml-2'>
-                        <Text className='text-center text-xl font-bold text-white'>
+                    {/* Customer */}
+                    <View className='flex-1'>
+                        <Text
+                            className={`text-center font-bold text-white ${customerSize}`}
+                            numberOfLines={2}
+                        >
                             {order.customer || 'Walk-in'}
                         </Text>
                     </View>
 
+                    {/* Status badge */}
                     <View className='flex-1 items-center'>
                         <View
-                            className='rounded-full px-3 py-1'
-                            style={{
-                                backgroundColor: currentStatusColors.backgroundColor
-                            }}
+                            className={`rounded-full ${badgePx}`}
+                            style={{ backgroundColor: currentStatusColors.backgroundColor }}
                         >
                             <Text
-                                className='text-xs font-semibold uppercase tracking-[1px]'
+                                className={`font-semibold uppercase tracking-[1px] ${statusTextSize}`}
                                 style={{ color: currentStatusColors.color }}
+                                numberOfLines={1}
                             >
                                 {order.status}
                             </Text>
@@ -87,49 +122,50 @@ export default function OrderCard({ order, onPress }: Props) {
                     </View>
                 </View>
 
+                {/* Order ID / Type */}
                 <View className='mt-2 items-center'>
-                    <Text className='text-sm text-white'>
+                    <Text className={`text-white ${metaTextSize}`}>
                         #{order.id} / {order.type}
                     </Text>
                 </View>
 
-                <View className='mt-4 flex-row items-center justify-between mb-2'>
-                    <Text className='text-xm text-white'>
+                {/* Date / Items */}
+                <View className='mt-3 flex-row items-center justify-between mb-2'>
+                    <Text className={`text-white ${metaTextSize}`}>
                         {order.date}
                     </Text>
-                    <Text className='text-sm font-semibold text-white'>
-                        {order.items}  Items
+                    <Text className={`font-semibold text-white ${metaTextSize}`}>
+                        {order.items} Items
                     </Text>
                 </View>
 
+                {/* Divider */}
                 <View
                     style={{
-                        marginVertical: 12,
+                        marginVertical: isSmallPhone ? 8 : 12,
                         borderTopWidth: 0.8,
                         borderTopColor: '#ffffff',
                         opacity: 0.95,
                     }}
                 />
 
+                {/* Total */}
                 <View className='flex-row items-center justify-between'>
-                    <Text className='text-lg font-bold text-white'>
-                        Total
-                    </Text>
-                    <Text className='text-lg font-bold text-white'>
+                    <Text className={`font-bold text-white ${totalTextSize}`}>Total</Text>
+                    <Text className={`font-bold text-white ${totalTextSize}`}>
                         Rs. {order.total.toFixed(2)}
                     </Text>
                 </View>
 
+                {/* Payment */}
                 <View className='mt-2 flex-row items-center justify-between'>
-                    <Text className='text-sm font-medium text-white'>
-                        Payment
-                    </Text>
+                    <Text className={`font-medium text-white ${metaTextSize}`}>Payment</Text>
                     <View
-                        className='rounded-full px-3 py-1'
+                        className={`rounded-full ${badgePx}`}
                         style={{ backgroundColor: currentPaymentColors.backgroundColor }}
                     >
                         <Text
-                            className='text-base uppercase tracking-[1px]'
+                            className={`uppercase tracking-[1px] ${metaTextSize}`}
                             style={{ color: currentPaymentColors.color }}
                         >
                             {order.paymentStatus}

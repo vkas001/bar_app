@@ -1,5 +1,9 @@
+import { order, orderItemStatus, OrderPayloadItem } from "../../orders/types/order.types";
+
 export type BarTabStatus = "active" | "closed" | "suspended";
 export type BarPaymentStatus = "active" | "partial" | "unpaid";
+
+export type barTabItemStatus = orderItemStatus | 'Cancel';
 
 // RAW API RESPONSE
 export interface BarTabItemAPI {
@@ -82,10 +86,19 @@ export interface BarTabItem {
   unit: string;
   price: number;
   note: string | null;
+  status: barTabItemStatus;
 }
 
 export interface CreateBarTabPayload {
   customerName: string;
   phone: string;
   notes: string;
+}
+
+export interface AddItemsToBarTabPayload {
+  items: OrderPayloadItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  orderNote?: string;
 }

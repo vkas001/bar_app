@@ -1,3 +1,4 @@
+import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
@@ -9,12 +10,14 @@ interface Props {
     onClose: () => void
 }
 
-export default function ReservationDetailsMotal({ 
-    visible, 
-    reservation, 
-    onClose 
+export default function ReservationDetailsMotal({
+    visible,
+    reservation,
+    onClose
 }: Props) {
     if (!reservation) return null
+
+    const { isSmallPhone, textXs, textSm, textBase, textLg, textXl, text2xl, iconXs, iconSm, iconMd, size } = useResponsive()
 
     const currentStatusColor = RESERVATION_STATUS_STYLES[reservation.status]
     const customerInitial = reservation.customerName.trim().charAt(0).toUpperCase() || '?'
@@ -22,14 +25,47 @@ export default function ReservationDetailsMotal({
     const totalAmount = reservation.total ?? 0
     const totalPaid = reservation.paymentStatus === 'Paid' ? totalAmount : 0
     const discount = 0
-    
+
     const reservationTables = reservation.tableNumber
         .split(',')
         .map((table) => table.trim())
         .filter(Boolean)
 
-    // Get order items from the original order
     const orderItems = reservation.originalOrder.orderItems || []
+
+    const s = isSmallPhone ? {
+        panelWidth: '92%',
+        headerText: textXl,
+        sectionTitle: textBase,
+        bodyText: textSm,
+        smallText: textXs,
+        amountText: textSm,
+        iconSize: iconXs,
+        sectionIcon: iconSm,
+        px: 'px-2',
+        cardP: 'p-3',
+        rowPy: 'py-1.5',
+        badgePx: 'px-2 py-0.5',
+        btnPy: 'py-2.5',
+        gap: size.padding.sm,
+        sectionGap: size.padding.sm,
+    } : {
+        panelWidth: '80%',
+        headerText: 'text-3xl',
+        sectionTitle: 'text-xl',
+        bodyText: 'text-lg',
+        smallText: 'text-lg',
+        amountText: 'text-lg',
+        iconSize: 20,
+        sectionIcon: 20,
+        px: 'px-4',
+        cardP: 'p-4',
+        rowPy: 'py-2',
+        badgePx: 'px-3 py-1',
+        btnPy: 'py-4',
+        gap: 8,
+        sectionGap: 8,
+    }
 
     return (
         <Modal visible={visible} animationType='slide' transparent onRequestClose={onClose}>
@@ -39,135 +75,110 @@ export default function ReservationDetailsMotal({
                 <View className='absolute inset-x-0 top-0 bottom-16 flex-row'>
                     <Pressable className='flex-1' onPress={onClose} />
 
-                    <View className='w-[80%] rounded-l-2xl bg-black px-4 py-4'>
+                    <View
+                        className='rounded-l-2xl bg-black'
+                        style={{ width: '100%' }}
+                    >
                         <ScrollView showsVerticalScrollIndicator={false}>
-                            <View className='flex-row items-center justify-between px-4 py-4'>
-                                <Text className='text-3xl font-bold text-white'>Reservation Details</Text>
 
-                                <Pressable onPress={onClose}>
-                                    <Ionicons name='close' size={26} color='white' />
+                            {/* Header */}
+                            <View className={`flex-row items-center justify-between ${s.px} py-4`}>
+                                <Text className={`font-bold text-white ${s.headerText}`}>
+                                    Reservation Details
+                                </Text>
+                                <Pressable onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                    <Ionicons name='close' size={isSmallPhone ? 20 : 26} color='white' />
                                 </Pressable>
                             </View>
 
-                            {/* Reservation & Customer Info */}
+                            <View className={s.px}>
 
-                            <View className='px-4 mb-4'>
-                                <View className='rounded-xl bg-zinc-900 p-4'>
-                                    <View className='flex-row items-center justify-between'>
-                                        <View className='flex-row items-center gap-2'>
-                                            <Ionicons name='calendar' size={20} color='#facc15' />
-                                            <Text className='text-xl font-bold text-white'>
-                                                Reservation & Customer
-
-                                            </Text>
-                                        </View>
-
+                                {/* Reservation & Customer Info */}
+                                <View className={`rounded-xl bg-zinc-900 ${s.cardP} mb-4`}>
+                                    <View className='flex-row items-center' style={{ gap: s.sectionGap }}>
+                                        <Ionicons name='calendar' size={s.sectionIcon} color='#facc15' />
+                                        <Text className={`font-bold text-white ${s.sectionTitle}`}>
+                                            {isSmallPhone ? 'Customer Info' : 'Reservation & Customer'}
+                                        </Text>
                                     </View>
 
-                                    <View className='mt-3 rounded-lg px-4 py-3'>
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Name
-                                            </Text>
-                                            <Text className='text-lg text-white'>
+                                    <View className='mt-3 rounded-lg px-2'>
+
+                                        {/* Name */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Name</Text>
+                                            <Text className={`text-white flex-shrink ml-4 ${s.bodyText}`} numberOfLines={1}>
                                                 {reservation.customerName}
                                             </Text>
                                         </View>
 
-
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Phone
-                                            </Text>
-                                            <Text className='text-lg text-white'>
-                                                {reservation.phone ?? '-'}
-                                            </Text>
+                                        {/* Phone */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Phone</Text>
+                                            <Text className={`text-white ${s.bodyText}`}>{reservation.phone ?? '-'}</Text>
                                         </View>
 
-                                        <View className='mb-2 h-[1px] bg-zinc-700' />
+                                        <View className='my-1.5 h-[1px] bg-zinc-700' />
 
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Date
-                                            </Text>
-                                            <Text className='text-lg font-semibold text-white'>
+                                        {/* Date */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Date</Text>
+                                            <Text className={`font-semibold text-white ${s.bodyText}`}>
                                                 {(() => {
-                                                    const dateStr = reservation.originalOrder.date;
+                                                    const dateStr = reservation.originalOrder.date
                                                     if (dateStr) {
-                                                        const d = new Date(dateStr);
+                                                        const d = new Date(dateStr)
                                                         if (!isNaN(d.getTime())) {
-                                                            return d.toLocaleDateString('en-US', {
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric',
-                                                            });
+                                                            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                                                         }
                                                     }
-                                                    // fallback to plain reservation.date
-                                                    return reservation.date || '-';
+                                                    return reservation.date || '-'
                                                 })()}
                                             </Text>
                                         </View>
 
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Time
-                                            </Text>
-                                            <Text className='text-lg text-white'>
+                                        {/* Time */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Time</Text>
+                                            <Text className={`text-white ${s.bodyText}`}>
                                                 {(() => {
-                                                    const dateStr = reservation.originalOrder.date;
+                                                    const dateStr = reservation.originalOrder.date
                                                     if (dateStr) {
-                                                        const d = new Date(dateStr);
+                                                        const d = new Date(dateStr)
                                                         if (!isNaN(d.getTime())) {
-                                                            return d.toLocaleTimeString('en-US', {
-                                                                hour: '2-digit',
-                                                                minute: '2-digit',
-                                                                hour12: true,
-                                                            });
+                                                            return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
                                                         }
                                                     }
-                                                    // fallback to plain reservation.time
-                                                    return reservation.time || '-';
+                                                    return reservation.time || '-'
                                                 })()}
                                             </Text>
                                         </View>
 
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Guest
-                                            </Text>
-                                            <Text className='text-lg text-white'>
-                                                {reservation.peopleCount}
-                                            </Text>
+                                        {/* Guest */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Guest</Text>
+                                            <Text className={`text-white ${s.bodyText}`}>{reservation.peopleCount}</Text>
                                         </View>
 
-                                        <View className='mb-2 flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Status
-                                            </Text>
-                                            <View className='rounded-full px-3 py-1'
-                                                style={{ backgroundColor: currentStatusColor.bg }}
-                                            >
-                                                <Text className='text-base font-semibold capitalize'
-                                                    style={{ color: currentStatusColor.text }}
-                                                >
+                                        {/* Status */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Status</Text>
+                                            <View className={`rounded-full ${s.badgePx}`} style={{ backgroundColor: currentStatusColor.bg }}>
+                                                <Text className={`font-semibold capitalize ${s.smallText}`} style={{ color: currentStatusColor.text }}>
                                                     {reservation.status}
                                                 </Text>
                                             </View>
                                         </View>
 
-                                        <View className='mb-2 h-[1px] bg-zinc-700' />
+                                        <View className='my-1.5 h-[1px] bg-zinc-700' />
 
-                                        <View className='flex-row items-center justify-between'>
-                                            <Text className='text-lg text-zinc-300'>
-                                                Tables
-                                            </Text>
-                                            <View className='max-w-[75%] flex-row flex-wrap justify-end gap-2'>
+                                        {/* Tables */}
+                                        <View className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>Tables</Text>
+                                            <View className='max-w-[65%] flex-row flex-wrap justify-end' style={{ gap: size.padding.sm }}>
                                                 {reservationTables.map((table) => (
-                                                    <View key={table} className='rounded-lg bg-yellow px-2 py-2'>
-                                                        <Text className='text-lg text-black'>
-                                                            {table}
-                                                        </Text>
+                                                    <View key={table} className={`rounded-lg bg-yellow ${isSmallPhone ? 'px-2 py-1' : 'px-2 py-2'}`}>
+                                                        <Text className={`text-black font-semibold ${s.smallText}`}>{table}</Text>
                                                     </View>
                                                 ))}
                                             </View>
@@ -175,32 +186,29 @@ export default function ReservationDetailsMotal({
                                     </View>
                                 </View>
 
-                                {/* Orders & Notes */}
-
-                                <View className='mt-4 rounded-xl bg-zinc-900 p-4'>
-                                    <View className='flex-row items-center gap-2'>
-                                        <Ionicons name='restaurant' size={20} color='#facc15' />
-                                        <Text className='text-2xl font-bold text-white'>
-                                            Orders
-                                        </Text>
+                                {/* Orders */}
+                                <View className={`rounded-xl bg-zinc-900 ${s.cardP} mb-4`}>
+                                    <View className='flex-row items-center' style={{ gap: s.sectionGap }}>
+                                        <Ionicons name='restaurant' size={s.sectionIcon} color='#facc15' />
+                                        <Text className={`font-bold text-white ${isSmallPhone ? textLg : text2xl}`}>Orders</Text>
                                     </View>
 
                                     <View className='mt-3 rounded-lg bg-black p-3'>
                                         <View className='flex-row items-start justify-between'>
-                                            <View>
-                                                <Text className='text-xl font-bold text-yellow'>
+                                            <View className='flex-1 mr-2'>
+                                                <Text className={`font-bold text-yellow ${s.sectionTitle}`} numberOfLines={1}>
                                                     Order {formattedOrderId}
                                                 </Text>
-                                                <Text className='mt-1 text-lg text-zinc-300'>
+                                                <Text className={`mt-1 text-zinc-300 ${s.bodyText}`}>
                                                     Items: {reservation.orderItems ?? reservation.peopleCount}
                                                 </Text>
                                             </View>
 
-                                            <View className='items-end'>
-                                                <Text className='text-lg text-zinc-300'>
+                                            <View className='items-end flex-shrink-0'>
+                                                <Text className={`text-zinc-300 ${s.smallText}`} numberOfLines={1}>
                                                     {reservation.orderStatus ?? '-'} / {reservation.paymentStatus ?? '-'}
                                                 </Text>
-                                                <Text className='mt-1 text-lg font-semibold text-white'>
+                                                <Text className={`mt-1 font-semibold text-white ${s.bodyText}`}>
                                                     Rs {reservation.total?.toLocaleString() ?? '-'}
                                                 </Text>
                                             </View>
@@ -208,100 +216,71 @@ export default function ReservationDetailsMotal({
                                     </View>
                                 </View>
 
-                                <View className='mt-4 rounded-xl bg-card p-4'>
-                                    <View className='flex-row items-center gap-2'>
-                                        <Ionicons name='document-text' size={20} color='#facc15' />
-                                        <Text className='text-xl font-bold text-white'>
-                                            Notes
-                                        </Text>
+                                {/* Notes */}
+                                <View className={`rounded-xl bg-card ${s.cardP} mb-4`}>
+                                    <View className='flex-row items-center' style={{ gap: s.sectionGap }}>
+                                        <Ionicons name='document-text' size={s.sectionIcon} color='#facc15' />
+                                        <Text className={`font-bold text-white ${s.sectionTitle}`}>Notes</Text>
                                     </View>
-                                    <Text className='mt-3 text-lg text-zinc-300'>
+                                    <Text className={`mt-3 text-zinc-300 ${s.bodyText}`}>
                                         No additional notes for this reservation.
                                     </Text>
                                 </View>
                             </View>
 
                             {/* Total Amount */}
-
-                            <View className='mx-4 rounded-xl bg-zinc-900 p-4'>
-                                <View className='flex-row items-center gap-2'>
-                                    <Ionicons name='cash-outline' size={20} color='#facc15' />
-                                    <Text className='text-2xl font-bold text-white'>
-                                        Total Amount
-                                    </Text>
+                            <View className={`mx-3 rounded-xl bg-zinc-900 ${s.cardP}`}>
+                                <View className='flex-row items-center' style={{ gap: s.sectionGap }}>
+                                    <Ionicons name='cash-outline' size={s.sectionIcon} color='#facc15' />
+                                    <Text className={`font-bold text-white ${isSmallPhone ? textLg : text2xl}`}>Total Amount</Text>
                                 </View>
 
                                 <View className='mt-3 rounded-lg bg-black p-3'>
-                                    <View className='mb-2 flex-row items-center justify-between'>
-                                        <Text className='text-lg text-zinc-300'>
-                                            Total Amount
-                                        </Text>
-                                        <Text className='text-lg font-semibold text-white'>
-                                            Rs {totalAmount.toLocaleString()}
-                                        </Text>
-                                    </View>
-
-                                    <View className='mb-2 flex-row items-center justify-between'>
-                                        <Text className='text-lg text-zinc-300'>
-                                            Total Paid
-                                        </Text>
-                                        <Text className='text-lg font-semibold text-white'>
-                                            Rs {totalPaid.toLocaleString()}
-                                        </Text>
-                                    </View>
-
-                                    <View className='mb-2 flex-row items-center justify-between'>
-                                        <Text className='text-lg text-zinc-300'>
-                                            Discount
-                                        </Text>
-                                        <Text className='text-lg font-semibold text-white'>
-                                            Rs {discount.toLocaleString()}
-                                        </Text>
-                                    </View>
-
-                                    <View className='flex-row items-center justify-between'>
-                                        <Text className='text-lg text-zinc-300'>
-                                            Payment Status
-                                        </Text>
-                                        <Text className='text-lg font-semibold text-white'>
-                                            {reservation.paymentStatus ?? '-'}
-                                        </Text>
-                                    </View>
+                                    {[
+                                        { label: 'Total Amount', value: `Rs ${totalAmount.toLocaleString()}` },
+                                        { label: 'Total Paid', value: `Rs ${totalPaid.toLocaleString()}` },
+                                        { label: 'Discount', value: `Rs ${discount.toLocaleString()}` },
+                                        { label: 'Payment Status', value: reservation.paymentStatus ?? '-' },
+                                    ].map(({ label, value }, i) => (
+                                        <View key={i} className={`flex-row items-center justify-between ${s.rowPy}`}>
+                                            <Text className={`text-zinc-300 ${s.bodyText}`}>{label}</Text>
+                                            <Text className={`font-semibold text-white ${s.amountText}`}>{value}</Text>
+                                        </View>
+                                    ))}
                                 </View>
                             </View>
 
                             {/* Actions */}
+                            <View className={`bg-zinc-900 mt-4 mx-3 rounded-xl ${s.cardP} mb-4`}>
+                                <Text className={`text-white font-bold mb-3 ${s.sectionTitle}`}>
+                                    Reservation Actions
+                                </Text>
 
-                            <View className='bg-zinc-900 mt-4 px-4 pb-4'>
-                                <View className='py-6'>
-                                    <Text className='text-white font-bold text-xl'>
-                                        Resercation Actions
-                                    </Text>
-
-                                </View>
-                                <View className='flex-row items-stretch gap-2'>
-                                    <TouchableOpacity className='flex-1 flex-row items-center justify-center rounded-lg bg-yellow py-4'>
-                                        <Ionicons name='add' size={20} color='black' />
-                                        <Text className='ml-2 text-center text-lg font-bold text-black'>
-                                            Add Order
-                                        </Text>
+                                <View className='flex-row items-stretch gap-2 mb-2'>
+                                    <TouchableOpacity className={`flex-1 flex-row items-center justify-center rounded-lg bg-yellow ${s.btnPy}`}>
+                                        <Ionicons name='add' size={s.iconSize} color='black' />
+                                        <Text className={`ml-1 font-bold text-black ${s.bodyText}`}>Add Order</Text>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity className='flex-1 flex-row items-center justify-center rounded-lg bg-blue py-4'>
-                                        <Ionicons name='refresh' size={20} color='white' />
-                                        <Text className='ml-2 text-center text-lg font-bold text-white'>
-                                            Change Table
+                                    <TouchableOpacity className={`flex-1 flex-row items-center justify-center rounded-lg bg-blue ${s.btnPy}`}>
+                                        <Ionicons name='refresh' size={s.iconSize} color='white' />
+                                        <Text className={`ml-1 font-bold text-white ${s.bodyText}`} numberOfLines={1}>
+                                            {isSmallPhone ? 'Chg Table' : 'Change Table'}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
 
-                                <TouchableOpacity onPress={onClose} className='mt-2 flex-row items-center justify-center rounded-lg bg-red py-4 mb-4'>
-                                    <Ionicons name='close' size={20} color='white' />
-                                    <Text className='ml-2 text-center text-lg font-bold text-white'>
+                                <TouchableOpacity
+                                    onPress={onClose}
+                                    className={`flex-row items-center justify-center rounded-lg bg-red ${s.btnPy}`}
+                                >
+                                    <Ionicons name='close' size={s.iconSize} color='white' />
+                                    <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
                                         Cancel Reservation
                                     </Text>
                                 </TouchableOpacity>
                             </View>
+
                         </ScrollView>
                     </View>
                 </View>

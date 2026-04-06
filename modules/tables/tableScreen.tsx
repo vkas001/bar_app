@@ -1,5 +1,4 @@
-import { createOrder } from '@/modules/orders/hook/useCreateOrder'
-import { CreateOrderRequest } from '@/modules/orders/types/order.types'
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useNavigation } from '@react-navigation/native'
 import React, { useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
@@ -8,12 +7,11 @@ import TableFilter from './components/TableFilter'
 import TableStatusFilter from './components/TableStatusFilter'
 import { useTables } from './hooks/useTable'
 import { TableType } from './types/table.types'
-import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 
 type CustomerData = {
-  customer_name: string
-  customer_phone: string
-  guest_count: number
+  customerName: string
+  customerPhone: string
+  guestCount: number
 }
 
 type TableScreenProps = {
@@ -29,8 +27,8 @@ export default function TableScreen({
   fromOrder = false,
   customerData,
 }: TableScreenProps) {
-  console.log('TableScreen fromOrder:', fromOrder)
-  console.log('TableScreen customerData:', customerData)
+  // console.log('TableScreen fromOrder:', fromOrder)
+  // console.log('TableScreen customerData:', customerData)
 
   const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error } = useTables()
   const [selectedType, setSelectedType] = useState<TableType>('AllTypes')
