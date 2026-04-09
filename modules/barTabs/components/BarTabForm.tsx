@@ -11,6 +11,7 @@ import { CreateBarTabPayload } from '../types/barTab.types'
 interface BarTabFormProps {
 	onClose: () => void
 	onCancel?: () => void
+	onCreateTab: (payload: CreateBarTabPayload) => Promise<void>
 }
 
 export default function BarTabForm({

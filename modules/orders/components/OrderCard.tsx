@@ -101,7 +101,7 @@ export default function OrderCard({ order, onPress }: Props) {
                             className={`text-center font-bold text-white ${customerSize}`}
                             numberOfLines={2}
                         >
-                            {order.customer || 'Walk-in'}
+                            {order.customer}
                         </Text>
                     </View>
 

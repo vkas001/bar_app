@@ -48,7 +48,7 @@ export default function CartButton({ itemCount, onPress }: CartButtonProps) {
             onPressOut={handlePressOut}
             style={{
                 position: 'absolute',
-                bottom: 28,
+                bottom: 18,
                 right: 20,
             }}
         >
@@ -57,9 +57,9 @@ export default function CartButton({ itemCount, onPress }: CartButtonProps) {
                 <Animated.View
                     style={{
                         position: 'absolute',
-                        width: 60,
-                        height: 60,
-                        borderRadius: 30,
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
                         backgroundColor: '#e5a100',
                         opacity: pulseOpacity,
                         transform: [{ scale: pulse }],
@@ -71,9 +71,9 @@ export default function CartButton({ itemCount, onPress }: CartButtonProps) {
             <Animated.View
                 style={{
                     transform: [{ scale }],
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
+                    width: 60,
+                    height: 60,
+                    borderRadius: 30,
                     backgroundColor: '#e5a100',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -91,8 +91,8 @@ export default function CartButton({ itemCount, onPress }: CartButtonProps) {
                         right: -10,
                         backgroundColor: 'red',
                         borderRadius: 20,
-                        minWidth: 40,
-                        height: 40,
+                        minWidth: 30,
+                        height: 30,
                         justifyContent: 'center',
                         alignItems: 'center',
                         paddingHorizontal: 4,
@@ -101,7 +101,7 @@ export default function CartButton({ itemCount, onPress }: CartButtonProps) {
                     <Text
                         style={{
                             color: 'white',
-                            fontSize: 18,
+                            fontSize: 14,
                             fontWeight: '800'
                         }}
                     >

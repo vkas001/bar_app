@@ -1,6 +1,6 @@
 import { useResponsive } from "@/shared/hooks/useResponsive";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { BarPaymentStatus, BarTab, BarTabStatus, barTabItemStatus } from "../types/barTab.types";
 import {
@@ -8,6 +8,8 @@ import {
     getItemStatusColor,
     getItemStatusIcon
 } from "../../menu/types/itemStatus";
+import { useOrderStore } from "@/modules/orders/store/createOrderStore";
+import { useRouter } from 'expo-router';
 
 interface Props {
     visible: boolean;
@@ -30,6 +32,14 @@ const paymentColors: Record<BarPaymentStatus, { backgroundColor: string; color: 
 export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
     const [tabItems, setTabItems] = useState(tab?.tabItems ?? []);
     const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | number | null>(null);
+
+    const setBarTabCustomerData = useOrderStore(state => state.setBarTabCustomerData);
+    const setBarTabPreviousItems = useOrderStore(state => state.setBarTabPreviousItems);
+    const router = useRouter();
+
+    useEffect(() => {
+        setTabItems(tab?.tabItems ?? []);
+    }, [tab]);
 
     const {
         isSmallPhone,
@@ -293,8 +303,8 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                                     <View className="mt-2" style={{ height: 1, backgroundColor: "#71717a" }} />
 
                                     <View className="mt-2 flex-row justify-between">
-                                        <Text className={`font-bold text-zinc-400 ${s.bodyText}`}>Balance:</Text>
-                                        <Text className={`font-bold text-red ${s.totalText}`}>Rs. {balanceAmount.toFixed(2)}</Text>
+                                        <Text className={`font-bold text-red-500 ${s.bodyText}`}>Balance:</Text>
+                                        <Text className={`font-bold text-red-500 ${s.totalText}`}>Rs. {balanceAmount.toFixed(2)}</Text>
                                     </View>
                                 </View>
 
@@ -313,8 +323,23 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
 
                             {/* Actions */}
                             <View className={`mt-2 ${s.px} pb-4 pt-3`}>
-                                <Pressable className={`rounded-lg bg-yellow mb-2 ${isSmallPhone ? 'py-2' : 'py-3'}`}>
-                                    <Text className={`text-center font-bold text-black ${s.sectionTitle}`}>Add Items</Text>
+                                <Pressable
+                                    className={`rounded-lg bg-yellow mb-2 ${isSmallPhone ? 'py-2' : 'py-3'}`}
+                                    onPress={() => {
+                                        setBarTabCustomerData({
+                                            id: tab.id,
+                                            customerName: tab.customerName,
+                                            customerPhone: tab.phone,
+                                            notes: tab.notes ?? null,
+                                        });
+                                        setBarTabPreviousItems(tab.tabItems);
+                                        onClose();
+                                        router.push('/(tabs)/menu');
+                                    }}
+                                >
+                                    <Text className={`text-center font-bold text-black ${s.sectionTitle}`}>
+                                        Add Items
+                                    </Text>
                                 </Pressable>
                                 <Pressable className={`rounded-lg bg-[#3a4455] ${isSmallPhone ? 'py-2' : 'py-3'}`}>
                                     <Text className={`text-center font-bold text-white ${s.sectionTitle}`}>Print Invoice</Text>

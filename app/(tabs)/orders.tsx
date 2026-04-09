@@ -5,9 +5,17 @@ import ScreenHeader from '@/components/Header/ScreenHeader';
 import OrderModule from '@/modules/orders/ordersScreen';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useOrders } from '@/modules/orders/hook/useOrder';
 
 export default function Orders() {
-  const { refreshing, onRefresh } = useScreenRefresh()
+  const { refetch: refetchOrders } = useOrders();
+  
+  const { refreshing, onRefresh } = useScreenRefresh(async () => {
+    await Promise.all([
+      refetchOrders?.(),
+    ]);
+  });
+
 
   return (
     <SafeAreaView className="flex-1 bg-black">

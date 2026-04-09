@@ -200,7 +200,7 @@ export default function OrderDetailsModal({
                     {/* Item ID */}
                     <View className={`flex-row justify-between items-center ${s.itemPx}`}>
                       <Text className={`text-yellow font-semibold ${s.bodyText}`} numberOfLines={1}>
-                        {item.id}
+                        {item.name}
                       </Text>
                     </View>
 

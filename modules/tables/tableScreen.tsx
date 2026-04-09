@@ -19,6 +19,8 @@ type TableScreenProps = {
   onRefresh?: () => void
   fromOrder?: boolean
   customerData?: CustomerData
+  changeTableMode?: boolean
+  onChangeTableConfirm?: (newTableIds: number[]) => Promise<void>
 }
 
 export default function TableScreen({
@@ -26,11 +28,13 @@ export default function TableScreen({
   onRefresh,
   fromOrder = false,
   customerData,
+  changeTableMode,
+  onChangeTableConfirm
 }: TableScreenProps) {
   // console.log('TableScreen fromOrder:', fromOrder)
   // console.log('TableScreen customerData:', customerData)
 
-  const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error } = useTables()
+  const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error, refetch: refetchTable } = useTables()
   const [selectedType, setSelectedType] = useState<TableType>('AllTypes')
   const [hideOccupied, setHideOccupied] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -56,6 +60,18 @@ export default function TableScreen({
 
     // Navigate to menu to add items
     navigation.navigate('menu' as never)
+  }
+
+  const handleChangeTableConfirm = async () => {
+    if (selectedIds.length === 0) {
+      Alert.alert('Error', 'Please select at least one table')
+      return
+    }
+    if (!onChangeTableConfirm) return
+
+    setSubmitting(true)
+    await onChangeTableConfirm(selectedIds.map(id => Number(id)))
+    setSubmitting(false)
   }
 
   if (loading) {
@@ -109,13 +125,16 @@ export default function TableScreen({
           ) : undefined
         }
         contentContainerClassName='px-2 pt-4 pb-4'
+
         renderItem={({ item: table }) => (
           <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
             <TableCard
               table={table}
               selected={selectedIds.includes(table.id)}
               onPress={() => toggleTableSelection(table.id)}
+              selectable={changeTableMode && selectedIds.includes(table.id)}
             />
+
           </View>
         )}
         ListEmptyComponent={
@@ -126,7 +145,7 @@ export default function TableScreen({
       />
 
       {/* Only show when coming from create order */}
-      {fromOrder && (
+      {fromOrder && !changeTableMode && (
         <View className='px-4 pb-4 pt-2 border-t border-zinc-800'>
           {/* Show selected count */}
           <Text className='text-red-500 text-lg text-center mb-3'>
@@ -147,6 +166,30 @@ export default function TableScreen({
               <Text className={`font-bold text-lg ${selectedIds.length === 0 ? 'text-white' : 'text-black'
                 }`}>
                 Confirm Selection
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Only show when coming from change table */}
+      {changeTableMode && (
+        <View className='px-4 pb-4 pt-2 border-t border-zinc-800'>
+          <Text className='text-zinc-400 text-lg text-center mb-3'>
+            {selectedIds.length === 0
+              ? 'No tables selected'
+              : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected`}
+          </Text>
+          <TouchableOpacity
+            onPress={handleChangeTableConfirm}
+            disabled={submitting || selectedIds.length === 0}
+            className={`rounded-xl items-center py-4 ${selectedIds.length === 0 ? 'bg-zinc-700' : 'bg-yellow'}`}
+          >
+            {submitting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text className={`font-bold text-lg ${selectedIds.length === 0 ? 'text-white' : 'text-white'}`}>
+                Confirm Table Change
               </Text>
             )}
           </TouchableOpacity>

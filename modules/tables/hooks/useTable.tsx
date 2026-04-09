@@ -1,13 +1,20 @@
 import { getToken } from '@/shared/storage/secure';
 import { useEffect, useState } from 'react';
 import { Table, TableType } from '../types/table.types';
+import { useOrderStore } from '@/modules/orders/store/createOrderStore';
 
 export const useTables = () => {
   const [tables, setTables] = useState<Table[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tableTypes, setTableTypes] = useState<TableType[]>([]);
+
+  const changeTableMode = useOrderStore(s => s.changeTableMode);
+  const storeSelectedTableIds = useOrderStore(s => s.selectedTableIds);
+
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    changeTableMode ? storeSelectedTableIds.map(String) : []
+  );
 
   useEffect(() => {
     fetchTables();

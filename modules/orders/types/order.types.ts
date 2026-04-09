@@ -5,7 +5,9 @@ export type orderItemStatus = 'Pending' | 'Preparing' | 'Ready' | 'Served' | 'Ca
 
 export interface order {
     id: string;
+    reservationId: string;
     table: string;
+    tableIds: number[];
     customer: string;
     customerPhone?: string;
     status: orderStatus;
@@ -43,6 +45,7 @@ export interface ApiOrderDetail {
 export interface ApiOrder {
     id: number;
     reservation: {
+        id: number;
         customer: {
             id: number;
             name: string;
@@ -102,7 +105,7 @@ export interface CreateOrderRequest {
     total: number;
     orderNote: string;
     paymentMethod: string;
-    reservationId: number | null;
+    reservationId: string | null;
 }
 
 export interface CreateOrderResponse {

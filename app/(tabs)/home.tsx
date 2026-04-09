@@ -6,12 +6,16 @@ import { useBarTabs } from '@/modules/barTabs/hook/useBarTabs';
 import HomeScreen from '@/modules/home/homeScreen';
 import { useOrders } from '@/modules/orders/hook/useOrder';
 import React from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View, Text, Touchable, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useToast } from '@/shared/ui/toast/toast.context';
 
 export default function home() {
   const { refetch: refetchOrders } = useOrders();
   const { refresh: refreshBarTabs } = useBarTabs();
+  const { showToast } = useToast();
+
+
   const { refreshing, onRefresh } = useScreenRefresh(async () => {
     await Promise.all([
       refetchOrders?.(),
@@ -26,6 +30,7 @@ export default function home() {
 
       <Greetings />
       <View className='mx-4 border-b border-[#2a2a2a] my-2' />
+
 
       <ScrollView
         refreshControl={

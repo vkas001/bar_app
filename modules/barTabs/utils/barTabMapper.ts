@@ -1,4 +1,4 @@
-import { BarPaymentStatus, BarTab, BarTabAPI } from "../types/barTab.types";
+import { BarPaymentStatus, BarTab, BarTabAPI, barTabItemStatus } from "../types/barTab.types";
 
 function derivePaymentStatus(paid: number, total: number): BarPaymentStatus {
     if (paid <= 0) return "unpaid";
@@ -32,6 +32,7 @@ export function mapBarTabAPIToCard(tab: BarTabAPI): BarTab {
                 unit: i.item_unit.title,
                 price: i.price,
                 note: i.note,
+                status: i.status as barTabItemStatus,
             })),
         raw: tab,
     };

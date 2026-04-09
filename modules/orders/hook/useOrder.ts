@@ -1,7 +1,7 @@
 import { getToken } from '@/shared/storage/secure';
 import { useEffect, useState } from 'react';
 import { ApiOrder, order } from '../types/order.types';
-import { mapApiOrder } from '../utils/orderMapper';
+import { groupReservationOrders, mapApiOrder } from '../utils/orderMapper';
 import { PaymentFilter, StatusFilter } from '../types/orderFilter.types';
 
 export const useOrders = () => {
@@ -29,9 +29,7 @@ export const useOrders = () => {
             const text = await res.text();
             const json = JSON.parse(text);
 
-            const mapped: order[] = (json.data || []).map((o: ApiOrder) =>
-                mapApiOrder(o)
-            );
+            const mapped = groupReservationOrders(json.data);
 
             // console.log('Fetched orders:', mapped);
 

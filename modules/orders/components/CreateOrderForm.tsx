@@ -56,8 +56,16 @@ export default function CreateOrderForm({
   const inputFlexClass = isTablet ? "flex-1" : "";
 
   const handleCreate = () => {
-    if (!name.trim()) { Alert.alert('Error', 'Please enter customer name'); return }
-    if (!phone.trim()) { Alert.alert('Error', 'Please enter customer phone'); return }
+    if (!isWalkIn) {
+      if (!name.trim()) {
+        Alert.alert('Error', 'Please enter customer name');
+        return
+      }
+      if (!phone.trim()) {
+        Alert.alert('Error', 'Please enter customer phone');
+        return
+      }
+    }
 
     setPendingCustomerData({
       customerName: isWalkIn ? "Walk In" : name.trim(),

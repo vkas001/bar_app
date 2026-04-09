@@ -8,16 +8,29 @@ export const ToastView = ({
     message: string;
     type: ToastType;
 }) => {
-    const bg =
+    const bgColor =
         type === 'success'
-            ? 'bg-green-500'
+            ? '#22c55e' // green-500
             : type === 'error'
-                ? 'bg-red-500'
-                : 'bg-blue-500';
+                ? '#ef4444' // red-500
+                : '#3b82f6'; // blue-500
 
     return (
-        <View className={`px-4 py-3 rounded-xl shadow-lg ${bg}`}>
-            <Text className="text-white font-semibold">{message}</Text>
+        <View style={{
+            backgroundColor: bgColor,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderRadius: 16,
+            shadowColor: '#000',
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 }
+        }}>
+            <Text
+                style={{ color: '#fff' }}
+            >
+                {message}
+            </Text>
         </View>
     );
 };

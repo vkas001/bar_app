@@ -7,9 +7,15 @@ type Props = {
     table: Table;
     selected: boolean;
     onPress: () => void;
+    selectable?: boolean;
 }
 
-export const TableCard = ({ table, selected, onPress }: Props) => {
+export const TableCard = ({
+    table,
+    selected,
+    onPress,
+    selectable = true
+}: Props) => {
     const {
         isSmallPhone,
         isTablet,
@@ -25,7 +31,7 @@ export const TableCard = ({ table, selected, onPress }: Props) => {
         size,
     } = useResponsive()
 
-    const isUnavailable = !table.is_available || !table.is_active;
+    const isUnavailable = !selectable && (!table.is_available || !table.is_active);
     const fullText = `${table.table_type.name}:${table.name}`;
     const isLong = fullText.length > 9;
 
@@ -53,10 +59,10 @@ export const TableCard = ({ table, selected, onPress }: Props) => {
         <Pressable
             onPress={isUnavailable ? undefined : onPress}
             className={`w-full p-4 rounded-lg ${isUnavailable
-                    ? 'opacity-50 bg-red-900/20 border-2 border-red-500/30'
-                    : selected
-                        ? 'bg-[#262626] border-2 border-yellow'
-                        : 'bg-[#262626] border-2 border-transparent'
+                ? 'opacity-50 bg-red-900/20 border-2 border-red-500/30'
+                : selected
+                    ? 'bg-[#262626] border-2 border-yellow'
+                    : 'bg-[#262626] border-2 border-transparent'
                 }`}
             style={{ height: cardHeight }}
         >
@@ -73,18 +79,18 @@ export const TableCard = ({ table, selected, onPress }: Props) => {
 
                 <View
                     className={`rounded-lg border flex-shrink-0 ${badgePx} ${isUnavailable
-                            ? 'bg-red-900/30 border-red-400/30'
-                            : table.status === 'Booked'
-                                ? 'bg-green-900/30 border-green-400/30'
-                                : 'bg-green-900/30 border-yellow'
+                        ? 'bg-red-900/30 border-red-400/30'
+                        : table.status === 'Booked'
+                            ? 'bg-green-900/30 border-green-400/30'
+                            : 'bg-green-900/30 border-yellow'
                         }`}
                 >
                     <Text
                         className={`font-medium ${statusTextSize} ${isUnavailable
-                                ? 'text-red-400'
-                                : table.status === 'Booked'
-                                    ? 'text-green-400'
-                                    : 'text-yellow'
+                            ? 'text-red-400'
+                            : table.status === 'Booked'
+                                ? 'text-green-400'
+                                : 'text-yellow'
                             }`}
                     >
                         {isUnavailable ? 'Occupied' : (table.status ?? 'Available')}

@@ -30,10 +30,10 @@ export default function MenuScreen() {
     useEffect(() => {
         if (pendingCustomerData && selectedTableIds.length > 0) {
             console.log('Pending Order Data:',
-                 {
-                customer: pendingCustomerData,
-                tables: selectedTableIds
-            });
+                {
+                    customer: pendingCustomerData,
+                    tables: selectedTableIds
+                });
         }
     }, []);
 
@@ -64,7 +64,7 @@ export default function MenuScreen() {
 
     const handleSelectItem = (item: MenuItemMerged) => {
         setSelectedItem(item);
-      //  console.log('Selected item:', item);
+        //  console.log('Selected item:', item);
     };
 
     return (
