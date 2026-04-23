@@ -19,10 +19,10 @@ export const useChangeTable = () => {
       });
 
       const json = await res.json();
-      console.log('Change table response:', json);
+     // console.log('Change table response:', json);
       return res.ok;
     } catch (err) {
-      console.error('Change table error:', err);
+    //  console.error('Change table error:', err);
       return false;
     }
   };

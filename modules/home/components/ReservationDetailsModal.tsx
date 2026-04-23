@@ -2,10 +2,15 @@ import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import React, { useState } from 'react'
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Reservation, RESERVATION_STATUS_STYLES } from '../types/reservation.types'
 import { useOrders } from '@/modules/orders/hook/useOrder'
+import { useCancelReservation } from '../hook/useReservaiton'
+import confirmDialog from '@/components/confirmDialog'
+import { useToast } from '@/shared/ui/toast'
+import ConfirmDialog from '@/components/confirmDialog'
+
 
 interface Props {
     visible: boolean
@@ -20,6 +25,11 @@ export default function ReservationDetailsModal({
     onClose,
     onOrderSuccess
 }: Props) {
+    const { cancelReservation } = useCancelReservation();
+    const [cancelling, setCancelling] = useState(false)
+    const [showCancelDialog, setShowCancelDialog] = useState(false)
+    const { showToast } = useToast();
+
     const { isSmallPhone, textXs, textSm, textBase, textLg, textXl, text2xl, iconXs, iconSm, iconMd, size } = useResponsive()
     const setPendingCustomerData = useOrderStore((state) => state.setPendingCustomerData);
     const setSelectedTableIds = useOrderStore((state) => state.setSelectedTableIds);
@@ -77,6 +87,29 @@ export default function ReservationDetailsModal({
         sectionGap: 8,
     }
 
+    const handleCancelReservation = async () => {
+        setShowCancelDialog(true)
+    }
+
+    // confirm handler
+    const handleConfirmCancel = async () => {
+        if (!reservation?.originalOrder.reservationId) return
+
+        setShowCancelDialog(false)
+        setCancelling(true)
+        const success = await cancelReservation(
+            Number(reservation.originalOrder.reservationId)
+        )
+        setCancelling(false)
+
+        if (success) {
+            showToast('Reservation cancelled successfully', 'success')
+            onClose()
+            onOrderSuccess?.()
+        } else {
+            showToast('Failed to cancel reservation', 'error')
+        }
+    }
     return (
         <Modal visible={visible} animationType='slide' transparent onRequestClose={onClose}>
             <View className='flex-1' pointerEvents='box-none'>
@@ -311,13 +344,21 @@ export default function ReservationDetailsModal({
                                 </View>
 
                                 <TouchableOpacity
-                                    onPress={onClose}
+                                    onPress={handleCancelReservation}
+                                    disabled={cancelling}
                                     className={`flex-row items-center justify-center rounded-lg bg-red-500 ${s.btnPy}`}
+                                    style={{ opacity: cancelling ? 0.6 : 1 }}
                                 >
-                                    <Ionicons name='close' size={s.iconSize} color='white' />
-                                    <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
-                                        Cancel Reservation
-                                    </Text>
+                                    {cancelling ? (
+                                        <ActivityIndicator size="small" color="white" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name='close' size={s.iconSize} color='white' />
+                                            <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
+                                                Cancel Reservation
+                                            </Text>
+                                        </>
+                                    )}
                                 </TouchableOpacity>
                             </View>
 
@@ -325,6 +366,16 @@ export default function ReservationDetailsModal({
                     </View>
                 </View>
             </View>
+
+            <ConfirmDialog
+                visible={showCancelDialog}
+                title="Cancel Reservation"
+                message="Are you sure you want to cancel this reservation?"
+                confirmText="Cancel"
+                cancelText="No"
+                onConfirm={handleConfirmCancel}
+                onCancel={() => setShowCancelDialog(false)}
+            />
         </Modal>
     )
 }

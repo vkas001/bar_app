@@ -24,9 +24,6 @@ export default function menu() {
 
       <ScreenHeader title="Menu" />
 
-
-
-     
         <MenuScreen/>
 
       <CartButton
