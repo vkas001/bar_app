@@ -42,15 +42,15 @@ export default function CategoryCard({
     const isAllItems = category.name.toLowerCase().includes('all');
     const iconName = isAllItems ? 'apps' : 'cafe';
 
-    const cardPadding = isLargeTablet ? 24 : isTablet ? 20 : isSmallPhone ? 8 : 8
-    const cardMinHeight = isLargeTablet ? 140 : isTablet ? 130 : isSmallPhone ? 60 : 90
+    const cardPadding = isLargeTablet ? 12 : isTablet ? 8 : isSmallPhone ? 6 : 6
+    const cardMinHeight = isLargeTablet ? 120 : isTablet ? 110 : isSmallPhone ? 60 : 90
     const cardMargin = isSmallPhone ? 4 : 2
 
     const iconContainerSize = isSmallPhone ? 'w-8 h-8' : isTablet ? 'w-12 h-12' : 'w-10 h-10'
     const iconSize = isSmallPhone ? iconXs : iconMd
     const iconRadius = isSmallPhone ? 'rounded-md' : 'rounded-lg'
 
-    const nameSize = isSmallPhone ? textBase : isTablet ? text2xl : textSm
+    const nameSize = isSmallPhone ? textBase : isTablet ? textLg : textSm
     const itemCountSize = isSmallPhone ? textSm : textBase
 
     const selectedDotOuter = isSmallPhone ? 'w-4 h-4' : 'w-5 h-5'
@@ -66,7 +66,7 @@ export default function CategoryCard({
                 minHeight: cardMinHeight,
                 justifyContent: 'center',
                 width: 200,
-                borderRadius: isSmallPhone ? 14 : 16,
+                borderRadius: isSmallPhone ? 12 : 14,
                 padding: cardPadding,
                 margin: cardMargin,
             }}
@@ -74,7 +74,7 @@ export default function CategoryCard({
             {/* Top row: icon + name + selected indicator */}
             <View
                 className='flex-row items-center'
-                style={{ marginBottom: isSmallPhone ? 8 : 16 }}
+                style={{ marginBottom: isSmallPhone ? 4 : 12 }}
             >
                 <View
                     className={`${iconContainerSize} ${iconRadius} 

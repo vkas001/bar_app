@@ -77,9 +77,12 @@ export default function BarTabScreen() {
     <SafeAreaView className="flex-1 bg-black">
       <ScreenHeader
         title="Bar Tabs"
-        extraContent={<TabInfo tabs={tabs} />}
         onBackPress={() => router.replace('/(tabs)/home')}
       />
+
+      <View className='justify-center items-center '>
+        <TabInfo tabs={tabs} />
+      </View>
 
       <BarTabFilter
         onPressNewTab={() => setIsCreateTabOpen(true)}

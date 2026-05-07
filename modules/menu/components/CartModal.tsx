@@ -10,8 +10,10 @@ import { useToast } from '@/shared/ui/toast';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
+    FlatList,
     Modal, Pressable, ScrollView,
-    Text, TextInput, TouchableOpacity, View
+    Text,
+    TouchableOpacity, View
 } from 'react-native';
 
 interface Props {
@@ -103,14 +105,14 @@ export default function CartModal({
 
         // DEBUG LOGGING 
          
-        console.log('handlePlaceOrder:', {
-            reservation,
-            pendingCustomerData,
-            selectedTableIds,
-            items,
-            total,
-            barTabCustomerData
-        });
+        // console.log('handlePlaceOrder:', {
+        //     reservation,
+        //     pendingCustomerData,
+        //     selectedTableIds,
+        //     items,
+        //     total,
+        //     barTabCustomerData
+        // });
         
         // BAR TAB ORDER
         if (barTabCustomerData) {
@@ -347,96 +349,99 @@ export default function CartModal({
                             </View>
                         )}
 
-                        {/* Inner ScrollView — scrolls only the items list */}
-                        {items.length === 0 ? (
-                            <View className="items-center py-8">
-                                <Text className={`text-[#888] ${textBase}`}>No items in cart</Text>
-                            </View>
-                        ) : (
-                            <ScrollView
-                                nestedScrollEnabled
-                                showsVerticalScrollIndicator
-                                style={{ maxHeight: itemsMaxHeight }}
-                            >
-                                {items.map((cartItem) => (
+                        {/* Items List using FlatList for both scrolls */}
+                        <FlatList
+                            data={items}
+                            keyExtractor={(item) => String(item.id)}
+                            scrollEnabled={true}
+                            nestedScrollEnabled
+                            showsVerticalScrollIndicator={true}
+                            scrollEventThrottle={16}
+                            removeClippedSubviews={true}
+                            style={{ maxHeight: itemsMaxHeight }}
+                            ListEmptyComponent={
+                                <View className="items-center py-8">
+                                    <Text className={`text-[#888] ${textBase}`}>No items in cart</Text>
+                                </View>
+                            }
+                            renderItem={({ item: cartItem }) => (
+                                <View
+                                    key={cartItem.id}
+                                    className={`bg-[#252525] rounded-xl ${itemCardPx} ${cardMb}`}
+                                >
+                                    {/* Name + Qty controls */}
                                     <View
-                                        key={cartItem.id}
-                                        className={`bg-[#252525] rounded-xl ${itemCardPx} ${cardMb}`}
+                                        className="flex-row justify-between items-center"
+                                        style={{ marginBottom: isSmallPhone ? 4 : 8 }}
                                     >
-                                        {/* Name + Qty controls */}
-                                        <View
-                                            className="flex-row justify-between items-center"
-                                            style={{ marginBottom: isSmallPhone ? 4 : 8 }}
-                                        >
-                                            <Text
-                                                className={`text-white font-medium flex-1 pr-2 ${itemNameSize}`}
-                                                numberOfLines={1}
-                                            >
-                                                {cartItem.name}
-                                            </Text>
-                                            <View className="flex-row items-center" style={{ gap: isSmallPhone ? size.padding.sm : 16 }}>
-                                                <TouchableOpacity
-                                                    onPress={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
-                                                    className={`${qtyBtnSize} rounded-md bg-[#333] items-center justify-center`}
-                                                >
-                                                    <Ionicons name="remove" size={qtyIconSize} color="#e5a100" />
-                                                </TouchableOpacity>
-                                                <Text
-                                                    className={`text-white font-medium text-center ${itemNameSize}`}
-                                                    style={{ minWidth: isSmallPhone ? 20 : 24 }}
-                                                >
-                                                    x{cartItem.quantity}
-                                                </Text>
-                                                <TouchableOpacity
-                                                    onPress={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
-                                                    className={`${qtyBtnSize} rounded-md bg-[#333] items-center justify-center`}
-                                                >
-                                                    <Ionicons name="add" size={qtyIconSize} color="#e5a100" />
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-
-                                        {/* Unit */}
                                         <Text
-                                            className={`text-[#888] ${itemMetaSize}`}
-                                            style={{ marginBottom: isSmallPhone ? 4 : 8 }}
+                                            className={`text-white font-medium flex-1 pr-2 ${itemNameSize}`}
+                                            numberOfLines={1}
                                         >
-                                            {cartItem.selectedUnit.item_unit_title} ({cartItem.selectedUnit.item_unit_name})
+                                            {cartItem.name}
                                         </Text>
+                                        <View className="flex-row items-center" style={{ gap: isSmallPhone ? size.padding.sm : 16 }}>
+                                            <TouchableOpacity
+                                                onPress={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
+                                                className={`${qtyBtnSize} rounded-md bg-[#333] items-center justify-center`}
+                                            >
+                                                <Ionicons name="remove" size={qtyIconSize} color="#e5a100" />
+                                            </TouchableOpacity>
+                                            <Text
+                                                className={`text-white font-medium text-center ${itemNameSize}`}
+                                                style={{ minWidth: isSmallPhone ? 20 : 24 }}
+                                            >
+                                                x{cartItem.quantity}
+                                            </Text>
+                                            <TouchableOpacity
+                                                onPress={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
+                                                className={`${qtyBtnSize} rounded-md bg-[#333] items-center justify-center`}
+                                            >
+                                                <Ionicons name="add" size={qtyIconSize} color="#e5a100" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
 
-                                        {/* Actions + Price */}
-                                        <View className="flex-row justify-between items-center">
-                                            <View className="flex-row" style={{ gap: size.padding.sm }}>
-                                                <TouchableOpacity
-                                                    onPress={() => removeItem(cartItem.id)}
-                                                    className={`${actionBtnSize} rounded-lg bg-[#333] items-center justify-center`}
-                                                >
-                                                    <Ionicons name="trash-outline" size={actionIconSize} color="red" />
-                                                </TouchableOpacity>
-                                                <View className={`${actionBtnSize} rounded-lg bg-[#333] items-center justify-center`}>
-                                                    <Ionicons name="document-text-outline" size={actionIconSize} color="#e5a100" />
-                                                </View>
-                                            </View>
-                                            <View className="items-end">
-                                                <Text className={`text-[#888] ${itemEachSize}`}>
-                                                    Rs. {cartItem.pricePerQuantity.toFixed(2)} each
-                                                </Text>
-                                                <Text className={`text-white font-medium ${itemPriceSize}`}>
-                                                    Rs. {cartItem.price.toFixed(2)}
-                                                </Text>
+                                    {/* Unit */}
+                                    <Text
+                                        className={`text-[#888] ${itemMetaSize}`}
+                                        style={{ marginBottom: isSmallPhone ? 4 : 8 }}
+                                    >
+                                        {cartItem.selectedUnit.item_unit_title} ({cartItem.selectedUnit.item_unit_name})
+                                    </Text>
+
+                                    {/* Actions + Price */}
+                                    <View className="flex-row justify-between items-center">
+                                        <View className="flex-row" style={{ gap: size.padding.sm }}>
+                                            <TouchableOpacity
+                                                onPress={() => removeItem(cartItem.id)}
+                                                className={`${actionBtnSize} rounded-lg bg-[#333] items-center justify-center`}
+                                            >
+                                                <Ionicons name="trash-outline" size={actionIconSize} color="red" />
+                                            </TouchableOpacity>
+                                            <View className={`${actionBtnSize} rounded-lg bg-[#333] items-center justify-center`}>
+                                                <Ionicons name="document-text-outline" size={actionIconSize} color="#e5a100" />
                                             </View>
                                         </View>
-
-                                        {/* Item note */}
-                                        {cartItem.note && (
-                                            <Text className={`text-[#888] mt-1 italic ${itemMetaSize}`}>
-                                                Note: {cartItem.note}
+                                        <View className="items-end">
+                                            <Text className={`text-[#888] ${itemEachSize}`}>
+                                                Rs. {cartItem.pricePerQuantity.toFixed(2)} each
                                             </Text>
-                                        )}
+                                            <Text className={`text-white font-medium ${itemPriceSize}`}>
+                                                Rs. {cartItem.price.toFixed(2)}
+                                            </Text>
+                                        </View>
                                     </View>
-                                ))}
-                            </ScrollView>
-                        )}
+
+                                    {/* Item note */}
+                                    {cartItem.note && (
+                                        <Text className={`text-[#888] mt-1 italic ${itemMetaSize}`}>
+                                            Note: {cartItem.note}
+                                        </Text>
+                                    )}
+                                </View>
+                            )}
+                        />
 
                         {/* Order Note */}
                         <Text className={`text-white font-medium mt-3 mb-1 ${noteLabelSize}`}>

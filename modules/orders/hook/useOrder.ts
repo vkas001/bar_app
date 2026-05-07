@@ -1,8 +1,19 @@
 import { getToken } from '@/shared/storage/secure';
 import { useEffect, useState } from 'react';
-import { ApiOrder, order } from '../types/order.types';
-import { groupReservationOrders, mapApiOrder } from '../utils/orderMapper';
-import { PaymentFilter, StatusFilter } from '../types/orderFilter.types';
+import { order, orderItem, orderItemStatus, orderStatus } from '../types/order.types';
+import { groupReservationOrders } from '../utils/orderMapper';
+
+export const deriveOrderStatusFromItems = (items: orderItem[]): orderStatus => {
+    if (items.length === 0) return 'Pending';
+
+    const activeItems = items.filter((item) => item.status !== 'Cancelled');
+
+    if (activeItems.length === 0) return 'Cancelled';
+    if (activeItems.every((item) => item.status === 'Served')) return 'Completed';
+    if (activeItems.every((item) => item.status === 'Pending')) return 'Pending';
+
+    return 'Processing';
+};
 
 export const useOrders = () => {
     const [orders, setOrders] = useState<order[]>([]);
@@ -42,5 +53,27 @@ export const useOrders = () => {
         }
     };
 
-    return { orders, loading, error, refetch: fetchOrders };
+    const updateOrderItemStatusLocally = (
+        orderId: string,
+        itemId: string,
+        newStatus: orderItemStatus
+    ) => {
+        setOrders((prevOrders) =>
+            prevOrders.map((existingOrder) => {
+                if (existingOrder.id !== orderId) return existingOrder;
+
+                const updatedItems = existingOrder.orderItems.map((item) =>
+                    item.id === itemId ? { ...item, status: newStatus } : item
+                );
+
+                return {
+                    ...existingOrder,
+                    orderItems: updatedItems,
+                    status: deriveOrderStatusFromItems(updatedItems),
+                };
+            })
+        );
+    };
+
+    return { orders, loading, error, refetch: fetchOrders, updateOrderItemStatusLocally };
 };

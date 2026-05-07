@@ -1,22 +1,24 @@
 import { useResponsive } from '@/shared/hooks/useResponsive';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { ITEM_STATUS_COLORS, ITEM_STATUS_ICONS, ORDER_STATUS_OPTIONS } from '../../menu/types/itemStatus';
-import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View, ActivityIndicator } from 'react-native';
-import { order, orderItem, orderItemStatus } from '../types/order.types';
-import { useUpdateOrderItemStatus } from '../hook/useUpdateOrder';
 import { useToast } from '@/shared/ui/toast';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ITEM_STATUS_COLORS, ITEM_STATUS_ICONS, ITEM_STATUS_OPTIONS } from '../../menu/types/itemStatus';
+import { useUpdateOrderItemStatus } from '../hook/useUpdateOrder';
+import { order, orderItem, orderItemStatus } from '../types/order.types';
 
 interface Props {
   visible: boolean;
   order: order | null;
   onClose: () => void;
+  onStatusUpdated?: (itemId: string, newStatus: orderItemStatus) => void;
 }
 
 export default function OrderDetailsModal({
   visible,
   order,
-  onClose
+  onClose,
+  onStatusUpdated,
 }: Props) {
   const [orderItems, setOrderItems] = useState<orderItem[]>([]);
   const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | null>(null);
@@ -44,9 +46,10 @@ export default function OrderDetailsModal({
 
       setOrderItems(prev =>
         prev.map(item =>
-          item.id === itemId ? { ...item, status: newStatus } : item
+          String(item.id) === String(itemId) ? { ...item, status: newStatus } : item
         )
       );
+      onStatusUpdated?.(String(itemId), newStatus);
       showToast('Status updated successfully', 'success');
     } else {
       showToast('Failed to update status', 'error');
@@ -296,7 +299,7 @@ export default function OrderDetailsModal({
 
                         {openStatusMenuItemId === item.id && (
                           <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
-                            {ORDER_STATUS_OPTIONS.map((statusOption) => (
+                            {ITEM_STATUS_OPTIONS.map((statusOption) => (
                               <Pressable
                                 key={statusOption}
                                 className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}

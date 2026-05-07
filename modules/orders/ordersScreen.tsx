@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
-import { FlatList, RefreshControl, View, Text, ActivityIndicator } from 'react-native'
+import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native'
 import OrderCard from './components/OrderCard'
 import OrderDetailsModal from './components/OrderDetailsModal'
 import OrderFilter from './components/OrderFilter'
-import { useOrders } from './hook/useOrder'
-import { order } from './types/order.types'
+import { deriveOrderStatusFromItems, useOrders } from './hook/useOrder'
+import { order, orderItemStatus } from './types/order.types'
 import { PaymentFilter, StatusFilter } from './types/orderFilter.types'
 import { filterOrders, getTableOptions } from './utils/orderFilter'
 
@@ -17,7 +17,7 @@ export default function OrderModule({
   refreshing = false,
   onRefresh
 }: OrderModuleProps) {
-  const { orders, loading, error, refetch } = useOrders()
+  const { orders, loading, error, refetch, updateOrderItemStatusLocally } = useOrders()
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All')
@@ -50,6 +50,26 @@ export default function OrderModule({
   const handleCloseDetails = () => {
     setIsDetailsVisible(false)
     setSelectedOrder(null)
+  }
+
+  const handleItemStatusUpdated = (itemId: string, newStatus: orderItemStatus) => {
+    if (!selectedOrder) return
+
+    updateOrderItemStatusLocally(selectedOrder.id, itemId, newStatus)
+
+    setSelectedOrder((prevOrder) => {
+      if (!prevOrder) return prevOrder
+
+      const updatedItems = prevOrder.orderItems.map((item) =>
+        item.id === itemId ? { ...item, status: newStatus } : item
+      )
+
+      return {
+        ...prevOrder,
+        orderItems: updatedItems,
+        status: deriveOrderStatusFromItems(updatedItems),
+      }
+    })
   }
 
   const handleRefresh = () => {
@@ -158,6 +178,7 @@ export default function OrderModule({
         visible={isDetailsVisible}
         order={selectedOrder}
         onClose={handleCloseDetails}
+        onStatusUpdated={handleItemStatusUpdated}
       />
     </View>
   )

@@ -20,6 +20,8 @@ export default function OrderFilter({
     onPaymentChange,
     onTableChange,
 }: OrderFilterProps) {
+    type OpenMenuKey = FilterKey | 'all'
+
     const {
         isPhone,
         isTablet,
@@ -35,7 +37,7 @@ export default function OrderFilter({
         size,
     } = useResponsive()
 
-    const [openMenu, setOpenMenu] = useState<FilterKey | null>(null)
+    const [openMenu, setOpenMenu] = useState<OpenMenuKey | null>(null)
     const [triggerHeight, setTriggerHeight] = useState(40)
 
     const labelSize = isLargeTablet ? textXl : isTablet ? textLg : textBase
@@ -88,20 +90,34 @@ export default function OrderFilter({
                 className={`w-full ${px} ${py}`}
                 style={{ zIndex: 1000, elevation: 1000, gap: size.padding.md }}
             >
-                {filterConfigs.map((filter) => (
+                {/* Single Filter trigger */}
+                <Pressable
+                    onPress={() => setOpenMenu((prev) => (prev === null ? 'all' : null))}
+                    onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}
+                    className={`flex-row items-center justify-between rounded-lg border border-yellow-500 ${triggerPx} ${triggerPy}`}
+                    style={{ backgroundColor: '#3a3a3a' }}
+                >
+                    <Text className={`font-bold text-white ${labelSize}`}>Filter</Text>
+                    <Ionicons
+                        name={openMenu !== null ? 'chevron-up' : 'chevron-down'}
+                        size={iconSize}
+                        color="white"
+                    />
+                </Pressable>
+
+                {/* All 3 filter rows — visible when openMenu is not null, behavior unchanged */}
+                {openMenu !== null && filterConfigs.map((filter) => (
                     <View key={filter.key} className='relative w-full flex-row items-center gap-8'>
 
-                        {/* Label */}
                         <View className='w-[40%]'>
-                        <Text className={`font-bold text-white ${labelSize}`}>
-                            {filter.label}:
-                        </Text>
+                            <Text className={`font-bold text-white ${labelSize}`}>
+                                {filter.label}:
+                            </Text>
                         </View>
 
-                        {/* Dropdown trigger — flex-1 to fill remaining width */}
                         <View className='relative flex-1 ml-8'>
                             <Pressable
-                                onPress={() => setOpenMenu((prev) => (prev === filter.key ? null : filter.key))}
+                                onPress={() => setOpenMenu((prev) => (prev === filter.key ? 'all' : filter.key))}
                                 onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}
                                 className={`w-full flex-row items-center justify-between rounded-lg border border-yellow-500 ${triggerPx} ${triggerPy}`}
                                 style={{ backgroundColor: '#3a3a3a' }}
@@ -121,7 +137,6 @@ export default function OrderFilter({
                                 />
                             </Pressable>
 
-                            {/* Dropdown menu */}
                             {openMenu === filter.key && (
                                 <View
                                     className='absolute left-0 right-0 rounded-lg p-2'
@@ -137,7 +152,10 @@ export default function OrderFilter({
                                         return (
                                             <Pressable
                                                 key={`${filter.key}-${option}`}
-                                                onPress={() => onSelect(filter.key, option)}
+                                                onPress={() => {
+                                                    onSelect(filter.key, option)
+                                                    setOpenMenu('all')
+                                                }}
                                                 className={`mb-1.5 flex-row items-center justify-between rounded-lg px-3 ${optionPy} ${isSelected ? 'bg-[#4a4a4a]' : ''}`}
                                             >
                                                 <Text className={`font-bold text-white ${optionSize}`}>

@@ -72,6 +72,7 @@ export default function TableScreen({
     setSubmitting(true)
     await onChangeTableConfirm(selectedIds.map(id => Number(id)))
     setSubmitting(false)
+
   }
 
   if (loading) {

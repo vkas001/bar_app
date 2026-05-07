@@ -58,11 +58,6 @@ export default function BarTabFilter({
                 leftIcon={<Ionicons name='search' size={iconMd} color='rgba(255,255,255,0.45)' />}
             />
 
-            {/* Filter Icon Button */}
-            <View className={`${iconBtnSize} items-center justify-center rounded-lg bg-card`}>
-                <Ionicons name="filter" size={iconMd} color="white" />
-            </View>
-
             {/* Status Dropdown */}
             <View className='relative'>
                 <Pressable

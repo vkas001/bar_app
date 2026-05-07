@@ -3,7 +3,6 @@ import ItemCard from '@/modules/menu/components/ItemCard';
 import { useMenu } from '@/modules/menu/hook/useMenu';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOrderStore } from '../orders/store/createOrderStore';
 import UnitSelectionModal from './components/UnitSelectionModal';
 import { useCartStore } from './store/cartStore';
@@ -79,17 +78,6 @@ export default function MenuScreen() {
         </View>
     );
 
-    const ListHeaderComponent = (
-        <>
-            {/* Divider */}
-            <View className="h-px bg-[#333] mx-4 my-3" />
-            {/* Selected category label */}
-            <Text className="text-white/50 text-base px-4 mb-3 uppercase tracking-widest">
-                {selectedCategory?.name} · {items.length} items
-            </Text>
-        </>
-    );
-
     const ListEmptyComponent = (
         <View className="items-center py-10">
             <Text className="text-[#888]">No items in this category</Text>
@@ -97,7 +85,7 @@ export default function MenuScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-[#111]">
+        <View className="flex-1 bg-[#111]">
 
             {/* Category section — horizontal FlatList */}
             <FlatList
@@ -106,8 +94,22 @@ export default function MenuScreen() {
                 renderItem={renderCategoryItem}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 10, paddingHorizontal: 4, paddingBottom: 8 }}
+                style={{
+                    flexGrow: 0,
+                    flexShrink: 0,
+                }}
+                contentContainerStyle={{
+                    gap: 10,
+                    paddingHorizontal: 8,
+                }}
             />
+
+            {/* Divider */}
+            <View className="h-px bg-[#333] mx-4 mt-2 mb-2" />
+            {/* Selected category label */}
+            <Text className="text-white/50 text-base px-4 mb-3 uppercase tracking-widest">
+                {selectedCategory?.name} · {items.length} items
+            </Text>
 
             {/* Items section — vertical FlatList with header */}
             <FlatList
@@ -115,10 +117,9 @@ export default function MenuScreen() {
                 data={itemRows}
                 keyExtractor={(_, index) => String(index)}
                 renderItem={renderItemRow}
-                ListHeaderComponent={ListHeaderComponent}
                 ListEmptyComponent={ListEmptyComponent}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ gap: 10, paddingBottom: 20 }}
+                contentContainerStyle={{ gap: 10, paddingVertical: 8 }}
             />
 
             <UnitSelectionModal
@@ -130,6 +131,6 @@ export default function MenuScreen() {
                     setSelectedItem(null);
                 }}
             />
-        </SafeAreaView>
+        </View>
     );
 }
