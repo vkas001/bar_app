@@ -1,4 +1,4 @@
-import { useResponsive } from '@/shared/hooks/useResponsive'
+import { useResponsive } from '@/shared/hooks/useResponsive';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { order, orderStatus } from '../types/order.types';
@@ -51,7 +51,7 @@ export default function OrderCard({ order, onPress }: Props) {
     const tableLabelSize = isSmallPhone ? textSm : isTablet ? text2xl : textXl
     const tableValueSize = isSmallPhone ? textXs : isTablet ? textXl : textBase
     const customerSize = isSmallPhone ? textSm : isTablet ? textXl : textBase
-    const statusTextSize = isSmallPhone ? textXs : textXs
+    const statusTextSize = isSmallPhone ? 'text-[10px]' : 'text-[8px]'
     const badgePx = isSmallPhone ? 'px-2 py-0.5' : 'px-3 py-1'
     const metaTextSize = isSmallPhone ? textXs : textSm
     const totalTextSize = isSmallPhone ? textBase : textLg
@@ -101,7 +101,7 @@ export default function OrderCard({ order, onPress }: Props) {
                             className={`text-center font-bold text-white ${customerSize}`}
                             numberOfLines={2}
                         >
-                            {order.customer || 'Walk-in'}
+                            {order.customer}
                         </Text>
                     </View>
 

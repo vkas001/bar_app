@@ -33,7 +33,7 @@ export default function TableFilter({
                     className={`rounded-lg ${btnPx} ${btnPy} ${selectedType === type ? 'bg-yellow' : 'bg-gray-500'}`}
                 >
                     <Text className={`font-bold text-white ${labelSize}`}>
-                        {type === 'AllTypes' ? 'AllTypes' : type}
+                        {type}
                     </Text>
                 </TouchableOpacity>
             ))}

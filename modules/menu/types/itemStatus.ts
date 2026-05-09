@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { orderItemStatus } from '@/modules/orders/types/order.types';
 import { barTabItemStatus } from '@/modules/barTabs/types/barTab.types';
 
-export const ORDER_STATUS_OPTIONS: orderItemStatus[] = [
+export const ITEM_STATUS_OPTIONS: orderItemStatus[] = [
     "Pending",
     "Preparing",
     "Ready",
@@ -10,6 +10,8 @@ export const ORDER_STATUS_OPTIONS: orderItemStatus[] = [
     "Cancelled"
 
 ];
+
+export const ORDER_STATUS_OPTIONS = ITEM_STATUS_OPTIONS;
 
 export const BAR_TAB_STATUS_OPTIONS: barTabItemStatus[] = [...ORDER_STATUS_OPTIONS, "Cancel"];
 

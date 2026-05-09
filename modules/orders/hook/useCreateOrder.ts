@@ -4,6 +4,13 @@ import { CreateOrderRequest } from '../types/order.types';
 export const useCreateOrder = () => {
     const createOrder = async (payload: CreateOrderRequest): Promise<boolean> => {
         try {
+            // Log the table ID(s) being sent in the payload
+            if (payload.tableIds) {
+              //  console.log('Table IDs in payload:', payload.tableIds);
+            } else {
+              //  console.log('No table IDs found in payload:', payload);
+            }
+
             const baseUrl = process.env.EXPO_PUBLIC_API_URL;
             const token = await getToken();
 
@@ -19,10 +26,10 @@ export const useCreateOrder = () => {
 
             const text = await res.text();
             const json = JSON.parse(text);
-            console.log('Order API response:', json);
+            // console.log('Order API response:', json);
 
             if (!res.ok) {
-                console.log('Order API error:', json);
+                // console.log('Order API error:', json);
                 return false;
             }
 

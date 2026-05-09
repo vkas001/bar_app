@@ -3,7 +3,13 @@ import { BarTabStatus } from '@/modules/barTabs/types/barTab.types'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { ActivityIndicator, Pressable, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import {
+    ActivityIndicator,
+    Pressable, Text,
+    TouchableOpacity,
+    useWindowDimensions, View
+} from 'react-native'
+import { ScreenState } from '@/components/screenState'
 
 const statusColors: Record<BarTabStatus, { bg: string; text: string }> = {
     active: { bg: '#16351f', text: '#86efac' },
@@ -22,7 +28,7 @@ const useResponsive = () => {
 export default function BarCard() {
     const router = useRouter()
     const { isTablet, isLargeTablet } = useResponsive()
-    const { tabs, loading } = useBarTabs()  // ← real data
+    const { tabs, loading, error, refetchBarTabs } = useBarTabs()
 
     const activeCount = tabs.filter((tab) => tab.status === 'active').length
     const totalAmount = tabs.reduce((sum, tab) => sum + tab.total, 0)
@@ -49,6 +55,14 @@ export default function BarCard() {
     const sectionMb = isLargeTablet ? 'mb-8' : isTablet ? 'mb-6' : 'mb-6'
     const tabListClass = isTablet ? 'flex-row flex-wrap gap-4 mt-4' : 'flex-col gap-3 mt-4'
     const tabCardClass = isLargeTablet ? 'w-[31%]' : isTablet ? 'w-[48%]' : 'w-full'
+
+    if (loading || error) {
+        return <ScreenState
+            loading={loading}
+            error={error}
+            onRetry={refetchBarTabs}
+        />;
+    }
 
     return (
         <View className='flex-1 bg-zinc-900 rounded-lg mb-4'>

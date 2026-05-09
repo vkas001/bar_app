@@ -1,15 +1,18 @@
 import CartButton from '@/components/cartButton'
 import PageHeader from '@/components/Header/PageHeader'
 import ScreenHeader from '@/components/Header/ScreenHeader'
+import { useScreenRefresh } from '@/components/refresh/refresh'
 import CartModal from '@/modules/menu/components/CartModal'
+import { useMenu } from '@/modules/menu/hook/useMenu'
 import MenuScreen from '@/modules/menu/menuscreen'
 import { useCartStore } from '@/modules/menu/store/cartStore'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
-import { View } from 'react-native'
+import { RefreshControl, ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function menu() {
+ 
   const [cartVisible, setCartVisible] = useState(false)
   const itemCount = useCartStore((state) => state.getTotalItems());
   const router = useRouter()
@@ -21,7 +24,7 @@ export default function menu() {
 
       <ScreenHeader title="Menu" />
 
-      <MenuScreen />
+        <MenuScreen/>
 
       <CartButton
         itemCount={itemCount}
@@ -33,7 +36,7 @@ export default function menu() {
         onClose={() => setCartVisible(false)}
         onOrderSuccess={(type) => {
           setCartVisible(false);
-          
+
           if (type === 'bar_tab') {
             router.push('/(tabs)/home');
 

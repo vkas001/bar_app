@@ -35,7 +35,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         // fade in
         Animated.timing(opacity, {
             toValue: 1,
-            duration: 200,
+            duration: 500,
             useNativeDriver: true,
         }).start();
 
@@ -43,7 +43,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         setTimeout(() => {
             Animated.timing(opacity, {
                 toValue: 0,
-                duration: 200,
+                duration: 500,
                 useNativeDriver: true,
             }).start(() => {
                 setToast(prev => ({ ...prev, visible: false }));
@@ -60,10 +60,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                     style={{
                         opacity,
                         position: 'absolute',
-                        top: 50,
                         left: 16,
                         right: 16,
-                        zIndex: 999,
+                        bottom: 76,
+                        zIndex: 9999,
                     }}
                 >
                     <ToastView message={toast.message} type={toast.type} />

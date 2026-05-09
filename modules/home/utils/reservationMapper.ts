@@ -46,7 +46,7 @@ export function mapOrderToReservation(order: order): Reservation {
         status: mapOrderStatusToReservationStatus(order.status),
         orderItems: order.items,
         orderStatus: order.status,
-        paymentStatus: order.paymentStatus as 'Pending' | 'Paid',
+            paymentStatus: order.paymentStatus === 'Paid' ? 'Paid' : 'Unpaid',
         total: order.total,
         originalOrder: order,
     }

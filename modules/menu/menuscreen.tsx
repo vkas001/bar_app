@@ -1,41 +1,36 @@
 import CategoryCard from '@/modules/menu/components/CategoryCard';
 import ItemCard from '@/modules/menu/components/ItemCard';
 import { useMenu } from '@/modules/menu/hook/useMenu';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { useOrderStore } from '../orders/store/createOrderStore';
 import UnitSelectionModal from './components/UnitSelectionModal';
 import { useCartStore } from './store/cartStore';
 import { MenuCategoryWithItems, MenuItemMerged } from './types/menu.types';
 
-const CARD_HEIGHT = 90;
-const GAP = 8;
-const VISIBLE_ROWS = 3;
-
 export default function MenuScreen() {
     const addItem = useCartStore((state) => state.addItem);
     const { categories, selectedCategory, setSelectedCategory, loading, error } = useMenu();
-    const {
-        pendingCustomerData,
-        selectedTableIds,
-        clearOrderData,
-    } = useOrderStore();
+    const { pendingCustomerData, selectedTableIds } = useOrderStore();
 
-    const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
-    const [createingOrder, setCreatingOrder] = useState(false);
     const [selectedItem, setSelectedItem] = useState<MenuItemMerged | null>(null);
+    const itemListRef = useRef<FlatList>(null);
 
-    // Check if we have a pending order on mount
     useEffect(() => {
         if (pendingCustomerData && selectedTableIds.length > 0) {
-            console.log('Pending Order Data:',
-                 {
+            console.log('Pending Order Data:', {
                 customer: pendingCustomerData,
-                tables: selectedTableIds
+                tables: selectedTableIds,
             });
         }
     }, []);
+
+    // Scroll items to top when category changes
+    useEffect(() => {
+        if (itemListRef.current) {
+            itemListRef.current.scrollToOffset({ offset: 0, animated: false });
+        }
+    }, [selectedCategory?.id]);
 
     if (loading) return (
         <View className="flex-1 bg-[#111] justify-center items-center">
@@ -49,14 +44,9 @@ export default function MenuScreen() {
         </View>
     );
 
-    // Chunk categories into rows of 2
-    const categoryRows: MenuCategoryWithItems[][] = [];
-    for (let i = 0; i < categories.length; i += 2) {
-        categoryRows.push(categories.slice(i, i + 2));
-    }
-
-    // Chunk selected items into rows of 2
     const items = selectedCategory?.items ?? [];
+
+    // Pair items into rows of 2 for the items FlatList
     const itemRows: MenuItemMerged[][] = [];
     for (let i = 0; i < items.length; i += 2) {
         itemRows.push(items.slice(i, i + 2));
@@ -64,75 +54,73 @@ export default function MenuScreen() {
 
     const handleSelectItem = (item: MenuItemMerged) => {
         setSelectedItem(item);
-      //  console.log('Selected item:', item);
     };
 
-    return (
-        <SafeAreaView className="flex-1 bg-[#111]">
+    const renderCategoryItem = ({ item, index }: { item: MenuCategoryWithItems; index: number }) => (
+        <CategoryCard
+            category={item}
+            index={index}
+            isSelected={selectedCategory?.id === item.id}
+            onPress={() => setSelectedCategory(item)}
+        />
+    );
 
-            {/* Category section — fixed height, scrollable */}
-            <View style={{ height: CARD_HEIGHT * VISIBLE_ROWS + GAP * (VISIBLE_ROWS - 1) }}>
-                <ScrollView
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ gap: GAP, paddingHorizontal: 16 }}
-                >
-                    {categoryRows.map((row, rowIndex) => (
-                        <View key={rowIndex} style={{ flexDirection: 'row', gap: GAP }}>
-                            {row.map((item, colIndex) => {
-                                const index = rowIndex * 2 + colIndex;
-                                return (
-                                    <CategoryCard
-                                        key={`${item.id}_${index}`}
-                                        category={item}
-                                        index={index}
-                                        isSelected={selectedCategory?.id === item.id}
-                                        onPress={() => setSelectedCategory(item)}
-                                    />
-                                );
-                            })}
-                            {row.length < 2 &&
-                                Array(2 - row.length).fill(null).map((_, i) => (
-                                    <View key={`empty_${i}`} className="flex-1" />
-                                ))
-                            }
-                        </View>
-                    ))}
-                </ScrollView>
-            </View>
+    const renderItemRow = ({ item: row }: { item: MenuItemMerged[] }) => (
+        <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 16 }}>
+            {row.map((item, colIndex) => (
+                <ItemCard
+                    key={`${item.item_id}_${colIndex}`}
+                    item={item}
+                    onSelect={handleSelectItem}
+                />
+            ))}
+            {row.length < 2 && <View className="flex-1" />}
+        </View>
+    );
+
+    const ListEmptyComponent = (
+        <View className="items-center py-10">
+            <Text className="text-[#888]">No items in this category</Text>
+        </View>
+    );
+
+    return (
+        <View className="flex-1 bg-[#111]">
+
+            {/* Category section — horizontal FlatList */}
+            <FlatList
+                data={categories}
+                keyExtractor={(item) => String(item.id)}
+                renderItem={renderCategoryItem}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{
+                    flexGrow: 0,
+                    flexShrink: 0,
+                }}
+                contentContainerStyle={{
+                    gap: 10,
+                    paddingHorizontal: 8,
+                }}
+            />
 
             {/* Divider */}
-            <View className="h-px bg-[#333] mx-4 my-3" />
-
+            <View className="h-px bg-[#333] mx-4 mt-2 mb-2" />
             {/* Selected category label */}
             <Text className="text-white/50 text-base px-4 mb-3 uppercase tracking-widest">
                 {selectedCategory?.name} · {items.length} items
             </Text>
 
-            {/* Items section — fills remaining space, scrollable */}
-            <ScrollView
+            {/* Items section — vertical FlatList with header */}
+            <FlatList
+                ref={itemListRef}
+                data={itemRows}
+                keyExtractor={(_, index) => String(index)}
+                renderItem={renderItemRow}
+                ListEmptyComponent={ListEmptyComponent}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ gap: 10, paddingHorizontal: 16, paddingBottom: 20 }}
-            >
-                {itemRows.length === 0 ? (
-                    <View className="items-center py-10">
-                        <Text className="text-[#888]">No items in this category</Text>
-                    </View>
-                ) : (
-                    itemRows.map((row, rowIndex) => (
-                        <View key={rowIndex} style={{ flexDirection: 'row', gap: 10 }}>
-                            {row.map((item, colIndex) => (
-                                <ItemCard
-                                    key={`${item.item_id}_${colIndex}`}
-                                    item={item}
-                                    onSelect={handleSelectItem}
-                                />
-                            ))}
-                            {row.length < 2 && <View className="flex-1" />}
-                        </View>
-                    ))
-                )}
-            </ScrollView>
+                contentContainerStyle={{ gap: 10, paddingVertical: 8 }}
+            />
 
             <UnitSelectionModal
                 item={selectedItem}
@@ -143,6 +131,6 @@ export default function MenuScreen() {
                     setSelectedItem(null);
                 }}
             />
-        </SafeAreaView>
+        </View>
     );
 }

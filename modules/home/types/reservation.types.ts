@@ -14,7 +14,7 @@ export interface Reservation {
     status: ReservationStatus
     orderItems: number
     orderStatus: string
-    paymentStatus: 'Pending' | 'Paid'
+    paymentStatus: 'Unpaid' | 'Paid'
     total: number
     originalOrder: order
 }

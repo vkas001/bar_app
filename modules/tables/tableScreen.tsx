@@ -1,12 +1,12 @@
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useNavigation } from '@react-navigation/native'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 import { TableCard } from './components/TableCard'
 import TableFilter from './components/TableFilter'
 import TableStatusFilter from './components/TableStatusFilter'
 import { useTables } from './hooks/useTable'
-import { TableType } from './types/table.types'
+import { Table, TableType } from './types/table.types'
 
 type CustomerData = {
   customerName: string
@@ -19,6 +19,8 @@ type TableScreenProps = {
   onRefresh?: () => void
   fromOrder?: boolean
   customerData?: CustomerData
+  changeTableMode?: boolean
+  onChangeTableConfirm?: (newTableIds: number[]) => Promise<void>
 }
 
 export default function TableScreen({
@@ -26,11 +28,13 @@ export default function TableScreen({
   onRefresh,
   fromOrder = false,
   customerData,
+  changeTableMode,
+  onChangeTableConfirm
 }: TableScreenProps) {
   // console.log('TableScreen fromOrder:', fromOrder)
   // console.log('TableScreen customerData:', customerData)
 
-  const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error } = useTables()
+  const { tables, tableTypes, selectedIds, toggleTableSelection, loading, error, refetch: refetchTable } = useTables()
   const [selectedType, setSelectedType] = useState<TableType>('AllTypes')
   const [hideOccupied, setHideOccupied] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -58,6 +62,19 @@ export default function TableScreen({
     navigation.navigate('menu' as never)
   }
 
+  const handleChangeTableConfirm = async () => {
+    if (selectedIds.length === 0) {
+      Alert.alert('Error', 'Please select at least one table')
+      return
+    }
+    if (!onChangeTableConfirm) return
+
+    setSubmitting(true)
+    await onChangeTableConfirm(selectedIds.map(id => Number(id)))
+    setSubmitting(false)
+
+  }
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -74,11 +91,41 @@ export default function TableScreen({
     )
   }
 
-  const visibleTables = tables.filter((table) => {
-    const matchesType = selectedType === 'AllTypes' || table.table_type.name === selectedType
-    const matchesStatus = !hideOccupied || table.is_available !== false
-    return matchesType && matchesStatus
-  })
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds])
+
+  const visibleTables = useMemo(() => {
+    return tables.filter((table) => {
+      const matchesType = selectedType === 'AllTypes' || table.table_type.name === selectedType
+      const matchesStatus = !hideOccupied || table.is_available !== false
+      return matchesType && matchesStatus
+    })
+  }, [tables, selectedType, hideOccupied])
+
+  const keyExtractor = useCallback((item: Table) => item.id, [])
+
+  const handleTablePress = useCallback(
+    (id: string) => {
+      toggleTableSelection(id)
+    },
+    [toggleTableSelection]
+  )
+
+  const renderItem = useCallback(
+    ({ item: table }: { item: Table }) => {
+      const isSelected = selectedIdSet.has(table.id)
+      return (
+        <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
+          <TableCard
+            table={table}
+            selected={isSelected}
+            onPress={handleTablePress}
+            selectable={Boolean(changeTableMode && isSelected)}
+          />
+        </View>
+      )
+    },
+    [selectedIdSet, handleTablePress, changeTableMode]
+  )
 
   return (
     <View className='flex-1'>
@@ -100,24 +147,20 @@ export default function TableScreen({
 
       <FlatList
         data={visibleTables}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         numColumns={2}
         className='flex-1'
+        initialNumToRender={12}
+        maxToRenderPerBatch={12}
+        windowSize={7}
+        removeClippedSubviews
         refreshControl={
           onRefresh ? (
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           ) : undefined
         }
         contentContainerClassName='px-2 pt-4 pb-4'
-        renderItem={({ item: table }) => (
-          <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
-            <TableCard
-              table={table}
-              selected={selectedIds.includes(table.id)}
-              onPress={() => toggleTableSelection(table.id)}
-            />
-          </View>
-        )}
+        renderItem={renderItem}
         ListEmptyComponent={
           <Text className='text-neutral-400 text-center mt-6 text-lg'>
             No tables match the selected filters.
@@ -126,7 +169,7 @@ export default function TableScreen({
       />
 
       {/* Only show when coming from create order */}
-      {fromOrder && (
+      {fromOrder && !changeTableMode && (
         <View className='px-4 pb-4 pt-2 border-t border-zinc-800'>
           {/* Show selected count */}
           <Text className='text-red-500 text-lg text-center mb-3'>
@@ -147,6 +190,30 @@ export default function TableScreen({
               <Text className={`font-bold text-lg ${selectedIds.length === 0 ? 'text-white' : 'text-black'
                 }`}>
                 Confirm Selection
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Only show when coming from change table */}
+      {changeTableMode && (
+        <View className='px-4 pb-4 pt-2 border-t border-zinc-800'>
+          <Text className='text-zinc-400 text-lg text-center mb-3'>
+            {selectedIds.length === 0
+              ? 'No tables selected'
+              : `${selectedIds.length} table${selectedIds.length > 1 ? 's' : ''} selected`}
+          </Text>
+          <TouchableOpacity
+            onPress={handleChangeTableConfirm}
+            disabled={submitting || selectedIds.length === 0}
+            className={`rounded-xl items-center py-4 ${selectedIds.length === 0 ? 'bg-zinc-700' : 'bg-yellow'}`}
+          >
+            {submitting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text className={`font-bold text-lg ${selectedIds.length === 0 ? 'text-white' : 'text-white'}`}>
+                Confirm Table Change
               </Text>
             )}
           </TouchableOpacity>

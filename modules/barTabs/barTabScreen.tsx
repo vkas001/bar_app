@@ -2,7 +2,7 @@ import ScreenHeader from '@/components/Header/ScreenHeader';
 import { useScreenRefresh } from '@/components/refresh/refresh';
 import LoadingScreen from '@/components/refresh/LoadingScreen';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BarTabCard from './components/BarTabCard';
@@ -12,13 +12,14 @@ import BarTabForm from './components/BarTabForm';
 import TabInfo from './components/TabInfo';
 import { useBarTabs } from './hook/useBarTabs';
 import { BarTab, BarTabStatus, CreateBarTabPayload } from './types/barTab.types';
+import { useOrderStore } from '../orders/store/createOrderStore';
 
 export default function BarTabScreen() {
   const router = useRouter()
   const { tabs, loading, creating, error, refresh, createBarTab } = useBarTabs()
+  const { orderJustCompleted, setOrderJustCompleted } = useOrderStore()
 
   const { refreshing, onRefresh } = useScreenRefresh(refresh)
-  // ...existing code...
   const [isCreateTabOpen, setIsCreateTabOpen] = useState(false)
   const [selectedTab, setSelectedTab] = useState<BarTab | null>(null)
   const [isTabDetailsOpen, setIsTabDetailsOpen] = useState(false)
@@ -26,6 +27,19 @@ export default function BarTabScreen() {
   // Filters
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | BarTabStatus>('all')
+
+  useEffect(() => {
+    if (!selectedTab) return
+    const updated = tabs.find(t => t.id === selectedTab.id)
+    if (updated) setSelectedTab(updated)
+  }, [tabs])
+
+  useEffect(() => {
+    if (orderJustCompleted) {
+      refresh()
+      setOrderJustCompleted(false)
+    }
+  }, [orderJustCompleted])
 
   const filteredTabs = useMemo(() => {
     return tabs
@@ -63,9 +77,12 @@ export default function BarTabScreen() {
     <SafeAreaView className="flex-1 bg-black">
       <ScreenHeader
         title="Bar Tabs"
-        extraContent={<TabInfo tabs={tabs} />}
         onBackPress={() => router.replace('/(tabs)/home')}
       />
+
+      <View className='justify-center items-center '>
+        <TabInfo tabs={tabs} />
+      </View>
 
       <BarTabFilter
         onPressNewTab={() => setIsCreateTabOpen(true)}
@@ -75,7 +92,7 @@ export default function BarTabScreen() {
       />
 
 
-        {refreshing && <LoadingScreen />}
+      {refreshing && <LoadingScreen />}
       <Modal
         visible={isCreateTabOpen}
         transparent
@@ -106,7 +123,11 @@ export default function BarTabScreen() {
 
       <ScrollView
         className='flex-1'
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 8,
+          paddingBottom: 24
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

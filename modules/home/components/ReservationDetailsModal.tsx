@@ -1,23 +1,43 @@
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
-import { Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import React, { useState } from 'react'
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Reservation, RESERVATION_STATUS_STYLES } from '../types/reservation.types'
+import { useOrders } from '@/modules/orders/hook/useOrder'
+import { useCancelReservation } from '../hook/useReservaiton'
+import confirmDialog from '@/components/confirmDialog'
+import { useToast } from '@/shared/ui/toast'
+import ConfirmDialog from '@/components/confirmDialog'
+
 
 interface Props {
     visible: boolean
     reservation: Reservation | null
     onClose: () => void
+    onOrderSuccess?: () => void
 }
 
-export default function ReservationDetailsMotal({
+export default function ReservationDetailsModal({
     visible,
     reservation,
-    onClose
+    onClose,
+    onOrderSuccess
 }: Props) {
-    if (!reservation) return null
+    const { cancelReservation } = useCancelReservation();
+    const [cancelling, setCancelling] = useState(false)
+    const [showCancelDialog, setShowCancelDialog] = useState(false)
+    const { showToast } = useToast();
 
     const { isSmallPhone, textXs, textSm, textBase, textLg, textXl, text2xl, iconXs, iconSm, iconMd, size } = useResponsive()
+    const setPendingCustomerData = useOrderStore((state) => state.setPendingCustomerData);
+    const setSelectedTableIds = useOrderStore((state) => state.setSelectedTableIds);
+    const setReservation = useOrderStore((state) => state.setReservation);
+    const setChangeTableMode = useOrderStore((state) => state.setChangeTableMode);
+    const router = useRouter();
+
+    if (!reservation) return null
 
     const currentStatusColor = RESERVATION_STATUS_STYLES[reservation.status]
     const customerInitial = reservation.customerName.trim().charAt(0).toUpperCase() || '?'
@@ -36,7 +56,7 @@ export default function ReservationDetailsMotal({
     const s = isSmallPhone ? {
         panelWidth: '92%',
         headerText: textXl,
-        sectionTitle: textBase,
+        sectionTitle: textXs,
         bodyText: textSm,
         smallText: textXs,
         amountText: textSm,
@@ -67,6 +87,29 @@ export default function ReservationDetailsMotal({
         sectionGap: 8,
     }
 
+    const handleCancelReservation = async () => {
+        setShowCancelDialog(true)
+    }
+
+    // confirm handler
+    const handleConfirmCancel = async () => {
+        if (!reservation?.originalOrder.reservationId) return
+
+        setShowCancelDialog(false)
+        setCancelling(true)
+        const success = await cancelReservation(
+            Number(reservation.originalOrder.reservationId)
+        )
+        setCancelling(false)
+
+        if (success) {
+            showToast('Reservation cancelled successfully', 'success')
+            onClose()
+            onOrderSuccess?.()
+        } else {
+            showToast('Failed to cancel reservation', 'error')
+        }
+    }
     return (
         <Modal visible={visible} animationType='slide' transparent onRequestClose={onClose}>
             <View className='flex-1' pointerEvents='box-none'>
@@ -193,26 +236,33 @@ export default function ReservationDetailsMotal({
                                         <Text className={`font-bold text-white ${isSmallPhone ? textLg : text2xl}`}>Orders</Text>
                                     </View>
 
-                                    <View className='mt-3 rounded-lg bg-black p-3'>
-                                        <View className='flex-row items-start justify-between'>
-                                            <View className='flex-1 mr-2'>
-                                                <Text className={`font-bold text-yellow ${s.sectionTitle}`} numberOfLines={1}>
-                                                    Order {formattedOrderId}
-                                                </Text>
-                                                <Text className={`mt-1 text-zinc-300 ${s.bodyText}`}>
-                                                    Items: {reservation.orderItems ?? reservation.peopleCount}
-                                                </Text>
-                                            </View>
+                                    <View className='mt-3 gap-2'>
+                                        {orderItems.map((item, index) => {
+                                            const itemId = item.id?.startsWith('#') ? item.id : `#${item.id ?? index + 1}`
+                                            return (
+                                                <View key={item.id ?? index} className='rounded-lg bg-black p-3'>
+                                                    <View className='flex-row items-start justify-between'>
+                                                        <View className='flex-1 mr-2'>
+                                                            <Text className={`font-bold text-yellow ${s.sectionTitle}`} numberOfLines={1}>
+                                                                Order {item.name}
+                                                            </Text>
+                                                            <Text className={`mt-1 text-zinc-300 ${s.bodyText}`}>
+                                                                Items: {item.quantity ?? 1}
+                                                            </Text>
+                                                        </View>
 
-                                            <View className='items-end flex-shrink-0'>
-                                                <Text className={`text-zinc-300 ${s.smallText}`} numberOfLines={1}>
-                                                    {reservation.orderStatus ?? '-'} / {reservation.paymentStatus ?? '-'}
-                                                </Text>
-                                                <Text className={`mt-1 font-semibold text-white ${s.bodyText}`}>
-                                                    Rs {reservation.total?.toLocaleString() ?? '-'}
-                                                </Text>
-                                            </View>
-                                        </View>
+                                                        <View className='items-end flex-shrink-0'>
+                                                            <Text className={`text-zinc-300 ${s.smallText}`} numberOfLines={1}>
+                                                                {item.status ?? reservation.orderStatus ?? '-'} / {reservation.paymentStatus ?? ''}
+                                                            </Text>
+                                                            <Text className={`mt-1 font-semibold text-white ${s.bodyText}`}>
+                                                                Rs {item.price?.toLocaleString() ?? item.price?.toLocaleString() ?? '-'}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            )
+                                        })}
                                     </View>
                                 </View>
 
@@ -257,12 +307,35 @@ export default function ReservationDetailsMotal({
                                 </Text>
 
                                 <View className='flex-row items-stretch gap-2 mb-2'>
-                                    <TouchableOpacity className={`flex-1 flex-row items-center justify-center rounded-lg bg-yellow ${s.btnPy}`}>
+                                    <TouchableOpacity
+                                        className={`flex-1 flex-row items-center justify-center rounded-lg bg-yellow ${s.btnPy}`}
+                                        onPress={() => {
+                                            setPendingCustomerData({
+                                                customerName: reservation.customerName,
+                                                customerPhone: reservation.phone ?? '',
+                                                guestCount: reservation.peopleCount,
+                                            });
+                                            setSelectedTableIds(reservation.originalOrder.tableIds ?? []);
+                                            setReservation(reservation);
+                                            router.push('/(tabs)/menu');
+                                            onClose();
+                                        }}
+                                    >
                                         <Ionicons name='add' size={s.iconSize} color='black' />
-                                        <Text className={`ml-1 font-bold text-black ${s.bodyText}`}>Add Order</Text>
+                                        <Text className={`ml-1 font-bold text-black ${s.bodyText}`}>
+                                            Add Order
+                                        </Text>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity className={`flex-1 flex-row items-center justify-center rounded-lg bg-blue ${s.btnPy}`}>
+                                    <TouchableOpacity
+                                        className={`flex-1 flex-row items-center justify-center rounded-lg bg-blue ${s.btnPy}`}
+                                        onPress={() => {
+                                            setReservation(reservation);
+                                            setChangeTableMode(true);
+                                            router.push('/(tabs)/tables');
+                                            onClose();
+                                        }}
+                                    >
                                         <Ionicons name='refresh' size={s.iconSize} color='white' />
                                         <Text className={`ml-1 font-bold text-white ${s.bodyText}`} numberOfLines={1}>
                                             {isSmallPhone ? 'Chg Table' : 'Change Table'}
@@ -271,13 +344,21 @@ export default function ReservationDetailsMotal({
                                 </View>
 
                                 <TouchableOpacity
-                                    onPress={onClose}
-                                    className={`flex-row items-center justify-center rounded-lg bg-red ${s.btnPy}`}
+                                    onPress={handleCancelReservation}
+                                    disabled={cancelling}
+                                    className={`flex-row items-center justify-center rounded-lg bg-red-500 ${s.btnPy}`}
+                                    style={{ opacity: cancelling ? 0.6 : 1 }}
                                 >
-                                    <Ionicons name='close' size={s.iconSize} color='white' />
-                                    <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
-                                        Cancel Reservation
-                                    </Text>
+                                    {cancelling ? (
+                                        <ActivityIndicator size="small" color="white" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name='close' size={s.iconSize} color='white' />
+                                            <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
+                                                Cancel Reservation
+                                            </Text>
+                                        </>
+                                    )}
                                 </TouchableOpacity>
                             </View>
 
@@ -285,6 +366,16 @@ export default function ReservationDetailsMotal({
                     </View>
                 </View>
             </View>
+
+            <ConfirmDialog
+                visible={showCancelDialog}
+                title="Cancel Reservation"
+                message="Are you sure you want to cancel this reservation?"
+                confirmText="Cancel"
+                cancelText="No"
+                onConfirm={handleConfirmCancel}
+                onCancel={() => setShowCancelDialog(false)}
+            />
         </Modal>
     )
 }

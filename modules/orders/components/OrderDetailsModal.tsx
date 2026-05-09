@@ -1,26 +1,62 @@
 import { useResponsive } from '@/shared/hooks/useResponsive';
+import { useToast } from '@/shared/ui/toast';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { ITEM_STATUS_COLORS, ITEM_STATUS_ICONS, ORDER_STATUS_OPTIONS } from '../../menu/types/itemStatus';
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ITEM_STATUS_COLORS, ITEM_STATUS_ICONS, ITEM_STATUS_OPTIONS } from '../../menu/types/itemStatus';
+import { useUpdateOrderItemStatus } from '../hook/useUpdateOrder';
 import { order, orderItem, orderItemStatus } from '../types/order.types';
 
 interface Props {
   visible: boolean;
   order: order | null;
   onClose: () => void;
+  onStatusUpdated?: (itemId: string, newStatus: orderItemStatus) => void;
 }
-
-
 
 export default function OrderDetailsModal({
   visible,
   order,
-  onClose
+  onClose,
+  onStatusUpdated,
 }: Props) {
   const [orderItems, setOrderItems] = useState<orderItem[]>([]);
   const [openStatusMenuItemId, setOpenStatusMenuItemId] = useState<string | null>(null);
 
+  const { updateOrderItemStatus } = useUpdateOrderItemStatus();
+  const { showToast } = useToast();
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+
+  const updateItemStatus = async (
+    itemId: string | number,
+    newStatus: orderItemStatus
+  ) => {
+    
+    if (!order) return
+
+    setUpdatingItemId(String(itemId));
+    setOpenStatusMenuItemId(null);
+
+    const success = await updateOrderItemStatus(
+      String(itemId),
+      newStatus
+    );
+
+    if (success) {
+
+      setOrderItems(prev =>
+        prev.map(item =>
+          String(item.id) === String(itemId) ? { ...item, status: newStatus } : item
+        )
+      );
+      onStatusUpdated?.(String(itemId), newStatus);
+      showToast('Status updated successfully', 'success');
+    } else {
+      showToast('Failed to update status', 'error');
+    }
+
+    setUpdatingItemId(null);
+  };
   const {
     isSmallPhone,
     isPhone,
@@ -46,13 +82,6 @@ export default function OrderDetailsModal({
   if (!order) return null;
 
   const tables = order.table.split(",").map((t) => t.trim()).filter(Boolean);
-
- const updateItemStatus = (itemId: string | number, newStatus: orderItemStatus) => {
-         setOrderItems(prev =>
-             prev.map(item => item.id === itemId ? { ...item, status: newStatus } : item)
-         );
-         setOpenStatusMenuItemId(null);
-     };
 
   // s config: tablet keeps originals, phone scales down
   const s = isSmallPhone ? {
@@ -200,7 +229,7 @@ export default function OrderDetailsModal({
                     {/* Item ID */}
                     <View className={`flex-row justify-between items-center ${s.itemPx}`}>
                       <Text className={`text-yellow font-semibold ${s.bodyText}`} numberOfLines={1}>
-                        {item.id}
+                        {item.name}
                       </Text>
                     </View>
 
@@ -223,6 +252,8 @@ export default function OrderDetailsModal({
 
                     {/* Status + Change */}
                     <View className={`mt-2 flex-row items-center justify-between ${s.px}`}>
+
+                      {/* ✅ Status badge — shows spinner when updating */}
                       <View
                         className={`rounded-full flex-row items-center ${s.badgePx}`}
                         style={{
@@ -230,23 +261,29 @@ export default function OrderDetailsModal({
                           gap: size.padding.sm,
                         }}
                       >
-                        <MaterialIcons
-                          name={ITEM_STATUS_ICONS[item.status]}
-                          size={s.iconSize}
-                          color={ITEM_STATUS_COLORS[item.status].color}
-                        />
+                        {updatingItemId === item.id ? (
+                          <ActivityIndicator size="small" color={ITEM_STATUS_COLORS[item.status].color} />
+                        ) : (
+                          <MaterialIcons
+                            name={ITEM_STATUS_ICONS[item.status]}
+                            size={s.iconSize}
+                            color={ITEM_STATUS_COLORS[item.status].color}
+                          />
+                        )}
                         <Text
                           className={`font-semibold ${s.smallText}`}
                           style={{ color: ITEM_STATUS_COLORS[item.status].color }}
                         >
-                          {item.status}
+                          {updatingItemId === item.id ? 'Updating...' : item.status}
                         </Text>
                       </View>
 
+                      {/* ✅ Change Status button — disabled while updating */}
                       <View className="relative items-end">
                         <Pressable
                           className={`bg-zinc-700 rounded-full flex-row items-center ${isSmallPhone ? 'px-2 py-0.5' : 'px-3 py-1'}`}
-                          style={{ gap: size.padding.sm }}
+                          style={{ gap: size.padding.sm, opacity: updatingItemId === item.id ? 0.5 : 1 }}
+                          disabled={updatingItemId === item.id}
                           onPress={() =>
                             setOpenStatusMenuItemId(openStatusMenuItemId === item.id ? null : item.id)
                           }
@@ -262,15 +299,12 @@ export default function OrderDetailsModal({
 
                         {openStatusMenuItemId === item.id && (
                           <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
-                            {ORDER_STATUS_OPTIONS.map((statusOption) => (
+                            {ITEM_STATUS_OPTIONS.map((statusOption) => (
                               <Pressable
                                 key={statusOption}
                                 className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
                                 style={{ gap: size.padding.sm }}
-                                onPress={() => {
-                                  updateItemStatus(item.id, statusOption);
-                                  setOpenStatusMenuItemId(null);
-                                }}
+                                onPress={() => updateItemStatus(item.id, statusOption)} // ✅ now async
                               >
                                 <MaterialIcons
                                   name={ITEM_STATUS_ICONS[statusOption]}

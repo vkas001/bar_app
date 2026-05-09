@@ -1,13 +1,13 @@
 import AppInput from '@/components/input'
 import { useResponsive } from '@/shared/hooks/useResponsive'
-import ReservationDetailsMotal from '@/modules/home/components/ReservationDetailsMotal'
+import ReservationDetailsModal from '@/modules/home/components/ReservationDetailsModal'
 import {
     filterReservations,
     mapOrderToReservation
 } from '@/modules/home/utils/reservationMapper'
 import { useOrders } from '@/modules/orders/hook/useOrder'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from 'react-native'
 import {
     Reservation,
@@ -15,15 +15,40 @@ import {
     RESERVATION_STATUS_STYLES,
     ReservationStatusFilter
 } from '../types/reservation.types'
+import { useToast } from '@/shared/ui/toast/toast.context'
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
+import { ScreenState } from '@/components/screenState'
 
 export default function ViewReservation() {
     const { orders, loading, error, refetch } = useOrders()
+    const { showToast } = useToast()
 
     const [query, setQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState<ReservationStatusFilter>('all')
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null)
+
+    const { orderJustCompleted, setOrderJustCompleted } = useOrderStore();
+
+    const handleOrderSuccess = async () => {
+        await refetch();
+    };
+
+    useEffect(() => {
+        if (orderJustCompleted) {
+            refetch()
+            setOrderJustCompleted(false)
+        }
+    }, [orderJustCompleted])
+
+    useEffect(() => {
+        if (!selectedReservation) return
+        const updated = orders.find(o => String(o.id) === selectedReservation.id)
+        if (updated) {
+            setSelectedReservation(mapOrderToReservation(updated))
+        }
+    }, [orders])
 
     const { isSmallPhone, textXs, textSm, textBase, textLg, iconXs, iconSm, size } = useResponsive()
 
@@ -33,30 +58,15 @@ export default function ViewReservation() {
         [reservations, query, statusFilter]
     )
 
-    if (loading && orders.length === 0) {
-        return (
-            <View className='bg-zinc-900 mt-4 rounded-lg'>
-                <View className='flex-1 mt-8 ml-4 mr-4 mb-8 items-center justify-center py-20'>
-                    <ActivityIndicator size="large" color="#fcd34d" />
-                    <Text className="mt-4 text-white text-base">Loading reservations...</Text>
-                </View>
-            </View>
-        )
+    if (loading && orders.length === 0 || error && orders.length === 0) {
+        return <ScreenState
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+            loadingText="Loading reservations..."
+        />;
     }
 
-    if (error && orders.length === 0) {
-        return (
-            <View className='bg-zinc-900 mt-4 rounded-lg'>
-                <View className='flex-1 mt-8 ml-4 mr-4 mb-8 items-center justify-center py-20'>
-                    <Text className="text-red-500 text-lg font-bold mb-2">Error Loading Reservations</Text>
-                    <Text className="text-white text-center mb-4">{error}</Text>
-                    <Pressable onPress={refetch}>
-                        <Text className="text-yellow-500 text-base font-semibold">Tap to retry</Text>
-                    </Pressable>
-                </View>
-            </View>
-        )
-    }
 
     return (
         <View className='bg-zinc-900 mt-4 rounded-lg'>
@@ -233,13 +243,14 @@ export default function ViewReservation() {
                     </View>
                 )}
 
-                <ReservationDetailsMotal
+                <ReservationDetailsModal
                     visible={isDetailsOpen}
                     reservation={selectedReservation}
                     onClose={() => {
                         setIsDetailsOpen(false)
                         setSelectedReservation(null)
                     }}
+                    onOrderSuccess={handleOrderSuccess}
                 />
             </View>
         </View>
