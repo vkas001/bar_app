@@ -1,12 +1,12 @@
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useNavigation } from '@react-navigation/native'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 import { TableCard } from './components/TableCard'
 import TableFilter from './components/TableFilter'
 import TableStatusFilter from './components/TableStatusFilter'
 import { useTables } from './hooks/useTable'
-import { TableType } from './types/table.types'
+import { Table, TableType } from './types/table.types'
 
 type CustomerData = {
   customerName: string
@@ -91,11 +91,41 @@ export default function TableScreen({
     )
   }
 
-  const visibleTables = tables.filter((table) => {
-    const matchesType = selectedType === 'AllTypes' || table.table_type.name === selectedType
-    const matchesStatus = !hideOccupied || table.is_available !== false
-    return matchesType && matchesStatus
-  })
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds])
+
+  const visibleTables = useMemo(() => {
+    return tables.filter((table) => {
+      const matchesType = selectedType === 'AllTypes' || table.table_type.name === selectedType
+      const matchesStatus = !hideOccupied || table.is_available !== false
+      return matchesType && matchesStatus
+    })
+  }, [tables, selectedType, hideOccupied])
+
+  const keyExtractor = useCallback((item: Table) => item.id, [])
+
+  const handleTablePress = useCallback(
+    (id: string) => {
+      toggleTableSelection(id)
+    },
+    [toggleTableSelection]
+  )
+
+  const renderItem = useCallback(
+    ({ item: table }: { item: Table }) => {
+      const isSelected = selectedIdSet.has(table.id)
+      return (
+        <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
+          <TableCard
+            table={table}
+            selected={isSelected}
+            onPress={handleTablePress}
+            selectable={Boolean(changeTableMode && isSelected)}
+          />
+        </View>
+      )
+    },
+    [selectedIdSet, handleTablePress, changeTableMode]
+  )
 
   return (
     <View className='flex-1'>
@@ -117,27 +147,20 @@ export default function TableScreen({
 
       <FlatList
         data={visibleTables}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         numColumns={2}
         className='flex-1'
+        initialNumToRender={12}
+        maxToRenderPerBatch={12}
+        windowSize={7}
+        removeClippedSubviews
         refreshControl={
           onRefresh ? (
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           ) : undefined
         }
         contentContainerClassName='px-2 pt-4 pb-4'
-
-        renderItem={({ item: table }) => (
-          <View style={{ width: '50%', paddingHorizontal: 8, marginBottom: 16 }}>
-            <TableCard
-              table={table}
-              selected={selectedIds.includes(table.id)}
-              onPress={() => toggleTableSelection(table.id)}
-              selectable={changeTableMode && selectedIds.includes(table.id)}
-            />
-
-          </View>
-        )}
+        renderItem={renderItem}
         ListEmptyComponent={
           <Text className='text-neutral-400 text-center mt-6 text-lg'>
             No tables match the selected filters.

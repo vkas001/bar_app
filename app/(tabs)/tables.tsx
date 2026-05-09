@@ -22,6 +22,7 @@ export default function tables() {
     await Promise.all([
       refetchTable?.(),
     ]);
+     showToast('Tables refreshed successfully', 'success');
   });
 
   const pendingCustomerData = useOrderStore(s => s.pendingCustomerData)
@@ -56,7 +57,7 @@ export default function tables() {
       setSelectedTableIds(newTableIds);
       setChangeTableMode(false);
       await refetchTable();
-      showToast('Table changed successfully');
+      showToast('Table changed successfully', 'success');
       router.push('/(tabs)/home');
     } else {
       showToast('Failed to change table', 'error');

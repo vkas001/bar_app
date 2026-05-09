@@ -6,11 +6,11 @@ import { Table } from '../types/table.types';
 type Props = {
     table: Table;
     selected: boolean;
-    onPress: () => void;
+    onPress: (id: string) => void;
     selectable?: boolean;
 }
 
-export const TableCard = ({
+const TableCardComponent = ({
     table,
     selected,
     onPress,
@@ -57,7 +57,7 @@ export const TableCard = ({
 
     return (
         <Pressable
-            onPress={isUnavailable ? undefined : onPress}
+            onPress={isUnavailable ? undefined : () => onPress(table.id)}
             className={`w-full p-4 rounded-lg ${isUnavailable
                 ? 'opacity-50 bg-red-900/20 border-2 border-red-500/30'
                 : selected
@@ -121,3 +121,17 @@ export const TableCard = ({
         </Pressable>
     );
 };
+
+export const TableCard = React.memo(TableCardComponent, (prev, next) => {
+    return (
+        prev.selected === next.selected &&
+        prev.selectable === next.selectable &&
+        prev.table.id === next.table.id &&
+        prev.table.name === next.table.name &&
+        prev.table.capacity === next.table.capacity &&
+        prev.table.status === next.table.status &&
+        prev.table.is_available === next.table.is_available &&
+        prev.table.is_active === next.table.is_active &&
+        prev.table.table_type.name === next.table.table_type.name
+    );
+});

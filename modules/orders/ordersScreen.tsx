@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from 'react-native'
 import OrderCard from './components/OrderCard'
 import OrderDetailsModal from './components/OrderDetailsModal'
 import OrderFilter from './components/OrderFilter'
@@ -96,12 +96,12 @@ export default function OrderModule({
       <View className="flex-1 items-center justify-center bg-[#1a1a1a] px-6">
         <Text className="text-red-500 text-lg font-bold mb-2">Error Loading Orders</Text>
         <Text className="text-white text-center mb-4">{error}</Text>
-        <Text 
-          className="text-yellow-500 text-base font-semibold"
-          onPress={handleRefresh}
+        <Pressable 
+          className="text-yellow text-base font-semibold"
+          onPress={refetch}
         >
           Tap to retry
-        </Text>
+        </Pressable>
       </View>
     )
   }

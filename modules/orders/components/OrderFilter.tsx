@@ -1,7 +1,7 @@
 import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useMemo, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { FlatList, Modal, Pressable, Text, View } from 'react-native'
 import {
     FilterKey,
     OrderFilterProps,
@@ -21,6 +21,11 @@ export default function OrderFilter({
     onTableChange,
 }: OrderFilterProps) {
     type OpenMenuKey = FilterKey | 'all'
+    type MenuPosition = {
+        top: number
+        left: number
+        width: number
+    }
 
     const {
         isPhone,
@@ -39,6 +44,8 @@ export default function OrderFilter({
 
     const [openMenu, setOpenMenu] = useState<OpenMenuKey | null>(null)
     const [triggerHeight, setTriggerHeight] = useState(40)
+    const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
+    const triggerRefs = useRef<Partial<Record<FilterKey, any>>>({})
 
     const labelSize = isLargeTablet ? textXl : isTablet ? textLg : textBase
     const valueSize = isLargeTablet ? textLg : isTablet ? textBase : textSm
@@ -46,9 +53,9 @@ export default function OrderFilter({
     const iconSize = isLargeTablet ? iconMd : iconSm
     const checkSize = isLargeTablet ? 22 : isTablet ? 20 : 18
     const minTriggerWidth = isLargeTablet ? 180 : isTablet ? 150 : 120
-    const triggerPx = isLargeTablet ? 'px-10' : isTablet ? 'px-8' : 'px-4'
+    const triggerPx = isLargeTablet ? 'px-8' : isTablet ? 'px-4' : 'px-2'
     const triggerPy = isLargeTablet ? 'py-3' : 'py-2'
-    const optionPy = isLargeTablet ? 'py-4' : isTablet ? 'py-3' : 'py-2'
+    const optionPy = isLargeTablet ? 'py-4' : isTablet ? 'py-2' : 'py-2'
     const tabletGap = isLargeTablet ? 'gap-6' : 'gap-4'
 
     const optionsMap = {
@@ -83,6 +90,27 @@ export default function OrderFilter({
         return Math.max(130, longestOptionLength * 10 + 48)
     }, [optionsMap])
 
+    const activeTabletMenu = openMenu !== null && openMenu !== 'all' ? openMenu : null
+
+    useEffect(() => {
+        if (!activeTabletMenu) {
+            setMenuPosition(null)
+            return
+        }
+
+        const frame = requestAnimationFrame(() => {
+            triggerRefs.current[activeTabletMenu]?.measureInWindow((x: number, y: number, width: number, height: number) => {
+                setMenuPosition({
+                    left: x,
+                    top: y + height + 25,
+                    width,
+                })
+            })
+        })
+
+        return () => cancelAnimationFrame(frame)
+    }, [activeTabletMenu])
+
     // Phone: each filter is a full-width row (label left, dropdown right) 
     if (isPhone) {
         return (
@@ -94,7 +122,7 @@ export default function OrderFilter({
                 <Pressable
                     onPress={() => setOpenMenu((prev) => (prev === null ? 'all' : null))}
                     onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}
-                    className={`flex-row items-center justify-between rounded-lg border border-yellow-500 ${triggerPx} ${triggerPy}`}
+                    className={`flex-row items-center justify-between rounded-lg border${triggerPx} ${triggerPy}`}
                     style={{ backgroundColor: '#3a3a3a' }}
                 >
                     <Text className={`font-bold text-white ${labelSize}`}>Filter</Text>
@@ -105,7 +133,7 @@ export default function OrderFilter({
                     />
                 </Pressable>
 
-                {/* All 3 filter rows — visible when openMenu is not null, behavior unchanged */}
+                {/* All 3 filter rows — visible when openMenu*/}
                 {openMenu !== null && filterConfigs.map((filter) => (
                     <View key={filter.key} className='relative w-full flex-row items-center gap-8'>
 
@@ -119,7 +147,7 @@ export default function OrderFilter({
                             <Pressable
                                 onPress={() => setOpenMenu((prev) => (prev === filter.key ? 'all' : filter.key))}
                                 onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}
-                                className={`w-full flex-row items-center justify-between rounded-lg border border-yellow-500 ${triggerPx} ${triggerPy}`}
+                                className={`w-full flex-row items-center justify-between rounded-lg ${triggerPx} ${triggerPy}`}
                                 style={{ backgroundColor: '#3a3a3a' }}
                             >
                                 <Text
@@ -139,34 +167,38 @@ export default function OrderFilter({
 
                             {openMenu === filter.key && (
                                 <View
-                                    className='absolute left-0 right-0 rounded-lg p-2'
-                                    style={{
-                                        top: triggerHeight + 4,
-                                        backgroundColor: '#3a3a3a',
-                                        zIndex: 1100,
-                                        elevation: 1100,
-                                    }}
+                                    style={{ position: 'absolute', left: 0, right: 0, top: triggerHeight + 4, zIndex: 1100, elevation: 1100 }}
+                                    onStartShouldSetResponderCapture={() => true}
+                                    onMoveShouldSetResponderCapture={() => true}
                                 >
-                                    {optionsMap[filter.key].map((option) => {
-                                        const isSelected = selectedMap[filter.key] === option
-                                        return (
-                                            <Pressable
-                                                key={`${filter.key}-${option}`}
-                                                onPress={() => {
-                                                    onSelect(filter.key, option)
-                                                    setOpenMenu('all')
-                                                }}
-                                                className={`mb-1.5 flex-row items-center justify-between rounded-lg px-3 ${optionPy} ${isSelected ? 'bg-[#4a4a4a]' : ''}`}
-                                            >
-                                                <Text className={`font-bold text-white ${optionSize}`}>
-                                                    {option}
-                                                </Text>
-                                                {isSelected && (
-                                                    <Ionicons name='checkmark' size={checkSize} color='#fcd34d' />
-                                                )}
-                                            </Pressable>
-                                        )
-                                    })}
+                                    <FlatList
+                                        data={optionsMap[filter.key]}
+                                        keyExtractor={(option) => `${filter.key}-${option}`}
+                                        nestedScrollEnabled
+                                        scrollEnabled
+                                        showsVerticalScrollIndicator
+                                        style={{ maxHeight: isLargeTablet ? 320 : isTablet ? 260 : 200, backgroundColor: '#3a3a3a', borderRadius: 8 }}
+                                        contentContainerStyle={{ paddingVertical: 4, paddingHorizontal: 8 }}
+                                        renderItem={({ item: option }) => {
+                                            const isSelected = selectedMap[filter.key] === option
+                                            return (
+                                                <Pressable
+                                                    onPress={() => {
+                                                        onSelect(filter.key, option)
+                                                        setOpenMenu('all')
+                                                    }}
+                                                    className={`mb-1 flex-row items-center justify-between rounded-lg px-3 ${optionPy} ${isSelected ? 'bg-[#4a4a4a]' : ''}`}
+                                                >
+                                                    <Text className={`font-bold text-white ${optionSize}`}>
+                                                        {option}
+                                                    </Text>
+                                                    {isSelected && (
+                                                        <Ionicons name='checkmark' size={checkSize} color='#fcd34d' />
+                                                    )}
+                                                </Pressable>
+                                            )
+                                        }}
+                                    />
                                 </View>
                             )}
                         </View>
@@ -179,21 +211,26 @@ export default function OrderFilter({
     // Tablet: all three filters in one row
     return (
         <View
-            className={`w-full flex-row items-center ${px} ${py} ${tabletGap}`}
+            className={` flex-row items-center ${px} ${py} ${tabletGap}`}
             style={{ zIndex: 1000, elevation: 1000 }}
         >
             {filterConfigs.map((filter) => (
-                <View key={filter.key} className='relative flex-1 flex-row items-center' style={{ gap: 8 }}>
+                <View key={filter.key} className='flex-1 flex-row items-center'
+                    style={{ gap: 4 }}
+                >
 
-                    <Text className={`font-bold text-white ${labelSize}`}>
+                    <Text className={` text-white ${labelSize}`}>
                         {filter.label}:
                     </Text>
 
                     <View className='relative flex-1'>
                         <Pressable
+                            ref={(node) => {
+                                triggerRefs.current[filter.key] = node
+                            }}
                             onPress={() => setOpenMenu((prev) => (prev === filter.key ? null : filter.key))}
                             onLayout={(e) => setTriggerHeight(e.nativeEvent.layout.height)}
-                            className={`w-full flex-row items-center justify-between rounded-lg border border-yellow-500 ${triggerPx} ${triggerPy}`}
+                            className={` flex-row items-center rounded-lg border ${triggerPx} ${triggerPy}`}
                             style={{ backgroundColor: '#3a3a3a' }}
                         >
                             <Text
@@ -211,25 +248,45 @@ export default function OrderFilter({
                             />
                         </Pressable>
 
-                        {openMenu === filter.key && (
-                            <View
-                                className='absolute left-0 right-0 rounded-lg p-2'
-                                style={{
-                                    top: triggerHeight + 4,
-                                    backgroundColor: '#3a3a3a',
-                                    zIndex: 1100,
-                                    elevation: 1100,
-                                }}
-                            >
-                                {optionsMap[filter.key].map((option) => {
-                                    const isSelected = selectedMap[filter.key] === option
+                    </View>
+                </View>
+            ))}
+
+            <Modal transparent visible={activeTabletMenu !== null && menuPosition !== null}
+                animationType="fade"
+                onRequestClose={() => setOpenMenu(null)}
+            >
+                <Pressable style={{ flex: 1 }} onPress={() => setOpenMenu(null)}>
+                    {activeTabletMenu && menuPosition && (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: menuPosition.top,
+                                left: menuPosition.left,
+                                width: menuPosition.width,
+                                maxHeight: isLargeTablet ? 320 : isTablet ? 260 : 200,
+                                backgroundColor: '#3a3a3a',
+                                borderRadius: 8,
+                                zIndex: 2000,
+                                elevation: 2000,
+                            }}
+                        >
+                            <FlatList
+                                data={optionsMap[activeTabletMenu]}
+                                keyExtractor={(option) => `${activeTabletMenu}-${option}`}
+                                nestedScrollEnabled
+                                scrollEnabled
+                                showsVerticalScrollIndicator
+                                keyboardShouldPersistTaps="handled"
+                                contentContainerStyle={{ paddingVertical: 4, paddingHorizontal: 8 }}
+                                renderItem={({ item: option }) => {
+                                    const isSelected = selectedMap[activeTabletMenu] === option
                                     return (
                                         <Pressable
-                                            key={`${filter.key}-${option}`}
-                                            onPress={() => onSelect(filter.key, option)}
-                                            className={`mb-1.5 flex-row items-center justify-between rounded-lg px-3 ${optionPy} ${isSelected ? 'bg-[#4a4a4a]' : ''}`}
+                                            onPress={() => onSelect(activeTabletMenu, option)}
+                                            className={`mb-1 flex-row items-center justify-between rounded-lg px-3 ${optionPy} ${isSelected ? 'bg-[#4a4a4a]' : ''}`}
                                         >
-                                            <Text className={`font-bold text-white ${optionSize}`}>
+                                            <Text className={`text-sm text-white ${optionSize}`}>
                                                 {option}
                                             </Text>
                                             {isSelected && (
@@ -237,12 +294,12 @@ export default function OrderFilter({
                                             )}
                                         </Pressable>
                                     )
-                                })}
-                            </View>
-                        )}
-                    </View>
-                </View>
-            ))}
+                                }}
+                            />
+                        </View>
+                    )}
+                </Pressable>
+            </Modal>
         </View>
     )
 }

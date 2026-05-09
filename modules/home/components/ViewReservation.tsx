@@ -17,6 +17,7 @@ import {
 } from '../types/reservation.types'
 import { useToast } from '@/shared/ui/toast/toast.context'
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
+import { ScreenState } from '@/components/screenState'
 
 export default function ViewReservation() {
     const { orders, loading, error, refetch } = useOrders()
@@ -57,30 +58,15 @@ export default function ViewReservation() {
         [reservations, query, statusFilter]
     )
 
-    if (loading && orders.length === 0) {
-        return (
-            <View className='bg-zinc-900 mt-4 rounded-lg'>
-                <View className='flex-1 mt-8 ml-4 mr-4 mb-8 items-center justify-center py-20'>
-                    <ActivityIndicator size="large" color="#fcd34d" />
-                    <Text className="mt-4 text-white text-base">Loading reservations...</Text>
-                </View>
-            </View>
-        )
+    if (loading && orders.length === 0 || error && orders.length === 0) {
+        return <ScreenState
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+            loadingText="Loading reservations..."
+        />;
     }
 
-    if (error && orders.length === 0) {
-        return (
-            <View className='bg-zinc-900 mt-4 rounded-lg'>
-                <View className='flex-1 mt-8 ml-4 mr-4 mb-8 items-center justify-center py-20'>
-                    <Text className="text-red-500 text-lg font-bold mb-2">Error Loading Reservations</Text>
-                    <Text className="text-white text-center mb-4">{error}</Text>
-                    <Pressable onPress={refetch}>
-                        <Text className="text-yellow-500 text-base font-semibold">Tap to retry</Text>
-                    </Pressable>
-                </View>
-            </View>
-        )
-    }
 
     return (
         <View className='bg-zinc-900 mt-4 rounded-lg'>

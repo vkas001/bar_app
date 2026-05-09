@@ -22,13 +22,12 @@ export default function TableStatusFilter({
         return (
             <TouchableOpacity
                 onPress={() => setHideOccupied(!hideOccupied)}
-                className={`rounded-lg border ${btnPx} ${btnPy} ${
-                    hideOccupied
+                className={`rounded-lg border ${btnPx} ${btnPy} ${hideOccupied
                         ? 'bg-green-800 border-green-700'
                         : 'bg-yellow border-yellow'
-                }`}
+                    }`}
             >
-                <Text className={`font-bold ${labelSize} ${hideOccupied ? 'text-white' : 'text-black'}`}>
+                <Text className={`font-bold ${labelSize} ${hideOccupied ? 'text-white' : 'text-white'}`}>
                     {hideOccupied ? 'Available' : 'All'}
                 </Text>
             </TouchableOpacity>
@@ -37,28 +36,39 @@ export default function TableStatusFilter({
 
     // Tablet: two buttons
     return (
-        <View className="flex-row" style={{ gap: size.padding.sm }}>
-            <TouchableOpacity
-                onPress={() => setHideOccupied(false)}
-                className={`${btnPx} ${btnPy} rounded-lg border ${
-                    !hideOccupied ? 'bg-yellow border-yellow' : 'bg-transparent border-neutral-600'
+        <TouchableOpacity
+            onPress={() => setHideOccupied(!hideOccupied)}
+            className={`rounded-lg border ${btnPx} ${btnPy} ${hideOccupied
+                    ? 'bg-green-800 border-green-700'
+                    : 'bg-yellow border-yellow'
                 }`}
-            >
-                <Text className={`font-bold ${labelSize} ${!hideOccupied ? 'text-black' : 'text-neutral-400'}`}>
-                    All
-                </Text>
-            </TouchableOpacity>
+        >
+            <Text className={`font-bold ${labelSize} ${hideOccupied ? 'text-white' : 'text-white'}`}>
+                {hideOccupied ? 'Available' : 'All'}
+            </Text>
+        </TouchableOpacity>
+        // <View className="flex-row" style={{ gap: size.padding.sm }}>
+        //     <TouchableOpacity
+        //         onPress={() => setHideOccupied(false)}
+        //         className={`${btnPx} ${btnPy} rounded-lg border ${
+        //             !hideOccupied ? 'bg-yellow border-yellow' : 'bg-transparent border-neutral-600'
+        //         }`}
+        //     >
+        //         <Text className={`font-bold ${labelSize} ${!hideOccupied ? 'text-black' : 'text-neutral-400'}`}>
+        //             All
+        //         </Text>
+        //     </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={() => setHideOccupied(true)}
-                className={`${btnPx} ${btnPy} rounded-lg border ${
-                    hideOccupied ? 'bg-green-800 border-green-700' : 'bg-transparent border-neutral-600'
-                }`}
-            >
-                <Text className={`font-bold ${labelSize} ${hideOccupied ? 'text-white' : 'text-neutral-400'}`}>
-                    Available
-                </Text>
-            </TouchableOpacity>
-        </View>
+        //     <TouchableOpacity
+        //         onPress={() => setHideOccupied(true)}
+        //         className={`${btnPx} ${btnPy} rounded-lg border ${
+        //             hideOccupied ? 'bg-green-800 border-green-700' : 'bg-transparent border-neutral-600'
+        //         }`}
+        //     >
+        //         <Text className={`font-bold ${labelSize} ${hideOccupied ? 'text-white' : 'text-neutral-400'}`}>
+        //             free
+        //         </Text>
+        //     </TouchableOpacity>
+        // </View>
     )
 }

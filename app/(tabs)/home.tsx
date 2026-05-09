@@ -5,10 +5,10 @@ import { useScreenRefresh } from '@/components/refresh/refresh';
 import { useBarTabs } from '@/modules/barTabs/hook/useBarTabs';
 import HomeScreen from '@/modules/home/homeScreen';
 import { useOrders } from '@/modules/orders/hook/useOrder';
-import React from 'react';
-import { Pressable, RefreshControl, ScrollView, View, Text, Touchable, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useToast } from '@/shared/ui/toast/toast.context';
+import React from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function home() {
   const { refetch: refetchOrders } = useOrders();
@@ -21,6 +21,7 @@ export default function home() {
       refetchOrders?.(),
       refreshBarTabs?.(),
     ]);
+    showToast('Data refreshed successfully', 'success');
   });
 
   return (

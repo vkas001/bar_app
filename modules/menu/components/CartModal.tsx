@@ -349,16 +349,14 @@ export default function CartModal({
                             </View>
                         )}
 
-                        {/* Items List using FlatList for both scrolls */}
+                        {/* Items List - disabled scrolling, let outer ScrollView handle it */}
                         <FlatList
                             data={items}
                             keyExtractor={(item) => String(item.id)}
-                            scrollEnabled={true}
-                            nestedScrollEnabled
-                            showsVerticalScrollIndicator={true}
-                            scrollEventThrottle={16}
+                            scrollEnabled={false}
+                            nestedScrollEnabled={false}
+                            showsVerticalScrollIndicator={false}
                             removeClippedSubviews={true}
-                            style={{ maxHeight: itemsMaxHeight }}
                             ListEmptyComponent={
                                 <View className="items-center py-8">
                                     <Text className={`text-[#888] ${textBase}`}>No items in cart</Text>
