@@ -28,7 +28,7 @@ const useResponsive = () => {
 export default function BarCard() {
     const router = useRouter()
     const { isTablet, isLargeTablet } = useResponsive()
-    const { tabs, loading, error, refetchBarTabs } = useBarTabs()
+    const { tabs, loading, error, refresh: fetchBarTabs } = useBarTabs()
 
     const activeCount = tabs.filter((tab) => tab.status === 'active').length
     const totalAmount = tabs.reduce((sum, tab) => sum + tab.total, 0)
@@ -60,7 +60,7 @@ export default function BarCard() {
         return <ScreenState
             loading={loading}
             error={error}
-            onRetry={refetchBarTabs}
+            onRetry={fetchBarTabs}
         />;
     }
 

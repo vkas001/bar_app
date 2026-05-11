@@ -1,3 +1,4 @@
+import { PermissionGuard } from '@/modules/auth/guard';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useToast } from '@/shared/ui/toast';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -299,26 +300,71 @@ export default function OrderDetailsModal({
 
                         {openStatusMenuItemId === item.id && (
                           <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
-                            {ITEM_STATUS_OPTIONS.map((statusOption) => (
-                              <Pressable
-                                key={statusOption}
-                                className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
-                                style={{ gap: size.padding.sm }}
-                                onPress={() => updateItemStatus(item.id, statusOption)} // ✅ now async
-                              >
-                                <MaterialIcons
-                                  name={ITEM_STATUS_ICONS[statusOption]}
-                                  size={s.iconSize}
-                                  color={ITEM_STATUS_COLORS[statusOption].color}
-                                />
-                                <Text
-                                  className={`font-semibold ${s.smallText}`}
-                                  style={{ color: ITEM_STATUS_COLORS[statusOption].color }}
+                            {ITEM_STATUS_OPTIONS.map((statusOption) => {
+                              if (statusOption === 'Cancelled') {
+                                return (
+                                  <PermissionGuard
+                                    key={statusOption}
+                                    permissions={['pos.order_delete']}
+                                    fallback={
+                                      <View className={`flex-row items-center opacity-40 ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                        style={{ gap: size.padding.sm }}
+                                      >
+                                        <MaterialIcons
+                                          name={ITEM_STATUS_ICONS[statusOption]}
+                                          size={s.iconSize}
+                                          color={ITEM_STATUS_COLORS[statusOption].color}
+                                        />
+                                        <Text
+                                          className={`font-semibold ${s.smallText}`}
+                                          style={{ color: ITEM_STATUS_COLORS[statusOption].color }}
+                                        >
+                                          {statusOption}
+                                        </Text>
+                                      </View>
+                                    }
+                                  >
+                                    <Pressable
+                                      className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                      style={{ gap: size.padding.sm }}
+                                      onPress={() => updateItemStatus(item.id, statusOption)}
+                                    >
+                                      <MaterialIcons
+                                        name={ITEM_STATUS_ICONS[statusOption]}
+                                        size={s.iconSize}
+                                        color={ITEM_STATUS_COLORS[statusOption].color}
+                                      />
+                                      <Text
+                                        className={`font-semibold ${s.smallText}`}
+                                        style={{ color: ITEM_STATUS_COLORS[statusOption].color }}
+                                      >
+                                        {statusOption}
+                                      </Text>
+                                    </Pressable>
+                                  </PermissionGuard>
+                                );
+                              }
+                              return (
+                                <Pressable
+                                  key={statusOption}
+                                  className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                  style={{ gap: size.padding.sm }}
+                                  onPress={() => updateItemStatus(item.id, statusOption)} // now async
                                 >
-                                  {statusOption}
-                                </Text>
-                              </Pressable>
-                            ))}
+                                  <MaterialIcons
+                                    name={ITEM_STATUS_ICONS[statusOption]}
+                                    size={s.iconSize}
+                                    color={ITEM_STATUS_COLORS[statusOption].color}
+                                  />
+                                  <Text
+                                    className={`font-semibold ${s.smallText}`}
+                                    style={{ color: ITEM_STATUS_COLORS[statusOption].color }}
+                                  >
+                                    {statusOption}
+                                  </Text>
+                                </Pressable>
+                              );
+                            })}
                           </View>
                         )}
                       </View>

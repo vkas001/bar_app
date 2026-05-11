@@ -8,7 +8,7 @@ import {
 import { useOrders } from '@/modules/orders/hook/useOrder'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import {
     Reservation,
     RESERVATION_STATUS_FILTERS,
@@ -84,16 +84,26 @@ export default function ViewReservation() {
 
                 {/* Search */}
                 <View className='mt-4 relative'>
-                    <AppInput
-                        placeholder='Search by customer or table...'
-                        inputClassName='h-14'
-                        inputTextClassName='text-xl'
-                        value={query}
-                        onChangeText={setQuery}
-                        leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
-                        rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
-                        onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
-                    />
+
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={{ flex: 1 }}
+                    >
+                        <ScrollView
+                            keyboardShouldPersistTaps='handled'
+                        >
+                            <AppInput
+                                placeholder='Search by customer or table...'
+                                inputClassName='h-14'
+                                inputTextClassName='text-xl'
+                                value={query}
+                                onChangeText={setQuery}
+                                leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
+                                rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
+                                onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
+                            />
+                        </ScrollView>
+                    </KeyboardAvoidingView>
 
                     {isFilterOpen && (
                         <View className='absolute right-0 top-16 z-20 min-w-[170px] rounded-xl border border-white/10 bg-zinc-900 p-2'>

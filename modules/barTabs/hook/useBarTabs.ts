@@ -14,7 +14,7 @@ export function useBarTabs() {
     const [creating, setCreating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const refetchBarTabs = async () => {
+    const fetchBarTabs = async () => {
         try {
             setLoading(true);
             setError(null);
@@ -77,7 +77,7 @@ export function useBarTabs() {
 
             const json = await res.json();
             console.log("Bar tab created successfully.");
-            await refetchBarTabs();
+            await fetchBarTabs();
             return json.data as BarTabAPI
         } catch (e: any) {
             console.error("Error creating bar tab:", e);
@@ -116,7 +116,7 @@ export function useBarTabs() {
             }
 
             console.log("Items added to bar tab successfully.");
-            await refetchBarTabs();
+            await fetchBarTabs();
             return true;
         } catch (e: any) {
             console.error("Error adding items to bar tab:", e);
@@ -127,7 +127,7 @@ export function useBarTabs() {
 
 
     useEffect(() => {
-        refetchBarTabs();
+        fetchBarTabs();
     }, []);
 
     return {
@@ -135,7 +135,7 @@ export function useBarTabs() {
         loading,
         creating,
         error,
-        refetchBarTabs,
+        refresh: fetchBarTabs,
         createBarTab,
         addItemsToBarTab
     };

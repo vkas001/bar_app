@@ -1,10 +1,23 @@
 import { BlurView } from 'expo-blur';
-import React from 'react';
-import { Image, ImageBackground, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ImageBackground, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LoginForm from '../../modules/auth/LoginForm';
+import ApiSetup from '@/components/apiSetup';
+import { hasApiBeenSetup } from '@/shared/storage/async';
+
+type SetUp = "loading" | "apiSetup" | "login";
 
 export default function Auth() {
+  const [setUp, setSetUp] = useState<SetUp>("loading");
+
+  useEffect(() => {
+    // On every app launch, check if the API URL has already been saved
+    hasApiBeenSetup().then((ready) => {
+      setSetUp(ready ? 'login' : 'apiSetup');
+    });
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 ">
       <View className="absolute inset-0">
@@ -14,7 +27,7 @@ export default function Auth() {
           className='flex-1'
           resizeMode="cover"
         >
-         
+
           <View className='absolute inset-0 bg-black/70' />
         </ImageBackground>
       </View>
@@ -30,7 +43,20 @@ export default function Auth() {
           <Text className="text-white text-3xl font-bold mt-2">Vintage Bar</Text>
           <Text className="text-gray-300 text-lg">Management System</Text>
         </View>
-        <LoginForm />
+
+        // Conditional rendering based on setup state
+
+        {setUp === 'loading' && (
+          <ActivityIndicator size="large" color="#fff" />
+        )}
+
+        {setUp === 'apiSetup' && (
+          <ApiSetup onApiSaved={() => setSetUp('login')} />
+        )}
+
+        {setUp === 'login' && (
+          <LoginForm />
+        )}
       </View>
     </SafeAreaView >
   );

@@ -1,15 +1,16 @@
+import { PermissionGuard } from "@/modules/auth/guard";
+import { useOrderStore } from "@/modules/orders/store/createOrderStore";
 import { useResponsive } from "@/shared/hooks/useResponsive";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
-import { BarPaymentStatus, BarTab, BarTabStatus, barTabItemStatus } from "../types/barTab.types";
 import {
     BAR_TAB_STATUS_OPTIONS,
     getItemStatusColor,
     getItemStatusIcon
 } from "../../menu/types/itemStatus";
-import { useOrderStore } from "@/modules/orders/store/createOrderStore";
-import { useRouter } from 'expo-router';
+import { BarPaymentStatus, BarTab, BarTabStatus, barTabItemStatus } from "../types/barTab.types";
 
 interface Props {
     visible: boolean;
@@ -241,12 +242,34 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
 
                                                         {openStatusMenuItemId === item.id && (
                                                             <View className="absolute top-8 right-0 bg-zinc-800 border border-zinc-700 rounded-xl py-1 min-w-[130px] z-20">
-                                                                {BAR_TAB_STATUS_OPTIONS.map((statusOption) => (
+                                                                {BAR_TAB_STATUS_OPTIONS.map((statusOption) => {
+                                                                    if (statusOption === 'Cancel') {
+                                                                        return (
+                                                                            <PermissionGuard
+                                                                                key={statusOption}
+                                                                                permissions={['pos.order_delete']}
+                                                                                fallback={
+                                                                                    <View className={`flex-row items-center opacity-40 ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                                                        style={{ gap: size.padding.sm }}
+                                                                                    >
+                                                                        <MaterialIcons
+                                                                            name={getItemStatusIcon(statusOption)}
+                                                                            size={s.iconSize}
+                                                                            color={getItemStatusColor(statusOption).color}
+                                                                        />
+                                                                        <Text
+                                                                            className={`font-semibold ${s.smallText}`}
+                                                                            style={{ color: getItemStatusColor(statusOption).color }}
+                                                                        >
+                                                                            {statusOption}
+                                                                        </Text>
+                                                                    </View>
+                                                                    }
+                                                                            >
                                                                     <Pressable
-                                                                        key={statusOption}
                                                                         className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
                                                                         style={{ gap: size.padding.sm }}
-                                                                        onPress={() => updateItemStatus(item.id, statusOption)} // ✅ wired up
+                                                                        onPress={() => updateItemStatus(item.id, statusOption)}
                                                                     >
                                                                         <MaterialIcons
                                                                             name={getItemStatusIcon(statusOption)}
@@ -260,7 +283,30 @@ export default function BarTabDetailsModal({ visible, tab, onClose }: Props) {
                                                                             {statusOption}
                                                                         </Text>
                                                                     </Pressable>
-                                                                ))}
+                                                                            </PermissionGuard>
+                                                                        );
+                                                                    }
+                                                                    return (
+                                                                        <Pressable
+                                                                            key={statusOption}
+                                                                            className={`flex-row items-center ${isSmallPhone ? 'px-2 py-1.5' : 'px-3 py-2'}`}
+                                                                            style={{ gap: size.padding.sm }}
+                                                                            onPress={() => updateItemStatus(item.id, statusOption)}
+                                                                        >
+                                                                            <MaterialIcons
+                                                                                name={getItemStatusIcon(statusOption)}
+                                                                                size={s.iconSize}
+                                                                                color={getItemStatusColor(statusOption).color}
+                                                                            />
+                                                                            <Text
+                                                                                className={`font-semibold ${s.smallText}`}
+                                                                                style={{ color: getItemStatusColor(statusOption).color }}
+                                                                            >
+                                                                                {statusOption}
+                                                                            </Text>
+                                                                        </Pressable>
+                                                                    );
+                                                                })}
                                                             </View>
                                                         )}
                                                     </View>

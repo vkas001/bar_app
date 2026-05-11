@@ -12,16 +12,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ToastProvider>
-      <StatusBar
-        style="light"
-        translucent={false}
-      />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </ToastProvider>
+
+      <ToastProvider>
+        <StatusBar
+          style="light"
+          translucent={false}
+        />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
+      </ToastProvider>
+
   );
 }

@@ -1,15 +1,14 @@
+import ConfirmDialog from '@/components/confirmDialog'
+import { PermissionGuard } from '@/modules/auth/guard'
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
 import { useResponsive } from '@/shared/hooks/useResponsive'
+import { useToast } from '@/shared/ui/toast'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { Reservation, RESERVATION_STATUS_STYLES } from '../types/reservation.types'
-import { useOrders } from '@/modules/orders/hook/useOrder'
 import { useCancelReservation } from '../hook/useReservaiton'
-import confirmDialog from '@/components/confirmDialog'
-import { useToast } from '@/shared/ui/toast'
-import ConfirmDialog from '@/components/confirmDialog'
+import { Reservation, RESERVATION_STATUS_STYLES } from '../types/reservation.types'
 
 
 interface Props {
@@ -88,12 +87,25 @@ export default function ReservationDetailsModal({
     }
 
     const handleCancelReservation = async () => {
+        console.log('[ReservationDetailsModal] Cancel button pressed - Permission guard passed', {
+            reservationId: reservation?.id,
+            customerName: reservation?.customerName
+        })
         setShowCancelDialog(true)
     }
 
     // confirm handler
     const handleConfirmCancel = async () => {
-        if (!reservation?.originalOrder.reservationId) return
+        if (!reservation?.originalOrder.reservationId) {
+            console.warn('[ReservationDetailsModal] Cancel confirmation - Missing reservation ID')
+            return
+        }
+
+        console.log('[ReservationDetailsModal] Confirming reservation cancellation', {
+            reservationId: reservation.originalOrder.reservationId,
+            customerName: reservation.customerName,
+            status: reservation.status
+        })
 
         setShowCancelDialog(false)
         setCancelling(true)
@@ -103,10 +115,16 @@ export default function ReservationDetailsModal({
         setCancelling(false)
 
         if (success) {
+            console.log('[ReservationDetailsModal] Reservation cancelled successfully', {
+                reservationId: reservation.originalOrder.reservationId
+            })
             showToast('Reservation cancelled successfully', 'success')
             onClose()
             onOrderSuccess?.()
         } else {
+            console.error('[ReservationDetailsModal] Failed to cancel reservation', {
+                reservationId: reservation.originalOrder.reservationId
+            })
             showToast('Failed to cancel reservation', 'error')
         }
     }
@@ -343,23 +361,27 @@ export default function ReservationDetailsModal({
                                     </TouchableOpacity>
                                 </View>
 
-                                <TouchableOpacity
-                                    onPress={handleCancelReservation}
-                                    disabled={cancelling}
-                                    className={`flex-row items-center justify-center rounded-lg bg-red-500 ${s.btnPy}`}
-                                    style={{ opacity: cancelling ? 0.6 : 1 }}
+                                <PermissionGuard
+                                    permissions={['pos.order_delete']}
                                 >
-                                    {cancelling ? (
-                                        <ActivityIndicator size="small" color="white" />
-                                    ) : (
-                                        <>
-                                            <Ionicons name='close' size={s.iconSize} color='white' />
-                                            <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
-                                                Cancel Reservation
-                                            </Text>
-                                        </>
-                                    )}
-                                </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={handleCancelReservation}
+                                        disabled={cancelling}
+                                        className={`flex-row items-center justify-center rounded-lg bg-red-500 ${s.btnPy}`}
+                                        style={{ opacity: cancelling ? 0.6 : 1 }}
+                                    >
+                                        {cancelling ? (
+                                            <ActivityIndicator size="small" color="white" />
+                                        ) : (
+                                            <>
+                                                <Ionicons name='close' size={s.iconSize} color='white' />
+                                                <Text className={`ml-1 font-bold text-white ${s.bodyText}`}>
+                                                    Cancel Reservation
+                                                </Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
+                                </PermissionGuard>
                             </View>
 
                         </ScrollView>
@@ -371,7 +393,7 @@ export default function ReservationDetailsModal({
                 visible={showCancelDialog}
                 title="Cancel Reservation"
                 message="Are you sure you want to cancel this reservation?"
-                confirmText="Cancel"
+                confirmText="Confirm"
                 cancelText="No"
                 onConfirm={handleConfirmCancel}
                 onCancel={() => setShowCancelDialog(false)}

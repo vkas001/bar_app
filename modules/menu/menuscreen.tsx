@@ -1,6 +1,8 @@
+import AppInput from '@/components/input';
 import CategoryCard from '@/modules/menu/components/CategoryCard';
 import ItemCard from '@/modules/menu/components/ItemCard';
 import { useMenu } from '@/modules/menu/hook/useMenu';
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { useOrderStore } from '../orders/store/createOrderStore';
@@ -15,6 +17,7 @@ export default function MenuScreen() {
 
     const [selectedItem, setSelectedItem] = useState<MenuItemMerged | null>(null);
     const itemListRef = useRef<FlatList>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (pendingCustomerData && selectedTableIds.length > 0) {
@@ -46,10 +49,17 @@ export default function MenuScreen() {
 
     const items = selectedCategory?.items ?? [];
 
+    // Filter items based on search query
+    const filteredItems = searchQuery.trim() === '' 
+        ? items 
+        : items.filter(item => 
+            item.item_name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+
     // Pair items into rows of 2 for the items FlatList
     const itemRows: MenuItemMerged[][] = [];
-    for (let i = 0; i < items.length; i += 2) {
-        itemRows.push(items.slice(i, i + 2));
+    for (let i = 0; i < filteredItems.length; i += 2) {
+        itemRows.push(filteredItems.slice(i, i + 2));
     }
 
     const handleSelectItem = (item: MenuItemMerged) => {
@@ -80,7 +90,9 @@ export default function MenuScreen() {
 
     const ListEmptyComponent = (
         <View className="items-center py-10">
-            <Text className="text-[#888]">No items in this category</Text>
+            <Text className="text-[#888]">
+                {searchQuery.trim() !== '' ? 'No items match your search' : 'No items in this category'}
+            </Text>
         </View>
     );
 
@@ -106,10 +118,22 @@ export default function MenuScreen() {
 
             {/* Divider */}
             <View className="h-px bg-[#333] mx-4 mt-2 mb-2" />
-            {/* Selected category label */}
-            <Text className="text-white/50 text-base px-4 mb-3 uppercase tracking-widest">
-                {selectedCategory?.name} · {items.length} items
-            </Text>
+            
+            {/* Selected category label and menu search */}
+            <View className='flex-row items-center mb-2'>
+                <Text className="text-white/50 text-base px-4 mb-3 uppercase tracking-widest">
+                    {selectedCategory?.name} · {filteredItems.length} items
+                </Text>
+                <AppInput
+                    containerClassName='flex-1 mr-4'
+                    placeholder="Search menu items..."
+                    inputClassName="h-12"
+                    inputTextClassName="text-base"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    leftIcon={<Ionicons name="search" size={20} color="rgba(255,255,255,0.45)" />}
+                />
+            </View>
 
             {/* Items section — vertical FlatList with header */}
             <FlatList
