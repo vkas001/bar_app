@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useState } from 'react'
-import AppInput from './input'
-import { saveApiConfig } from '../shared/storage/async'
+import React, { useState } from 'react';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { saveApiConfig } from '../shared/storage/async';
+import AppInput from './input';
 
 interface ApiSetupProps {
   onApiSaved: () => void;
@@ -29,7 +29,7 @@ export default function ApiSetup({
     setLoading(true);
     try {
       await saveApiConfig({ url: trimmed });
-      onApiSaved(); // ← tells the parent to switch to LoginForm
+      onApiSaved();
     } catch {
       setError('Failed to save. Please try again.');
     } finally {

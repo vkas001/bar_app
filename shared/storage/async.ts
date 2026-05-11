@@ -1,3 +1,4 @@
+import { setApiBaseUrl } from "@/shared/api/baseUrl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USER_KEY = "auth_user";
@@ -41,6 +42,7 @@ export interface ApiConfig {
 
 export const saveApiConfig = async (config: ApiConfig): Promise<void> => {
     await AsyncStorage.setItem(API_URL, JSON.stringify(config));
+    setApiBaseUrl(config.url);
 };
 
 export const loadApiConfig = async (): Promise<ApiConfig | null> => {

@@ -1,10 +1,11 @@
+import { getApiBaseUrl } from "@/shared/api/baseUrl";
 import { getToken } from "@/shared/storage/secure";
 import { useEffect, useState } from "react";
 import {
+    AddItemsToBarTabPayload,
     BarTab,
     BarTabAPI,
-    CreateBarTabPayload,
-    AddItemsToBarTabPayload
+    CreateBarTabPayload
 } from "../types/barTab.types";
 import { mapBarTabAPIToCard } from "../utils/barTabMapper";
 
@@ -19,7 +20,7 @@ export function useBarTabs() {
             setLoading(true);
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs`, {
@@ -51,7 +52,7 @@ export function useBarTabs() {
             setCreating(true);
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs`, {
@@ -95,7 +96,7 @@ export function useBarTabs() {
         try {
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs/${tabId}/items`, {

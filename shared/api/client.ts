@@ -1,12 +1,16 @@
 import axios from "axios";
-import { getToken } from "../storage/secure";
+import { getApiBaseUrl, subscribeApiBaseUrl } from "./baseUrl";
 
 export const api = axios.create({
-    baseURL: process.env.EXPO_PUBLIC_API_URL,
+    baseURL: getApiBaseUrl(),
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
     },
+});
+
+subscribeApiBaseUrl((baseUrl) => {
+    api.defaults.baseURL = baseUrl;
 });
 
 // auto attach token to every request

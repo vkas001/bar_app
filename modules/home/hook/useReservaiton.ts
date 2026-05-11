@@ -1,9 +1,10 @@
+import { getApiBaseUrl } from '@/shared/api/baseUrl';
 import { getToken } from '@/shared/storage/secure';
 
 export const useCancelReservation = () => {
   const cancelReservation = async (reservationId: number) => {
     try {
-      const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+      const baseUrl = getApiBaseUrl();
       const token = await getToken();
 
       const res = await fetch(`${baseUrl}/pos/reservation/${reservationId}/status`, {

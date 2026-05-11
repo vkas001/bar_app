@@ -1,9 +1,10 @@
+import { getApiBaseUrl } from '@/shared/api/baseUrl';
 import { getToken } from '@/shared/storage/secure';
 
 export const useUpdateOrderItemStatus = () => {
   const updateOrderItemStatus = async (itemId: string, status: string) => { 
     try {
-      const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+      const baseUrl = getApiBaseUrl();
       const token = await getToken();
 
     //  console.log('URL:', `${baseUrl}/pos/order-details/${itemId}/status`);

@@ -1,9 +1,10 @@
+import { getApiBaseUrl } from '@/shared/api/baseUrl';
 import { getToken } from '@/shared/storage/secure';
 
 export const useChangeTable = () => {
   const changeTable = async (reservationId: number, tableIds: number[]) => {
     try {
-      const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+      const baseUrl = getApiBaseUrl();
       const token = await getToken();
 
       const res = await fetch(`${baseUrl}/pos/reservation/${reservationId}/change-table`, {

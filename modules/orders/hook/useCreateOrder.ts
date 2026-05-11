@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from '@/shared/api/baseUrl';
 import { getToken } from '@/shared/storage/secure';
 import { CreateOrderRequest } from '../types/order.types';
 
@@ -11,7 +12,7 @@ export const useCreateOrder = () => {
               //  console.log('No table IDs found in payload:', payload);
             }
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/reservation`, {

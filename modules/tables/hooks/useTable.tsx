@@ -1,7 +1,8 @@
+import { useOrderStore } from '@/modules/orders/store/createOrderStore';
+import { getApiBaseUrl } from '@/shared/api/baseUrl';
 import { getToken } from '@/shared/storage/secure';
 import { useEffect, useState } from 'react';
 import { Table, TableType } from '../types/table.types';
-import { useOrderStore } from '@/modules/orders/store/createOrderStore';
 
 export const useTables = () => {
   const [tables, setTables] = useState<Table[]>([]);
@@ -23,7 +24,7 @@ export const useTables = () => {
   const fetchTables = async () => {
     try {
       setLoading(true);
-      const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+      const baseUrl = getApiBaseUrl();
       const token = await getToken();
 
       const res = await fetch(`${baseUrl}/pos/tables`, {
