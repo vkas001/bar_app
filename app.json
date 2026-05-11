@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "bar_app",
+    "name": "InfinityPOS",
     "slug": "bar_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "",
+    "icon": "./assets/images/logo.png",
     "scheme": "barapp",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -13,14 +13,12 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "",
-        "backgroundImage": "",
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundImage": "./assets/images/logo.png",
         "monochromeImage": ""
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anshtech.infinitypos",
-      "enableProguardInReleaseBuilds": true,
-      "enableShrinkResourcesInReleaseBuilds": true
+      "package": "com.anshtech.infinitypos"
     },
     "web": {
       "output": "static",
@@ -59,6 +57,7 @@
     },
     "updates": {
       "url": "https://u.expo.dev/e67fb527-a207-497f-9c61-b68cda5a50e0"
-    }
+    },
+    "owner": "vkas001"
   }
 }
