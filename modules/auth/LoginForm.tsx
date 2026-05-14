@@ -14,21 +14,31 @@ const LoginForm = () => {
   const { logIn, loading } = useAuth();
 
   const handleLogin = async () => {
+    // console.log('[LoginForm] handleLogin called');
+    // console.log('[LoginForm] Email:', email);
+
     setError("");
     try {
+      // console.log('[LoginForm] Attempting to log in with email:', email);
       const user = await logIn({ email, password });
+      // console.log('[LoginForm] Login response received:', user);
+      
       if (user) {
+        // console.log('[LoginForm] Login successful, user:', user);
         router.replace("/(tabs)/home");
       } else {
+        // console.warn('[LoginForm] Login failed: Invalid credentials');
         setError("Invalid credentials");
       }
     } catch (e: any) {
+      // console.error('[LoginForm] Login error caught:', e);
       // Show the REAL error instead of generic message
       const msg =
         e?.response?.data?.message ||
         e?.response?.status ||
         e?.message ||
         JSON.stringify(e);
+      // console.error('[LoginForm] Error message:', msg);
       setError(`Error: ${msg}`);
     }
   };

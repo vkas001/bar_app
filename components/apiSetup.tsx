@@ -16,21 +16,31 @@ export default function ApiSetup({
   const [error, setError] = useState('');
 
   async function handleSave() {
+    // console.log('[ApiSetup] handleSave called');
     const trimmed = apiUrl.trim();
+    // console.log('[ApiSetup] API URL trimmed:', trimmed);
+    
     if (!trimmed) {
+      // console.warn('[ApiSetup] Validation failed: Empty URL');
       setError("Please enter a valid Api URL");
       return;
     }
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      // console.warn('[ApiSetup] Validation failed: Invalid protocol');
       setError('URL must start with http:// or https://');
       return;
     }
+    
+    // console.log('[ApiSetup] Validation passed, proceeding to save');
     setError('');
     setLoading(true);
     try {
+      // console.log('[ApiSetup] Saving API config with URL:', trimmed);
       await saveApiConfig({ url: trimmed });
+      // console.log('[ApiSetup] API config saved successfully');
       onApiSaved();
-    } catch {
+    } catch (error) {
+      // console.error('[ApiSetup] Error saving API config:', error);
       setError('Failed to save. Please try again.');
     } finally {
       setLoading(false);

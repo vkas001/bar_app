@@ -1,27 +1,31 @@
 import AppInput from '@/components/input'
-import { useResponsive } from '@/shared/hooks/useResponsive'
+import { ScreenState } from '@/components/screenState'
 import ReservationDetailsModal from '@/modules/home/components/ReservationDetailsModal'
 import {
     filterReservations,
     mapOrderToReservation
 } from '@/modules/home/utils/reservationMapper'
-import { useOrders } from '@/modules/orders/hook/useOrder'
+import { useOrderStore } from '@/modules/orders/store/createOrderStore'
+import { order } from '@/modules/orders/types/order.types'
+import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Pressable, Text, TouchableOpacity, View } from 'react-native'
 import {
     Reservation,
     RESERVATION_STATUS_FILTERS,
     RESERVATION_STATUS_STYLES,
     ReservationStatusFilter
 } from '../types/reservation.types'
-import { useToast } from '@/shared/ui/toast/toast.context'
-import { useOrderStore } from '@/modules/orders/store/createOrderStore'
-import { ScreenState } from '@/components/screenState'
 
-export default function ViewReservation() {
-    const { orders, loading, error, refetch } = useOrders()
-    const { showToast } = useToast()
+interface Props {
+    orders: order[]
+    loading: boolean
+    error: string | null
+    refetch: () => Promise<void>
+}
+
+export default function ViewReservation({ orders, loading, error, refetch }: Props) {
 
     const [query, setQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState<ReservationStatusFilter>('all')
@@ -69,8 +73,8 @@ export default function ViewReservation() {
 
 
     return (
-        <View className='bg-zinc-900 mt-4 rounded-lg'>
-            <View className='flex-1 mt-8 ml-4 mr-4 mb-8'>
+        <View className='mt-4 overflow-hidden rounded-lg bg-zinc-900'>
+            <View className='px-4 py-8'>
 
                 {/* Header */}
                 <View className='flex-row justify-between items-center'>
@@ -85,25 +89,16 @@ export default function ViewReservation() {
                 {/* Search */}
                 <View className='mt-4 relative'>
 
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                        style={{ flex: 1 }}
-                    >
-                        <ScrollView
-                            keyboardShouldPersistTaps='handled'
-                        >
-                            <AppInput
-                                placeholder='Search by customer or table...'
-                                inputClassName='h-14'
-                                inputTextClassName='text-xl'
-                                value={query}
-                                onChangeText={setQuery}
-                                leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
-                                rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
-                                onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
-                            />
-                        </ScrollView>
-                    </KeyboardAvoidingView>
+                    <AppInput
+                        placeholder='Search by customer or table...'
+                        inputClassName='h-14'
+                        inputTextClassName='text-xl'
+                        value={query}
+                        onChangeText={setQuery}
+                        leftIcon={<Ionicons name='search' size={24} color='rgba(255,255,255,0.45)' />}
+                        rightIcon={<Ionicons name='filter' size={24} color='rgba(255,255,255,0.8)' />}
+                        onRightIconPress={() => setIsFilterOpen((prev) => !prev)}
+                    />
 
                     {isFilterOpen && (
                         <View className='absolute right-0 top-16 z-20 min-w-[170px] rounded-xl border border-white/10 bg-zinc-900 p-2'>

@@ -11,8 +11,8 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function home() {
-  const { refetch: refetchOrders } = useOrders();
-  const { refresh: refreshBarTabs } = useBarTabs();
+  const { orders, loading: ordersLoading, error: ordersError, refetch: refetchOrders } = useOrders();
+  const { tabs, loading: tabsLoading, error: tabsError, refresh: refreshBarTabs } = useBarTabs();
   const { showToast } = useToast();
 
 
@@ -34,6 +34,8 @@ export default function home() {
 
 
       <ScrollView
+        className='flex-1'
+        contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -41,7 +43,16 @@ export default function home() {
           />
         }
       >
-        <HomeScreen />
+        <HomeScreen
+          orders={orders}
+          ordersLoading={ordersLoading}
+          ordersError={ordersError}
+          refetchOrders={refetchOrders}
+          tabs={tabs}
+          tabsLoading={tabsLoading}
+          tabsError={tabsError}
+          refreshBarTabs={refreshBarTabs}
+        />
       </ScrollView>
 
       {refreshing && <LoadingScreen />}

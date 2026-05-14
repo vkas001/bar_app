@@ -1,5 +1,5 @@
-import { useBarTabs } from '@/modules/barTabs/hook/useBarTabs'
-import { BarTabStatus } from '@/modules/barTabs/types/barTab.types'
+import { ScreenState } from '@/components/screenState'
+import { BarTab, BarTabStatus } from '@/modules/barTabs/types/barTab.types'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import React from 'react'
@@ -9,7 +9,6 @@ import {
     TouchableOpacity,
     useWindowDimensions, View
 } from 'react-native'
-import { ScreenState } from '@/components/screenState'
 
 const statusColors: Record<BarTabStatus, { bg: string; text: string }> = {
     active: { bg: '#16351f', text: '#86efac' },
@@ -25,10 +24,16 @@ const useResponsive = () => {
     return { isTablet, isLargeTablet, isLandscape }
 }
 
-export default function BarCard() {
+interface Props {
+    tabs: BarTab[]
+    loading: boolean
+    error: string | null
+    onRetry: () => Promise<void>
+}
+
+export default function BarCard({ tabs, loading, error, onRetry }: Props) {
     const router = useRouter()
     const { isTablet, isLargeTablet } = useResponsive()
-    const { tabs, loading, error, refresh: fetchBarTabs } = useBarTabs()
 
     const activeCount = tabs.filter((tab) => tab.status === 'active').length
     const totalAmount = tabs.reduce((sum, tab) => sum + tab.total, 0)
@@ -60,7 +65,7 @@ export default function BarCard() {
         return <ScreenState
             loading={loading}
             error={error}
-            onRetry={fetchBarTabs}
+            onRetry={onRetry}
         />;
     }
 
