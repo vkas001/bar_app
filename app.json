@@ -18,7 +18,8 @@
         "monochromeImage": ""
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.vkas001.bar_app"
+      "package": "com.vkas001.bar_app",
+      "versionCode": 7
     },
     "web": {
       "output": "static",

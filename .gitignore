@@ -31,17 +31,27 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
 *.tsbuildinfo
 
-app-example
+example
 
 # generated native folders
 /ios
 /android
 
-#environment variables
-.env
-.env.*
+# Android build artifacts
+**/android/build/
+**/android/.gradle/
+*.class
+*.dex
+*.lock
+
+# Credentials
+keystore.properties
+keystore/
+credentials.json
+credentials/

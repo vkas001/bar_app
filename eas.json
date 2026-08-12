@@ -1,22 +1,31 @@
 {
   "cli": {
-    "version": ">= 18.4.0",
-    "appVersionSource": "remote"
+    "version": ">= 21.0.1",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_TV": "1"
+      },
       "android": {
         "buildType": "apk"
       },
       "channel": "preview"
     },
     "production": {
-      "autoIncrement": true,
+      "env": {
+        "EXPO_TV": "1"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
       "channel": "production"
     }
   },
@@ -24,3 +33,6 @@
     "production": {}
   }
 }
+
+// eas build --platform android --profile production
+// eas build --platform android --profile preview
