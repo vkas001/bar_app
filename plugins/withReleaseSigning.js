@@ -23,6 +23,19 @@ const withReleaseSigning = (config) => {
         return acc;
       }, {});
 
+    const required = [
+      "BARAPP_RELEASE_STORE_FILE",
+      "BARAPP_RELEASE_STORE_PASSWORD",
+      "BARAPP_RELEASE_KEY_ALIAS",
+      "BARAPP_RELEASE_KEY_PASSWORD",
+    ];
+    if (required.some((key) => !props[key])) {
+      console.warn(
+        "keystore.properties is missing required release signing keys, skipping release signing config",
+      );
+      return config;
+    }
+
     let contents = config.modResults.contents;
 
     contents = contents.replace(

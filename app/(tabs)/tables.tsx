@@ -9,8 +9,6 @@ import { useTables } from '@/modules/tables/hooks/useTable'
 import { useChangeTable } from '@/modules/tables/hooks/useChangeTable'
 import { useRouter } from 'expo-router'
 import { useToast } from '@/shared/ui/toast/toast.context'
-import { Table } from '@/modules/tables/types/table.types'
-
 
 export default function tables() {
   const { refetch: refetchTable, tables } = useTables();

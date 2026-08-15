@@ -8,6 +8,7 @@ import React, {
 import { Animated } from 'react-native';
 import { ToastView } from './toast.component';
 import { ToastState, ToastType } from './toast.types';
+import { log } from '@/shared/debug/startupLog';
 
 type ToastContextType = {
     showToast: (message: string, type?: ToastType) => void;
@@ -16,6 +17,7 @@ type ToastContextType = {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
+    log("ToastProvider render");
     const [toast, setToast] = useState<ToastState>({
         message: '',
         type: 'success',

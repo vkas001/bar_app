@@ -116,7 +116,7 @@ export default function CartModal({
         
         // BAR TAB ORDER
         if (barTabCustomerData) {
-            console.log('selectedUnit:', JSON.stringify(items[0]?.selectedUnit));
+          // console.log('selectedUnit:', JSON.stringify(items[0]?.selectedUnit));
             if (!barTabCustomerData.id) {
                 setError('Bar tab ID is missing');
                 setLoading(false);

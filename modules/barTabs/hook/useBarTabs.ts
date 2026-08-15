@@ -1,4 +1,5 @@
 import { getToken } from "@/shared/storage/secure";
+import { getApiBaseUrl } from "@/shared/api/config";
 import { useEffect, useState } from "react";
 import {
     BarTab,
@@ -19,7 +20,7 @@ export function useBarTabs() {
             setLoading(true);
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = await getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs`, {
@@ -51,7 +52,7 @@ export function useBarTabs() {
             setCreating(true);
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = await getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs`, {
@@ -70,13 +71,13 @@ export function useBarTabs() {
 
             if (!res.ok) {
                 const rawText = await res.text();
-                console.log("STATUS:", res.status);
-                console.log("RAW ERROR:", rawText);
+               // console.log("STATUS:", res.status);
+               // console.log("RAW ERROR:", rawText);
                 throw new Error(`Failed to create bar tab: ${res.status}`);
             }
 
             const json = await res.json();
-            console.log("Bar tab created successfully.");
+           // console.log("Bar tab created successfully.");
             await refetchBarTabs();
             return json.data as BarTabAPI
         } catch (e: any) {
@@ -95,7 +96,7 @@ export function useBarTabs() {
         try {
             setError(null);
 
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = await getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/bar-tabs/${tabId}/items`, {
@@ -110,12 +111,12 @@ export function useBarTabs() {
 
             if (!res.ok) {
                 const rawText = await res.text();
-                console.log("STATUS:", res.status);
-                console.log("RAW ERROR:", rawText);
+                // console.log("STATUS:", res.status);
+                // console.log("RAW ERROR:", rawText);
                 throw new Error(`Failed to add items to bar tab: ${res.status}`);
             }
 
-            console.log("Items added to bar tab successfully.");
+            // console.log("Items added to bar tab successfully.");
             await refetchBarTabs();
             return true;
         } catch (e: any) {

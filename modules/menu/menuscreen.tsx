@@ -18,10 +18,10 @@ export default function MenuScreen() {
 
     useEffect(() => {
         if (pendingCustomerData && selectedTableIds.length > 0) {
-            console.log('Pending Order Data:', {
-                customer: pendingCustomerData,
-                tables: selectedTableIds,
-            });
+            // console.log('Pending Order Data:', {
+            //     customer: pendingCustomerData,
+            //     tables: selectedTableIds,
+            // });
         }
     }, []);
 

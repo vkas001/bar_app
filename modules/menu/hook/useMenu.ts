@@ -1,4 +1,5 @@
 import { getToken } from '@/shared/storage/secure';
+import { getApiBaseUrl } from '@/shared/api/config';
 import { useEffect, useState } from 'react';
 import { MenuCategoryWithItems } from '../types/menu.types';
 import { mapMenuItems } from '../utils/menuMapper';
@@ -16,7 +17,7 @@ export const useMenu = () => {
     const fetchMenu = async () => {
         try {
             setLoading(true);
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = await getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/menu`, {

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "bar_app",
+    "name": "Infinity POS",
     "slug": "bar_app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,8 +18,8 @@
         "monochromeImage": ""
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.vkas001.bar_app",
-      "versionCode": 7
+      "package": "com.anshtech.infinitypos",
+      "versionCode": 8
     },
     "web": {
       "output": "static",
@@ -41,7 +41,13 @@
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-image",
+      "expo-status-bar",
+      "./plugins/withAndroidSdkVersion",
+      "./plugins/withLocalProperties",
+      "./plugins/withNetworkSecurityConfig",
+      "./plugins/withReleaseSigning"
     ],
     "experiments": {
       "typedRoutes": true,

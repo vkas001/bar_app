@@ -25,7 +25,7 @@ export default function TabsLayout() {
 
   return (
     <>
-      <StatusBar style="light" translucent={false} />
+      <StatusBar style="light" />
 
       <Tabs
         screenOptions={{

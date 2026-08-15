@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { log, logError } from "@/shared/debug/startupLog";
 
 const TOKEN_KEY = "auth_token";
 
@@ -7,7 +8,15 @@ export const saveToken = async (token: string) => {
 };
 
 export const getToken = async () => {
-    return await SecureStore.getItemAsync(TOKEN_KEY);
+    try {
+        log("secure-store getItemAsync start");
+        const value = await SecureStore.getItemAsync(TOKEN_KEY);
+        log("secure-store getItemAsync ok, token present =", !!value);
+        return value;
+    } catch (e: any) {
+        logError("secure-store getItemAsync FAILED", e?.name, e?.message, e?.code);
+        throw e;
+    }
 };
 
 export const removeToken = async () => {

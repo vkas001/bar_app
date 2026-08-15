@@ -1,4 +1,5 @@
 import { getToken } from '@/shared/storage/secure';
+import { getApiBaseUrl } from '@/shared/api/config';
 import { useEffect, useState } from 'react';
 import { order, orderItem, orderItemStatus, orderStatus } from '../types/order.types';
 import { groupReservationOrders } from '../utils/orderMapper';
@@ -27,7 +28,7 @@ export const useOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const baseUrl = process.env.EXPO_PUBLIC_API_URL;
+            const baseUrl = await getApiBaseUrl();
             const token = await getToken();
 
             const res = await fetch(`${baseUrl}/pos/latest-orders`, {

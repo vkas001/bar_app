@@ -1,4 +1,5 @@
 import { useFonts } from "expo-font";
+import { log, logError } from "@/shared/debug/startupLog";
 
 import {
     Poppins_600SemiBold,
@@ -12,7 +13,8 @@ import {
 } from "@expo-google-fonts/inter";
 
 export function useLoadFonts() {
-    const [loaded] = useFonts({
+    log("useLoadFonts: calling useFonts");
+    const [loaded, error] = useFonts({
         Poppins_600SemiBold,
         Poppins_700Bold,
 
@@ -20,6 +22,11 @@ export function useLoadFonts() {
         Inter_500Medium,
         Inter_700Bold,
     });
+
+    if (error) {
+        logError("useFonts ERROR", error?.message, error?.stack);
+    }
+    log("useFonts returned loaded =", loaded);
 
     return loaded;
 }

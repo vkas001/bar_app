@@ -4,14 +4,40 @@ import React, { useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import AppInput from "../../components/input";
 import { useAuth } from "./hooks/useAuth";
+import { useAuthStore } from "./store/auth.store";
+import { removeToken } from "@/shared/storage/secure";
+import { removeUserLocal } from "@/shared/storage/async";
 
-const LoginForm = () => {
+const LoginForm = ({ onSessionReset }: { onSessionReset?: () => void }) => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [resetting, setResetting] = useState(false);
   const { logIn, loading } = useAuth();
+  const { clearUser } = useAuthStore();
+
+  const handleResetEnv = async () => {
+    setResetting(true);
+    setError("");
+    try {
+      await removeToken();
+      await removeUserLocal();
+      clearUser();
+      setEmail("");
+      setPassword("");
+      if (onSessionReset) {
+        onSessionReset();
+      } else {
+        router.replace("/auth");
+      }
+    } catch (e: any) {
+      setError(`Reset failed: ${e?.message || "unknown error"}`);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const handleLogin = async () => {
     setError("");
@@ -35,8 +61,8 @@ const LoginForm = () => {
 
   return (
     <View
-      className=" p-6 rounded-3xl border border-black/20"
-      style={{ width: "90%", alignSelf: "center", backgroundColor: "black" }}
+      className=" p-4 rounded-3xl border border-black/20"
+      style={{ width: "95%", alignSelf: "center", backgroundColor: "black" }}
     >
       <Text className="text-white text-lg font-semibold text-center mb-6">
         Staff Login
@@ -99,6 +125,21 @@ const LoginForm = () => {
       <Text className="text-white text-xs text-center" >
         Secure access to Vintage Bar POS
       </Text>
+
+      <TouchableOpacity
+        onPress={handleResetEnv}
+        activeOpacity={0.85}
+        className="mt-4 border border-gray-700 rounded-lg py-2 items-center"
+        disabled={resetting}
+      >
+        {resetting ? (
+          <ActivityIndicator color="rgba(255,255,255,0.7)" size="small" />
+        ) : (
+          <Text className="text-gray-400 text-xs font-semibold">
+            Reset Env
+          </Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
