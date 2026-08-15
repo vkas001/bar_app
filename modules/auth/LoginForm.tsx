@@ -7,6 +7,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useAuthStore } from "./store/auth.store";
 import { removeToken } from "@/shared/storage/secure";
 import { removeUserLocal } from "@/shared/storage/async";
+import { removeApiBaseUrl } from "@/shared/api/config";
 
 const LoginForm = ({ onSessionReset }: { onSessionReset?: () => void }) => {
   const router = useRouter();
@@ -24,6 +25,7 @@ const LoginForm = ({ onSessionReset }: { onSessionReset?: () => void }) => {
     try {
       await removeToken();
       await removeUserLocal();
+      await removeApiBaseUrl();
       clearUser();
       setEmail("");
       setPassword("");

@@ -58,6 +58,7 @@ const SetupForm: React.FC<SetupFormProps> = ({ onSetupComplete }) => {
         autoCorrect={false}
         inputTextClassName="text-sm"
         labelClassName="text-lg"
+        containerClassName="mb-10"
       />
 
       {error ? (
@@ -67,7 +68,7 @@ const SetupForm: React.FC<SetupFormProps> = ({ onSetupComplete }) => {
       <TouchableOpacity
         onPress={handleSave}
         activeOpacity={0.85}
-        className="bg-yellow rounded-lg py-3 items-center mb-8"
+        className="bg-yellow rounded-lg py-3 items-center mb-10"
         disabled={saving}
       >
         {saving ? (
