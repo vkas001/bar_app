@@ -5,16 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LoginForm from '../../modules/auth/LoginForm';
 import SetupForm from '../../modules/auth/SetupForm';
 import { getSavedApiBaseUrl } from '@/shared/api/config';
-import { log } from '@/shared/debug/startupLog';
 
 export default function Auth() {
-  log("Auth screen render");
   const [needsSetup, setNeedsSetup] = useState<boolean | null>(null);
 
   useEffect(() => {
     getSavedApiBaseUrl().then((url) => {
       setNeedsSetup(!url);
-      log("Auth needsSetup =", !url);
     });
   }, []);
 
