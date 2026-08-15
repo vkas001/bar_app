@@ -1,5 +1,5 @@
 import { useOrderStore } from '@/modules/orders/store/createOrderStore'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 import { TableCard } from './components/TableCard'

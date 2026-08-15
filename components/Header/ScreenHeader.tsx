@@ -1,6 +1,6 @@
 import { useResponsive } from '@/shared/hooks/useResponsive'
 import { Feather } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from 'expo-router'
 import React, { ReactNode } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 
